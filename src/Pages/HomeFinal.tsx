@@ -21,7 +21,7 @@ import { FaSun, FaMoon, FaBars, FaTimes, FaUser, FaGlobe } from "react-icons/fa"
 import heroBackground from "../Images/Herobg.jpg";
 import avatar1 from "../Images/Freelancers/Yohannes.png";
 import avatar2 from "../Images/Freelancers/Samuel.png";
-import avatar3 from "../Images/Freelancers/Messie.png";
+import avatar3 from "../Images/Freelancers/messie.png";
 import avatar4 from "../Images/Freelancers/Messi.jpg";
 import avatar5 from "../Images/testimonials/Messay.jpg";
 import beuLogo from "../assets/logos/beu.png";
