@@ -12,7 +12,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import { useAuth } from "../store/hooks";
 
 // Import video
-import howItWorksVideo from "./videos/howitworks.mp4";
+import howItWorksVideo from "./videos/HowItWorks.mp4";
 
 // Essential icons only
 import { FaSun, FaMoon, FaBars, FaTimes, FaUser, FaGlobe } from "react-icons/fa";
