@@ -859,6 +859,7 @@ const ReviewStep: React.FC<StepProps> = ({ data, onPrev, onSubmit, isFirst, isLa
         location: data.location || "",
         bio: data.bio || "",
         education: data.education || "",
+        experience: data.workExperience || "",
         workExperience: data.workExperience || "",
         skills: data.skills || [],
         primarySkill: data.primarySkill || "",

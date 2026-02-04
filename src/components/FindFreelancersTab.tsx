@@ -17,17 +17,19 @@ interface FindFreelancersTabProps {
   setSharedFreelancers?: (freelancers: FreelancerWithStatus[]) => void;
 }
 
-const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({ 
-  sharedFreelancers, 
-  setSharedFreelancers 
+const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
+  sharedFreelancers,
+  setSharedFreelancers
 }) => {
+  const resetFindFreelancers = false;
+  const shouldClearCacheOnMount = true;
   const darkMode = useAppSelector((s) => s.theme.darkMode);
   const { user } = useAuth();
   const navigate = useNavigate();
   // Use shared state if provided, otherwise use local state
   const [localFreelancers, setLocalFreelancers] = useState<FreelancerWithStatus[]>([]);
   const freelancers = sharedFreelancers || localFreelancers;
-  
+
   const setFreelancers = (newFreelancers: FreelancerWithStatus[]) => {
     if (setSharedFreelancers) {
       setSharedFreelancers(newFreelancers);
@@ -50,13 +52,20 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
 
   // Load from cache on mount
   useEffect(() => {
+    if (shouldClearCacheOnMount) {
+      try {
+        localStorage.removeItem(CACHE_KEY);
+      } catch (error) {
+        console.error("Failed to clear freelancers cache:", error);
+      }
+    }
     const loadCachedFreelancers = () => {
       try {
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
           const { data, timestamp } = JSON.parse(cached);
           const age = Date.now() - timestamp;
-          
+
           // Use cache if less than timeout old
           if (age < CACHE_TIMEOUT && Array.isArray(data) && data.length > 0) {
             console.log("Loading freelancers from cache");
@@ -73,7 +82,7 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
 
     // Try to load from cache first
     const cacheLoaded = loadCachedFreelancers();
-    
+
     // Always fetch fresh data, but cache provides instant display
     if (!hasFetchedRef.current) {
       fetchFreelancers();
@@ -103,8 +112,9 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
       console.log("Number of freelancers:", Array.isArray(data) ? data.length : 0);
       // Only update if we got valid data
       if (Array.isArray(data)) {
+        const activeFreelancers = data.filter((freelancer) => freelancer.isActive !== false);
         console.log("Setting freelancers:", data.length);
-        setFreelancers(data);
+        setFreelancers(activeFreelancers);
         // Clear any retry timeout on success
         if (retryTimeoutRef.current) {
           clearTimeout(retryTimeoutRef.current);
@@ -116,16 +126,16 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
       }
     } catch (error: any) {
       console.error("Error fetching freelancers:", error);
-      
+
       // Check if it's a network error (backend not running)
-      const isNetworkError = error?.code === 'ERR_NETWORK' || 
-                            error?.code === 'ECONNREFUSED' ||
-                            error?.message?.includes('Network Error') || 
-                            error?.message?.includes('CONNECTION_REFUSED');
-      
+      const isNetworkError = error?.code === 'ERR_NETWORK' ||
+        error?.code === 'ECONNREFUSED' ||
+        error?.message?.includes('Network Error') ||
+        error?.message?.includes('CONNECTION_REFUSED');
+
       if (isNetworkError) {
         console.warn("Backend server appears to be offline. Please ensure the backend server is running on port 5000.");
-        
+
         // Retry logic for network errors
         if (retries > 0) {
           console.log(`Retrying in 2 seconds... (${retries} attempts remaining)`);
@@ -196,7 +206,7 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
       if (user?._id && freelancer._id === user._id) {
         return false;
       }
-      
+
       const profile = freelancer.profile || {};
       const fullName = `${profile.firstName || ""} ${profile.lastName || ""}`.trim().toLowerCase();
       const email = freelancer.email.toLowerCase();
@@ -284,15 +294,13 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
     <div className="h-full flex flex-col relative overflow-hidden">
       {/* Animated Background Gradient */}
       <div className="absolute inset-0 -z-10">
-        <div className={`absolute inset-0 ${
-          darkMode 
-            ? "bg-gradient-to-br from-gray-900 via-black to-gray-900" 
-            : "bg-gradient-to-br from-cyan-50 via-white to-blue-50"
-        }`} />
+        <div className={`absolute inset-0 ${darkMode
+          ? "bg-gradient-to-br from-gray-900 via-black to-gray-900"
+          : "bg-gradient-to-br from-cyan-50 via-white to-blue-50"
+          }`} />
         <motion.div
-          className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 ${
-            darkMode ? "bg-cyan-500" : "bg-cyan-400"
-          }`}
+          className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 ${darkMode ? "bg-cyan-500" : "bg-cyan-400"
+            }`}
           animate={{
             x: [0, 100, 0],
             y: [0, 50, 0],
@@ -305,9 +313,8 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
           }}
         />
         <motion.div
-          className={`absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl opacity-20 ${
-            darkMode ? "bg-blue-500" : "bg-blue-400"
-          }`}
+          className={`absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl opacity-20 ${darkMode ? "bg-blue-500" : "bg-blue-400"
+            }`}
           animate={{
             x: [0, -100, 0],
             y: [0, -50, 0],
@@ -326,37 +333,32 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className={`p-6 backdrop-blur-xl ${
-          darkMode 
-            ? "bg-black/40 border-b border-white/10" 
-            : "bg-white/60 border-b border-gray-200/50"
-        }`}
+        className={`p-6 backdrop-blur-xl ${darkMode
+          ? "bg-black/40 border-b border-white/10"
+          : "bg-white/60 border-b border-gray-200/50"
+          }`}
       >
         <div className="flex flex-col gap-6">
           {/* Header */}
           <div className="flex items-center gap-3">
             <motion.div
-              className={`p-3 rounded-2xl ${
-                darkMode 
-                  ? "bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30" 
-                  : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
-              }`}
+              className={`p-3 rounded-2xl ${darkMode
+                ? "bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30"
+                : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
+                }`}
               whileHover={{ scale: 1.05, rotate: 5 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <Sparkles className={`w-6 h-6 ${
-                darkMode ? "text-cyan-400" : "text-cyan-600"
-              }`} />
+              <Sparkles className={`w-6 h-6 ${darkMode ? "text-cyan-400" : "text-cyan-600"
+                }`} />
             </motion.div>
             <div>
-              <h2 className={`text-2xl font-bold ${
-                darkMode ? "text-white" : "text-gray-900"
-              }`}>
+              <h2 className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"
+                }`}>
                 Find Elite Freelancers
               </h2>
-              <p className={`text-sm ${
-                darkMode ? "text-gray-400" : "text-gray-600"
-              }`}>
+              <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"
+                }`}>
                 Discover top talent ready to work
               </p>
             </div>
@@ -369,20 +371,18 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
             transition={{ type: "spring", stiffness: 300 }}
           >
             <Search
-              className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${
-                darkMode ? "text-cyan-400" : "text-cyan-600"
-              }`}
+              className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${darkMode ? "text-cyan-400" : "text-cyan-600"
+                }`}
             />
             <input
               type="text"
               placeholder="Search by name, skill, or expertise..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all backdrop-blur-xl ${
-                darkMode
-                  ? "bg-white/5 border-cyan-500/30 text-white placeholder-gray-500 focus:border-cyan-500 focus:bg-white/10 focus:shadow-[0_0_30px_rgba(6,182,212,0.3)]"
-                  : "bg-white/80 border-cyan-200 text-black placeholder-gray-500 focus:border-cyan-500 focus:bg-white focus:shadow-[0_0_30px_rgba(6,182,212,0.2)]"
-              } focus:outline-none focus:ring-4 focus:ring-cyan-500/20`}
+              className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all backdrop-blur-xl ${darkMode
+                ? "bg-white/5 border-cyan-500/30 text-white placeholder-gray-500 focus:border-cyan-500 focus:bg-white/10 focus:shadow-[0_0_30px_rgba(6,182,212,0.3)]"
+                : "bg-white/80 border-cyan-200 text-black placeholder-gray-500 focus:border-cyan-500 focus:bg-white focus:shadow-[0_0_30px_rgba(6,182,212,0.2)]"
+                } focus:outline-none focus:ring-4 focus:ring-cyan-500/20`}
             />
           </motion.div>
         </div>
@@ -398,18 +398,16 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
               animate={{ opacity: 1, scale: 1 }}
             >
               <motion.div
-                className={`w-16 h-16 border-4 rounded-full mx-auto mb-6 ${
-                  darkMode 
-                    ? "border-cyan-500/30 border-t-cyan-500" 
-                    : "border-cyan-200 border-t-cyan-500"
-                }`}
+                className={`w-16 h-16 border-4 rounded-full mx-auto mb-6 ${darkMode
+                  ? "border-cyan-500/30 border-t-cyan-500"
+                  : "border-cyan-200 border-t-cyan-500"
+                  }`}
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
               <motion.p
-                className={`text-lg font-semibold ${
-                  darkMode ? "text-cyan-400" : "text-cyan-600"
-                }`}
+                className={`text-lg font-semibold ${darkMode ? "text-cyan-400" : "text-cyan-600"
+                  }`}
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               >
@@ -425,26 +423,22 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
           >
             <div className="text-center">
               <motion.div
-                className={`w-24 h-24 rounded-full mx-auto mb-6 ${
-                  darkMode 
-                    ? "bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/30" 
-                    : "bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-cyan-200"
-                } flex items-center justify-center`}
+                className={`w-24 h-24 rounded-full mx-auto mb-6 ${darkMode
+                  ? "bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/30"
+                  : "bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-cyan-200"
+                  } flex items-center justify-center`}
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <Search className={`w-12 h-12 ${
-                  darkMode ? "text-gray-600" : "text-gray-400"
-                }`} />
+                <Search className={`w-12 h-12 ${darkMode ? "text-gray-600" : "text-gray-400"
+                  }`} />
               </motion.div>
-              <p className={`text-xl font-bold mb-2 ${
-                darkMode ? "text-gray-300" : "text-gray-700"
-              }`}>
+              <p className={`text-xl font-bold mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"
+                }`}>
                 No freelancers found
               </p>
-              <p className={`text-sm ${
-                darkMode ? "text-gray-500" : "text-gray-500"
-              }`}>
+              <p className={`text-sm ${darkMode ? "text-gray-500" : "text-gray-500"
+                }`}>
                 {searchTerm || filters.skills.length > 0 || filters.location || filters.status || filters.experienceLevel
                   ? "Try adjusting your search or filters"
                   : "No freelancers available at the moment"}
@@ -466,31 +460,29 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
                   key={freelancer._id}
                   initial={{ opacity: 0, y: 30, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ 
+                  transition={{
                     delay: index * 0.05,
                     type: "spring",
                     stiffness: 100,
                     damping: 15
                   }}
-                  whileHover={{ 
+                  whileHover={{
                     y: -8,
                     scale: 1.02,
                     transition: { duration: 0.2 }
                   }}
-                  className={`group relative rounded-2xl border-2 p-6 cursor-pointer transition-all backdrop-blur-xl overflow-hidden ${
-                    darkMode
-                      ? "bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-cyan-500/30 hover:border-cyan-500 hover:shadow-[0_0_40px_rgba(6,182,212,0.4)]"
-                      : "bg-gradient-to-br from-white to-gray-50/50 border-cyan-200 hover:border-cyan-400 hover:shadow-2xl"
-                  }`}
+                  className={`group relative rounded-2xl border-2 p-6 cursor-pointer transition-all backdrop-blur-xl overflow-hidden ${darkMode
+                    ? "bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-cyan-500/30 hover:border-cyan-500 hover:shadow-[0_0_40px_rgba(6,182,212,0.4)]"
+                    : "bg-gradient-to-br from-white to-gray-50/50 border-cyan-200 hover:border-cyan-400 hover:shadow-2xl"
+                    }`}
                   onClick={() => handleViewProfile(freelancer)}
                 >
                   {/* Shine Effect */}
                   <motion.div
-                    className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-                      darkMode 
-                        ? "bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent" 
-                        : "bg-gradient-to-r from-transparent via-cyan-100/50 to-transparent"
-                    }`}
+                    className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${darkMode
+                      ? "bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent"
+                      : "bg-gradient-to-r from-transparent via-cyan-100/50 to-transparent"
+                      }`}
                     initial={{ x: "-100%" }}
                     whileHover={{ x: "100%" }}
                     transition={{ duration: 0.6 }}
@@ -505,11 +497,10 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
                         transition={{ type: "spring", stiffness: 400 }}
                       >
                         <div
-                          className={`w-16 h-16 rounded-2xl ${
-                            darkMode 
-                              ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border-2 border-cyan-500/50" 
-                              : "bg-gradient-to-br from-cyan-100 to-blue-100 border-2 border-cyan-200"
-                          } flex items-center justify-center text-2xl font-bold shadow-lg`}
+                          className={`w-16 h-16 rounded-2xl ${darkMode
+                            ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border-2 border-cyan-500/50"
+                            : "bg-gradient-to-br from-cyan-100 to-blue-100 border-2 border-cyan-200"
+                            } flex items-center justify-center text-2xl font-bold shadow-lg`}
                         >
                           {fullName.charAt(0).toUpperCase()}
                         </div>
@@ -526,35 +517,29 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className={`font-bold text-lg mb-1 truncate ${
-                          darkMode ? "text-white" : "text-gray-900"
-                        }`}>
+                        <h3 className={`font-bold text-lg mb-1 truncate ${darkMode ? "text-white" : "text-gray-900"
+                          }`}>
                           {fullName}
                         </h3>
-                        <p className={`text-sm font-medium mb-3 truncate ${
-                          darkMode ? "text-cyan-400" : "text-cyan-600"
-                        }`}>
+                        <p className={`text-sm font-medium mb-3 truncate ${darkMode ? "text-cyan-400" : "text-cyan-600"
+                          }`}>
                           {primarySkill}
                         </p>
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <MapPin className={`w-4 h-4 ${
-                              darkMode ? "text-cyan-400" : "text-cyan-600"
-                            }`} />
-                            <span className={`text-xs font-medium ${
-                              darkMode ? "text-gray-400" : "text-gray-600"
-                            }`}>
+                            <MapPin className={`w-4 h-4 ${darkMode ? "text-cyan-400" : "text-cyan-600"
+                              }`} />
+                            <span className={`text-xs font-medium ${darkMode ? "text-gray-400" : "text-gray-600"
+                              }`}>
                               {location}
                             </span>
                           </div>
                           {monthlyRate !== "0" && (
                             <div className="flex items-center gap-2">
-                              <Briefcase className={`w-4 h-4 ${
-                                darkMode ? "text-cyan-400" : "text-cyan-600"
-                              }`} />
-                              <span className={`text-xs font-bold ${
-                                darkMode ? "text-cyan-300" : "text-cyan-700"
-                              }`}>
+                              <Briefcase className={`w-4 h-4 ${darkMode ? "text-cyan-400" : "text-cyan-600"
+                                }`} />
+                              <span className={`text-xs font-bold ${darkMode ? "text-cyan-300" : "text-cyan-700"
+                                }`}>
                                 {monthlyRate} {currency}/mo
                               </span>
                             </div>
@@ -572,11 +557,10 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: idx * 0.1 }}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
-                              darkMode
-                                ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/30"
-                                : "bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-700 border border-cyan-200"
-                            }`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${darkMode
+                              ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/30"
+                              : "bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-700 border border-cyan-200"
+                              }`}
                           >
                             {skill}
                           </motion.span>
@@ -585,11 +569,10 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
                           <motion.span
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
-                              darkMode 
-                                ? "bg-white/10 text-gray-400 border border-white/20" 
-                                : "bg-gray-100 text-gray-600 border border-gray-200"
-                            }`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold ${darkMode
+                              ? "bg-white/10 text-gray-400 border border-white/20"
+                              : "bg-gray-100 text-gray-600 border border-gray-200"
+                              }`}
                           >
                             +{profile.skills.length - 3} more
                           </motion.span>
@@ -600,30 +583,28 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
                     {/* Actions */}
                     <div className="mt-6 flex gap-3">
                       <motion.button
-                        onClick={(e) => {
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                           e.stopPropagation();
                           handleViewProfile(freelancer);
                         }}
-                        className={`flex-1 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                          darkMode
-                            ? "bg-white/10 hover:bg-white/20 text-white border-2 border-white/20 hover:border-white/40"
-                            : "bg-gray-100 hover:bg-gray-200 text-gray-900 border-2 border-gray-200 hover:border-gray-300"
-                        }`}
+                        className={`flex-1 px-4 py-3 rounded-xl text-sm font-bold transition-all ${darkMode
+                          ? "bg-white/10 hover:bg-white/20 text-white border-2 border-white/20 hover:border-white/40"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-900 border-2 border-gray-200 hover:border-gray-300"
+                          }`}
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         View Profile
                       </motion.button>
                       <motion.button
-                        onClick={(e) => {
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                           e.stopPropagation();
                           handleMessage(freelancer);
                         }}
-                        className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                          darkMode
-                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg shadow-cyan-500/50"
-                            : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg"
-                        }`}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${darkMode
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg shadow-cyan-500/50"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg"
+                          }`}
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         whileTap={{ scale: 0.9 }}
                       >

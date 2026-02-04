@@ -26,6 +26,7 @@ export interface User {
     portfolioUrl?: string;
     certifications?: string[];
     cvUrl?: string;
+    workExperience?: string;
 
     // Availability & Rates
     availability?: string;
@@ -58,6 +59,7 @@ export interface User {
 export interface FreelancerWithStatus extends User {
   status?: "online" | "offline" | "available" | "busy";
   lastActive?: string;
+  isActive?: boolean;
   portfolio?: {
     url: string;
     projects?: PortfolioProject[];

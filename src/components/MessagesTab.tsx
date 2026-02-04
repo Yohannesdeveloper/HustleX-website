@@ -4,8 +4,8 @@ import { useAppSelector } from "../store/hooks";
 import { useAuth } from "../store/hooks";
 import { useLocation } from "react-router-dom";
 import { useWebSocket } from "../context/WebSocketContext";
-import { Send, User, MessageSquare, X, Smile, Sparkles, Zap, Clock, CheckCircle2, Paperclip, Mic, MicOff, Video, FileText, Image, File, Trash2, Play, Pause, Square, Music, Film, Archive, Code, Database, FileSpreadsheet, Presentation, FileImage, MoreVertical, Copy, Forward, Reply, Pencil } from "lucide-react";
-import EmojiPicker from "emoji-picker-react";
+import { Send, MessageSquare, X, Smile, CheckCircle2, Paperclip, Mic, MicOff, Video, FileText, Image, File, Trash2, Play, Pause, Square, Music, Film, Archive, Code, Database, FileSpreadsheet, Presentation, MoreVertical, Copy, Forward, Reply, Pencil, Download, Pin } from "lucide-react";
+import EmojiPicker, { Theme } from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
 import apiService from "../services/api";
 import { FreelancerWithStatus } from "../types";
@@ -19,6 +19,51 @@ interface Conversation {
   lastMessageTime: string;
   unreadCount: number;
   freelancer?: FreelancerWithStatus;
+}
+
+interface UserProfile {
+  firstName?: string;
+  lastName?: string;
+}
+
+interface ChatUser {
+  _id?: string;
+  id?: string;
+  email?: string;
+  profile?: UserProfile;
+}
+
+interface FileAttachment {
+  name: string;
+  size: number;
+  type: string;
+  dataUrl: string;
+}
+
+interface StoredMessage {
+  _id?: string;
+  id?: string;
+  senderId?: string | ChatUser;
+  receiverId?: string | ChatUser;
+  conversationId?: string;
+  message: string;
+  messageType?: string;
+  voiceData?: string | null;
+  voiceDuration?: number;
+  files?: FileAttachment[];
+  createdAt?: string;
+  timestamp?: string;
+  sender?: ChatUser;
+  receiver?: ChatUser;
+  senderEmail?: string;
+  senderName?: string;
+  receiverEmail?: string;
+  receiverName?: string;
+  editedAt?: string;
+  isEdited?: boolean;
+  action?: string;
+  isEdit?: boolean;
+  messageId?: string;
 }
 
 const getNormalizedConversationKey = (userId: string, otherId: string) =>
@@ -48,19 +93,40 @@ const getConversationKeyFromData = (data: {
   freelancerName?: string;
 }) => data.freelancerId || normalizeEmail(data.freelancerEmail) || normalizeName(data.freelancerName);
 
-const extractId = (value: any) => {
+const extractId = (value: unknown) => {
   if (!value) return "";
   if (typeof value === "string") return value;
-  return value._id || value.id || "";
+  if (typeof value === "object") {
+    const candidate = value as { _id?: string; id?: string };
+    return candidate._id || candidate.id || "";
+  }
+  return "";
 };
+
+const getUserId = (value?: string | ChatUser) => extractId(value);
+
+const parseStoredMessages = (raw: string | null): StoredMessage[] => {
+  try {
+    const parsed = JSON.parse(raw ?? "[]");
+    return Array.isArray(parsed) ? (parsed as StoredMessage[]) : [];
+  } catch (parseError) {
+    console.warn("Failed to parse stored messages:", parseError);
+    return [];
+  }
+};
+
+const getStoredMessages = (key: string) => parseStoredMessages(localStorage.getItem(key));
+
+const getConversationClearedKey = (userId: string, otherId: string) =>
+  `conversation_cleared_${[userId, otherId].sort().join("_")}`;
 
 const persistMessageToLocalStorage = (
   conversationKey: string,
-  message: any
+  message: StoredMessage
 ) => {
   try {
-    const existing = JSON.parse(localStorage.getItem(conversationKey) || "[]");
-    const exists = existing.some((m: any) =>
+    const existing = getStoredMessages(conversationKey);
+    const exists = existing.some((m) =>
       (m._id && message._id && m._id === message._id) ||
       (m.id && message.id && m.id === message.id) ||
       (m.message === message.message &&
@@ -105,7 +171,7 @@ const MessagesTab: React.FC = () => {
   const { socket, connected, joinUser, sendMessage, onMessage, offMessage } = useWebSocket();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<StoredMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [sending, setSending] = useState(false);
@@ -124,52 +190,53 @@ const MessagesTab: React.FC = () => {
   const [messageMenuOpen, setMessageMenuOpen] = useState<string | null>(null);
   const [chatHeaderMenuOpen, setChatHeaderMenuOpen] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-  const [editingMessageText, setEditingMessageText] = useState<string>("");
+  const [replyToMessage, setReplyToMessage] = useState<{ id: string; text: string } | null>(null);
+  const [pinnedMessageIds, setPinnedMessageIds] = useState<string[]>([]);
   const messageMenuRef = useRef<HTMLDivElement>(null);
   const chatHeaderMenuRef = useRef<HTMLDivElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Listen for message edit events from WebSocket (works for both sender and receiver)
   useEffect(() => {
     if (!socket) return;
-    
-    const handleMessageEdit = (data: any) => {
+
+    const handleMessageEdit = (data: StoredMessage) => {
       console.log("📝 Received message edit event:", data);
-      
+
       // Check if we have a selected conversation
       if (!selectedConversation || !user?._id) {
         console.log("⏭️ No selected conversation, skipping edit");
         return;
       }
-      
+
       const conversationKey = getNormalizedConversationKey(user._id, selectedConversation.freelancerId);
       const backendConversationId = [user._id, selectedConversation.freelancerId].sort().join("_");
-      
+
       // Extract IDs for comparison
-      const dataSenderId = data.senderId?._id || data.senderId;
-      const dataReceiverId = data.receiverId?._id || data.receiverId;
+      const dataSenderId = getUserId(data.senderId);
+      const dataReceiverId = getUserId(data.receiverId);
       const dataConversationId = data.conversationId;
-      
+
       // Check if this edit is for the current conversation
-      const isCurrentConversation = 
-        dataConversationId === backendConversationId || 
+      const isCurrentConversation =
+        dataConversationId === backendConversationId ||
         dataConversationId === conversationKey ||
         (dataSenderId && dataReceiverId && (
           (dataSenderId.toString() === user._id.toString() && dataReceiverId.toString() === selectedConversation.freelancerId.toString()) ||
           (dataReceiverId.toString() === user._id.toString() && dataSenderId.toString() === selectedConversation.freelancerId.toString())
         ));
-      
+
       if (isCurrentConversation) {
         const editId = data.messageId || data._id || data.id;
         console.log("✅ Updating message in current conversation:", editId, "New text:", data.message);
-        
+
         // Update message in state immediately (real-time)
         setMessages((prev) => {
           const updated = prev.map((msg) => {
             const msgId = (msg._id || msg.id)?.toString();
             const editIdStr = editId?.toString();
-            
+
             if (msgId === editIdStr) {
               console.log("🔄 Found matching message, updating:", msgId);
               return {
@@ -181,7 +248,7 @@ const MessagesTab: React.FC = () => {
             }
             return msg;
           });
-          
+
           // Log if message wasn't found
           const found = updated.some((msg) => {
             const msgId = (msg._id || msg.id)?.toString();
@@ -190,7 +257,7 @@ const MessagesTab: React.FC = () => {
           if (!found) {
             console.warn("⚠️ Message not found in current messages list:", editId);
           }
-          
+
           // Update conversation list if this is the last message
           const lastMessage = updated[updated.length - 1];
           if (lastMessage && (lastMessage._id?.toString() === editId?.toString() || lastMessage.id?.toString() === editId?.toString())) {
@@ -207,17 +274,17 @@ const MessagesTab: React.FC = () => {
               })
             );
           }
-          
+
           return updated;
         });
-        
+
         // Update localStorage
         try {
-          const storedMessages = JSON.parse(localStorage.getItem(conversationKey) || "[]");
-          const updatedMessages = storedMessages.map((msg: any) => {
+          const storedMessages = getStoredMessages(conversationKey);
+          const updatedMessages = storedMessages.map((msg) => {
             const msgId = (msg._id || msg.id)?.toString();
             const editIdStr = editId?.toString();
-            
+
             if (msgId === editIdStr) {
               return {
                 ...msg,
@@ -237,9 +304,9 @@ const MessagesTab: React.FC = () => {
         console.log("⏭️ Edit is for different conversation, skipping");
       }
     };
-    
+
     socket.on("messageEdited", handleMessageEdit);
-    
+
     return () => {
       socket.off("messageEdited", handleMessageEdit);
     };
@@ -264,7 +331,7 @@ const MessagesTab: React.FC = () => {
 
   // Listen for real-time messages
   useEffect(() => {
-    const handleNewMessage = (messageData: any) => {
+    const handleNewMessage = (messageData: StoredMessage) => {
       console.log("Received message via WebSocket:", messageData);
       console.log("📥 Message files check:", {
         hasFiles: messageData.files && messageData.files.length > 0,
@@ -272,7 +339,7 @@ const MessagesTab: React.FC = () => {
         files: messageData.files,
         messageType: messageData.messageType,
       });
-      
+
       // Check if this is an edit action
       if (messageData.action === 'edit' || messageData.isEdit) {
         // Update existing message instead of adding new one
@@ -280,39 +347,39 @@ const MessagesTab: React.FC = () => {
           prev.map((msg) =>
             (msg._id || msg.id) === (messageData.messageId || messageData._id)
               ? {
-                  ...msg,
-                  message: messageData.message,
-                  editedAt: messageData.editedAt || new Date().toISOString(),
-                  isEdited: true,
-                }
+                ...msg,
+                message: messageData.message,
+                editedAt: messageData.editedAt || new Date().toISOString(),
+                isEdited: true,
+              }
               : msg
           )
         );
-        
+
         // Update in localStorage
         if (selectedConversation && user?._id) {
           const conversationKey = getNormalizedConversationKey(user._id, selectedConversation.freelancerId);
-          const storedMessages = JSON.parse(localStorage.getItem(conversationKey) || "[]");
-          const updatedMessages = storedMessages.map((msg: any) =>
+          const storedMessages = getStoredMessages(conversationKey);
+          const updatedMessages = storedMessages.map((msg) =>
             (msg._id || msg.id) === (messageData.messageId || messageData._id)
               ? {
-                  ...msg,
-                  message: messageData.message,
-                  editedAt: messageData.editedAt || new Date().toISOString(),
-                  isEdited: true,
-                }
+                ...msg,
+                message: messageData.message,
+                editedAt: messageData.editedAt || new Date().toISOString(),
+                isEdited: true,
+              }
               : msg
           );
           localStorage.setItem(conversationKey, JSON.stringify(updatedMessages));
         }
         return;
       }
-      
+
       // Normalize conversationId format
       // Backend uses: [senderId, receiverId].sort().join("_")
       // Frontend uses: conversation_${user._id}_${freelancerId}
-      const senderId = extractId(messageData.senderId);
-      const receiverId = extractId(messageData.receiverId);
+      const senderId = getUserId(messageData.senderId);
+      const receiverId = getUserId(messageData.receiverId);
       const backendConversationId = messageData.conversationId || [senderId, receiverId].sort().join("_");
       const targetFreelancerId = senderId === user?._id ? receiverId : senderId;
       const frontendConversationId = getNormalizedConversationKey(user?._id || "", targetFreelancerId);
@@ -323,24 +390,24 @@ const MessagesTab: React.FC = () => {
         }
         processedMessageIdsRef.current.add(messageKey);
       }
-      
+
       // Check if this message belongs to the currently selected conversation
       const isCurrentConversation = selectedConversation && (
         getConversationKey(selectedConversation) === frontendConversationId ||
         getConversationKey(selectedConversation) === backendConversationId ||
         selectedConversation.freelancerId === targetFreelancerId
       );
-      
+
       // Check if this is a message we sent (confirmation from backend)
       const isOwnMessage = senderId === user?._id;
-      
+
       // If this message belongs to the current conversation, add/replace it in messages
       if (isCurrentConversation) {
         setMessages((prev) => {
           // If it's our own message, check if we have a temp message to replace
           if (isOwnMessage) {
             // Find and replace temp message with same content (match by message text and file count)
-            const tempIndex = prev.findIndex(m => 
+            const tempIndex = prev.findIndex(m =>
               (m._id && m._id.startsWith("temp_")) &&
               m.message === messageData.message &&
               m.senderId === messageData.senderId &&
@@ -348,7 +415,7 @@ const MessagesTab: React.FC = () => {
               ((m.files?.length || 0) === (messageData.files?.length || 0)) &&
               (!!m.voiceData === !!messageData.voiceData)
             );
-            
+
             if (tempIndex !== -1) {
               // Replace temp message with real message (preserve all fields including files)
               console.log("Replacing temp message with real message", {
@@ -367,9 +434,9 @@ const MessagesTab: React.FC = () => {
               return updated;
             }
           }
-          
+
           // Check if message already exists (avoid duplicates)
-          const exists = prev.some(m => 
+          const exists = prev.some(m =>
             (m._id || m.id) === (messageData._id || messageData.id) ||
             (!m._id?.startsWith("temp_") && m._id === messageData._id && m.message === messageData.message)
           );
@@ -397,7 +464,7 @@ const MessagesTab: React.FC = () => {
       }
 
       // Persist incoming message to localStorage (include all fields including files, voice, etc.)
-      const localKey = getNormalizedConversationKey(user?._id || "", targetFreelancerId);
+      const localKey = getNormalizedConversationKey(user?._id || "", targetFreelancerId || "");
       persistMessageToLocalStorage(localKey, {
         _id: messageData._id,
         id: messageData.id,
@@ -423,19 +490,19 @@ const MessagesTab: React.FC = () => {
         const existingConv = prev.find(
           (conv) => getConversationKey(conv) === normalizedKey
         );
-        
+
         if (existingConv) {
           // Update existing conversation - ensure no duplicates
           const updated = prev.map((conv) =>
             getConversationKey(conv) === normalizedKey
               ? {
-                  ...conv,
-                  lastMessage: messageData.message,
-                  lastMessageTime: messageData.createdAt || new Date().toISOString(),
-                }
+                ...conv,
+                lastMessage: messageData.message,
+                lastMessageTime: messageData.createdAt || new Date().toISOString(),
+              }
               : conv
           );
-          
+
           // Remove duplicates by freelancerId (keep first occurrence)
           const seen = new Set<string>();
           const deduplicated = updated.filter(conv => {
@@ -445,8 +512,8 @@ const MessagesTab: React.FC = () => {
             seen.add(conv.freelancerId);
             return true;
           });
-          
-          return deduplicated.sort((a, b) => 
+
+          return deduplicated.sort((a, b) =>
             new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
           );
         } else {
@@ -460,20 +527,20 @@ const MessagesTab: React.FC = () => {
             return prev.map((conv) =>
               getConversationKey(conv) === normalizedKey
                 ? {
-                    ...conv,
-                    lastMessage: messageData.message,
-                    lastMessageTime: messageData.createdAt || new Date().toISOString(),
-                  }
+                  ...conv,
+                  lastMessage: messageData.message,
+                  lastMessageTime: messageData.createdAt || new Date().toISOString(),
+                }
                 : conv
-            ).sort((a, b) => 
+            ).sort((a, b) =>
               new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
             );
           }
-          
+
           // Add new conversation
           const profile = messageData.sender?.profile || {};
           const senderName = `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || messageData.sender?.email || "Unknown";
-          const isOwnMessage = messageData.senderId === user?._id;
+          const isOwnMessage = getUserId(messageData.senderId) === user?._id;
           const fallbackName = selectedConversation?.freelancerName || senderName;
           const fallbackEmail = selectedConversation?.freelancerEmail || messageData.sender?.email || "";
 
@@ -486,7 +553,7 @@ const MessagesTab: React.FC = () => {
             lastMessageTime: messageData.createdAt || new Date().toISOString(),
             unreadCount: 0,
           };
-          
+
           // Remove duplicates before adding
           const seen = new Set<string>();
           const deduplicated = prev.filter(conv => {
@@ -496,8 +563,8 @@ const MessagesTab: React.FC = () => {
             seen.add(conv.freelancerId);
             return true;
           });
-          
-          return [newConv, ...deduplicated].sort((a, b) => 
+
+          return [newConv, ...deduplicated].sort((a, b) =>
             new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
           );
         }
@@ -528,7 +595,7 @@ const MessagesTab: React.FC = () => {
 
       const convs: Conversation[] = [];
 
-      const mergedByKey = new Map<string, { key: string; messages: any[]; lastMessage: any }>();
+      const mergedByKey = new Map<string, { key: string; messages: StoredMessage[]; lastMessage: StoredMessage }>();
       const bestKeyByIdentity = new Map<string, { key: string; time: number }>();
       const keysToRemove = new Set<string>();
 
@@ -546,15 +613,15 @@ const MessagesTab: React.FC = () => {
         if (!otherId || otherId === user._id) continue;
 
         const normalizedKey = getNormalizedConversationKey(user._id, otherId);
-        const conversationMessages = JSON.parse(localStorage.getItem(key) || "[]");
+        const conversationMessages = getStoredMessages(key);
         if (conversationMessages.length === 0) continue;
 
         const lastMessage = conversationMessages[conversationMessages.length - 1];
 
         // Migrate to normalized key if needed (merge messages)
         if (key !== normalizedKey) {
-          const existing = JSON.parse(localStorage.getItem(normalizedKey) || "[]");
-          const merged = [...existing, ...conversationMessages].sort((a: any, b: any) => {
+          const existing = getStoredMessages(normalizedKey);
+          const merged = [...existing, ...conversationMessages].sort((a, b) => {
             const aTime = a.createdAt || a.timestamp || 0;
             const bTime = b.createdAt || b.timestamp || 0;
             return new Date(aTime).getTime() - new Date(bTime).getTime();
@@ -566,8 +633,8 @@ const MessagesTab: React.FC = () => {
         // Merge by conversation key (prefer freelancerId, then email/name)
         const conversationKey = getConversationKeyFromData({
           freelancerId: otherId,
-          freelancerEmail: lastMessage.receiverEmail,
-          freelancerName: lastMessage.receiverName,
+          freelancerEmail: lastMessage.receiverEmail || lastMessage.senderEmail,
+          freelancerName: lastMessage.receiverName || lastMessage.senderName,
         });
         if (!conversationKey) continue;
 
@@ -590,8 +657,8 @@ const MessagesTab: React.FC = () => {
 
         // Track best key per identity (email/name) to remove duplicates in localStorage
         const identityKey =
-          normalizeEmail(lastMessage.receiverEmail) ||
-          normalizeName(lastMessage.receiverName) ||
+          normalizeEmail(lastMessage.receiverEmail || lastMessage.senderEmail) ||
+          normalizeName(lastMessage.receiverName || lastMessage.senderName) ||
           otherId;
         if (identityKey) {
           const timeValue = new Date(
@@ -611,17 +678,17 @@ const MessagesTab: React.FC = () => {
         // Try to fetch freelancer data
         try {
           const freelancers = await apiService.getFreelancersWithStatus();
-          const freelancer = freelancers.find((f: any) => f._id === otherId);
+          const freelancer = freelancers.find((f: FreelancerWithStatus) => f._id === otherId);
           const freelancerProfile = freelancer?.profile || {};
-          const freelancerName = freelancer 
+          const freelancerName = freelancer
             ? `${freelancerProfile.firstName || ""} ${freelancerProfile.lastName || ""}`.trim() || freelancer.email
             : lastMessage.receiverName || "Unknown";
-          
+
           convs.push({
             id: normalizedKey,
             freelancerId: otherId,
             freelancerName: freelancerName,
-            freelancerEmail: freelancer?.email || lastMessage.receiverEmail || "",
+            freelancerEmail: freelancer?.email || lastMessage.receiverEmail || lastMessage.senderEmail || "",
             lastMessage: lastMessage.message,
             lastMessageTime: lastMessage.timestamp || lastMessage.createdAt || new Date().toISOString(),
             unreadCount: 0,
@@ -633,7 +700,7 @@ const MessagesTab: React.FC = () => {
             id: normalizedKey,
             freelancerId: otherId,
             freelancerName: lastMessage.receiverName || "Unknown",
-            freelancerEmail: lastMessage.receiverEmail || "",
+            freelancerEmail: lastMessage.receiverEmail || lastMessage.senderEmail || "",
             lastMessage: lastMessage.message,
             lastMessageTime: lastMessage.timestamp || lastMessage.createdAt || new Date().toISOString(),
             unreadCount: 0,
@@ -692,70 +759,71 @@ const MessagesTab: React.FC = () => {
 
   // Auto-select conversation when navigating with freelancer ID
   useEffect(() => {
-    const state = location.state as any;
-    if (state?.freelancerId && user?._id) {
+    const state = location.state as { freelancerId?: string; freelancer?: FreelancerWithStatus } | null;
+    const freelancerId = state?.freelancerId;
+    if (freelancerId && user?._id) {
       // Prevent messaging yourself
-      if (state.freelancerId === user._id) {
+      if (freelancerId === user._id) {
         console.warn("Cannot message yourself");
         return;
       }
-      
+
       // Skip if we've already processed this freelancer ID
-      if (lastProcessedFreelancerIdRef.current === state.freelancerId) {
+      if (lastProcessedFreelancerIdRef.current === freelancerId) {
         return;
       }
-      
-      const conversationKey = getNormalizedConversationKey(user._id, state.freelancerId);
-      
+
+      const conversationKey = getNormalizedConversationKey(user._id, freelancerId);
+
       const createAndSelectConversation = async () => {
         // Check if conversation already exists in conversations list using ref
         const existingConv = conversationsRef.current.find(
-          (c) => getConversationKey(c) === getNormalizedConversationKey(user._id, state.freelancerId)
+          (c) => getConversationKey(c) === getNormalizedConversationKey(user._id, freelancerId)
         );
         if (existingConv) {
           setSelectedConversation(existingConv);
-          lastProcessedFreelancerIdRef.current = state.freelancerId;
+          lastProcessedFreelancerIdRef.current = freelancerId;
           return;
         }
-        
+
         // Check localStorage for existing messages
-        const existingMessages = JSON.parse(localStorage.getItem(conversationKey) || "[]");
+        const existingMessages = getStoredMessages(conversationKey);
         let conv: Conversation | null = null;
-        
+
         if (existingMessages.length > 0) {
           // Conversation exists in localStorage, create it
           const lastMessage = existingMessages[existingMessages.length - 1];
           conv = {
             id: conversationKey,
-            freelancerId: state.freelancerId,
+            freelancerId: freelancerId,
             freelancerName: lastMessage.receiverName || "Unknown",
-            freelancerEmail: lastMessage.receiverEmail || "",
+            freelancerEmail: lastMessage.receiverEmail || lastMessage.senderEmail || "",
             lastMessage: lastMessage.message,
-            lastMessageTime: lastMessage.timestamp,
+            lastMessageTime: lastMessage.timestamp || lastMessage.createdAt || new Date().toISOString(),
             unreadCount: 0,
           };
         } else {
           // New conversation - fetch freelancer data
           let freelancer: FreelancerWithStatus | undefined = state?.freelancer;
-          
+
           // If freelancer not in state, fetch it
           if (!freelancer) {
             try {
               const freelancers = await apiService.getFreelancersWithStatus();
-              freelancer = freelancers.find((f: any) => f._id === state.freelancerId);
+              freelancer = freelancers.find((f: FreelancerWithStatus) => f._id === freelancerId);
             } catch (error) {
               console.error("Error fetching freelancer:", error);
             }
           }
-          
+
           const profile = freelancer?.profile || {};
-          const fullName = freelancer 
+          const fullName = freelancer
             ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || freelancer.email
             : "Unknown Freelancer";
-          
+
           conv = {
             id: conversationKey,
-            freelancerId: state.freelancerId,
+            freelancerId: freelancerId,
             freelancerName: fullName,
             freelancerEmail: freelancer?.email || "",
             lastMessage: "",
@@ -764,7 +832,7 @@ const MessagesTab: React.FC = () => {
             freelancer: freelancer,
           };
         }
-        
+
         if (conv) {
           // Add to conversations list if not already there
           setConversations(prev => {
@@ -776,18 +844,18 @@ const MessagesTab: React.FC = () => {
             }
             return prev;
           });
-          
+
           // Select the conversation
           setSelectedConversation(conv);
-          lastProcessedFreelancerIdRef.current = state.freelancerId;
+          lastProcessedFreelancerIdRef.current = freelancerId;
         }
       };
-      
+
       createAndSelectConversation();
     }
-    
+
     // Reset ref when location state changes to a different freelancer
-    if (!location.state || !(location.state as any)?.freelancerId) {
+    if (!location.state || !freelancerId) {
       lastProcessedFreelancerIdRef.current = null;
     }
   }, [location.state, user?._id]);
@@ -800,6 +868,10 @@ const MessagesTab: React.FC = () => {
     }
 
     const loadMessages = async () => {
+      const clearedKey = getConversationClearedKey(user._id, selectedConversation.freelancerId);
+      const clearedAtRaw = localStorage.getItem(clearedKey);
+      const clearedAt = clearedAtRaw ? new Date(clearedAtRaw).getTime() : null;
+
       try {
         // Try to load from API first
         // Backend uses format: senderId_receiverId (sorted)
@@ -807,14 +879,20 @@ const MessagesTab: React.FC = () => {
           user._id,
           selectedConversation.freelancerId
         ).replace("conversation_", "");
-        
-        const apiMessages = await apiService.getConversationMessages(backendConversationId);
+
+        const apiMessages = await apiService.getConversationMessages(backendConversationId) as StoredMessage[];
         if (apiMessages && Array.isArray(apiMessages) && apiMessages.length > 0) {
           console.log("Loaded messages from API:", apiMessages.length);
-          setMessages(apiMessages);
+          const filteredApiMessages = clearedAt
+            ? apiMessages.filter((msg) => {
+              const timestamp = msg.createdAt || msg.timestamp || "";
+              return new Date(timestamp).getTime() > clearedAt;
+            })
+            : apiMessages;
+          setMessages(filteredApiMessages);
           // Persist API messages locally for refresh safety
           const conversationKey = getNormalizedConversationKey(user._id, selectedConversation.freelancerId);
-          localStorage.setItem(conversationKey, JSON.stringify(apiMessages));
+          localStorage.setItem(conversationKey, JSON.stringify(filteredApiMessages));
           return;
         }
       } catch (error) {
@@ -823,9 +901,15 @@ const MessagesTab: React.FC = () => {
 
       // Fallback to localStorage
       const conversationKey = getNormalizedConversationKey(user._id, selectedConversation.freelancerId);
-      const conversationMessages = JSON.parse(localStorage.getItem(conversationKey) || "[]");
+      const conversationMessages = getStoredMessages(conversationKey);
       console.log("Loaded messages from localStorage:", conversationMessages.length);
-      setMessages(conversationMessages);
+      const filteredLocalMessages = clearedAt
+        ? conversationMessages.filter((msg) => {
+          const timestamp = msg.createdAt || msg.timestamp || "";
+          return new Date(timestamp).getTime() > clearedAt;
+        })
+        : conversationMessages;
+      setMessages(filteredLocalMessages);
     };
 
     loadMessages();
@@ -836,12 +920,12 @@ const MessagesTab: React.FC = () => {
     const hasText = newMessage.trim().length > 0;
     const hasVoice = audioBlob !== null;
     const hasFiles = attachedFiles.length > 0;
-    
+
     if ((!hasText && !hasVoice && !hasFiles) || !selectedConversation || !user?._id || sending) return;
 
     setSending(true);
     const messageText = newMessage.trim();
-    
+
     // Handle editing existing message
     if (editingMessageId) {
       const updatedMessage = {
@@ -862,8 +946,8 @@ const MessagesTab: React.FC = () => {
       // Update in localStorage
       if (selectedConversation && user?._id) {
         const conversationKey = getNormalizedConversationKey(user._id, selectedConversation.freelancerId);
-        const storedMessages = JSON.parse(localStorage.getItem(conversationKey) || "[]");
-        const updatedMessages = storedMessages.map((msg: any) =>
+        const storedMessages = getStoredMessages(conversationKey);
+        const updatedMessages = storedMessages.map((msg) =>
           (msg._id || msg.id) === editingMessageId
             ? { ...msg, ...updatedMessage }
             : msg
@@ -896,7 +980,6 @@ const MessagesTab: React.FC = () => {
           await apiService.editMessage(editingMessageId, messageText);
         } catch (error) {
           console.error("Error editing message via API:", error);
-          setError("Failed to edit message. Please try again.");
           setSending(false);
           return;
         }
@@ -917,7 +1000,7 @@ const MessagesTab: React.FC = () => {
     let displayMessage = messageText;
     let messageType = 'text';
     let voiceDataUrl: string | null = null;
-    let fileAttachments: { name: string; size: number; type: string; dataUrl: string }[] = [];
+    const fileAttachments: FileAttachment[] = [];
 
     // Handle voice recording
     if (hasVoice && audioBlob) {
@@ -1016,7 +1099,7 @@ const MessagesTab: React.FC = () => {
     } else {
       // Fallback to localStorage if WebSocket not connected
       const normalizedKey = getNormalizedConversationKey(user._id, selectedConversation.freelancerId);
-      const existingMessages = JSON.parse(localStorage.getItem(normalizedKey) || "[]");
+      const existingMessages = getStoredMessages(normalizedKey);
       const message = {
         id: Date.now().toString(),
         senderId: user._id,
@@ -1032,6 +1115,11 @@ const MessagesTab: React.FC = () => {
       };
       existingMessages.push(message);
       localStorage.setItem(normalizedKey, JSON.stringify(existingMessages));
+    }
+
+    // Clear reply state after sending
+    if (replyToMessage) {
+      setReplyToMessage(null);
     }
 
     // Clear voice recording after sending
@@ -1051,16 +1139,16 @@ const MessagesTab: React.FC = () => {
       const updated = prev.map((conv) =>
         getConversationKey(conv) === conversationId
           ? {
-              ...conv,
-              id: conversationId,
-              freelancerName: selectedConversation.freelancerName,
-              freelancerEmail: selectedConversation.freelancerEmail,
-              lastMessage: displayMessage,
-              lastMessageTime: new Date().toISOString(),
-            }
+            ...conv,
+            id: conversationId,
+            freelancerName: selectedConversation.freelancerName,
+            freelancerEmail: selectedConversation.freelancerEmail,
+            lastMessage: displayMessage,
+            lastMessageTime: new Date().toISOString(),
+          }
           : conv
       );
-      
+
       // Remove duplicates by freelancerId (keep first occurrence)
       const seen = new Set<string>();
       const deduplicated = updated.filter(conv => {
@@ -1070,8 +1158,8 @@ const MessagesTab: React.FC = () => {
         seen.add(conv.freelancerId);
         return true;
       });
-      
-      return deduplicated.sort((a, b) => 
+
+      return deduplicated.sort((a, b) =>
         new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
       );
     });
@@ -1103,38 +1191,38 @@ const MessagesTab: React.FC = () => {
   const getFileIcon = (file: File) => {
     const type = file.type.toLowerCase();
     const name = file.name.toLowerCase();
-    
+
     // Images
     if (type.startsWith('image/')) return Image;
-    
+
     // Videos
     if (type.startsWith('video/') || ['.mp4', '.avi', '.mov', '.mkv', '.webm', '.flv', '.wmv'].some(ext => name.endsWith(ext))) return Film;
-    
+
     // Audio
     if (type.startsWith('audio/') || ['.mp3', '.wav', '.ogg', '.flac', '.aac', '.wma', '.m4a'].some(ext => name.endsWith(ext))) return Music;
-    
+
     // Documents
     if (type.includes('pdf') || name.endsWith('.pdf')) return FileText;
     if (type.includes('document') || type.includes('msword') || ['.doc', '.docx', '.rtf', '.odt'].some(ext => name.endsWith(ext))) return FileText;
-    
+
     // Spreadsheets
     if (type.includes('spreadsheet') || type.includes('excel') || ['.xls', '.xlsx', '.csv', '.ods'].some(ext => name.endsWith(ext))) return FileSpreadsheet;
-    
+
     // Presentations
     if (type.includes('presentation') || type.includes('powerpoint') || ['.ppt', '.pptx', '.odp'].some(ext => name.endsWith(ext))) return Presentation;
-    
+
     // Code files
     if (['.js', '.ts', '.jsx', '.tsx', '.py', '.java', '.cpp', '.c', '.h', '.cs', '.php', '.rb', '.go', '.rs', '.swift', '.kt', '.html', '.css', '.scss', '.sass', '.less', '.json', '.xml', '.yaml', '.yml', '.md', '.sql', '.sh', '.bat', '.ps1'].some(ext => name.endsWith(ext))) return Code;
-    
+
     // Archives
     if (type.includes('zip') || type.includes('rar') || type.includes('tar') || type.includes('compressed') || ['.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.iso'].some(ext => name.endsWith(ext))) return Archive;
-    
+
     // Database
     if (['.db', '.sqlite', '.sql', '.mdb', '.accdb'].some(ext => name.endsWith(ext))) return Database;
-    
+
     // Text files
     if (type.startsWith('text/') || name.endsWith('.txt') || name.endsWith('.log')) return FileText;
-    
+
     // Default
     return File;
   };
@@ -1172,7 +1260,7 @@ const MessagesTab: React.FC = () => {
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
-      
+
       // Start timer
       recordingIntervalRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
@@ -1239,24 +1327,24 @@ const MessagesTab: React.FC = () => {
     setShowVideoCallModal(true);
     setCallStatus('calling');
     console.log('Initiating video call with:', selectedConversation?.freelancerName);
-    
+
     try {
       // Request camera and microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
           facingMode: 'user'
-        }, 
-        audio: true 
+        },
+        audio: true
       });
-      
+
       console.log('Got media stream:', stream.getTracks().map(t => t.kind));
-      
+
       setLocalStream(stream);
       setIsVideoEnabled(true);
       setIsAudioEnabled(true);
-      
+
       // Wait for next render cycle then attach stream to video element
       setTimeout(() => {
         if (localVideoRef.current) {
@@ -1269,7 +1357,7 @@ const MessagesTab: React.FC = () => {
           console.log('Video ref not available yet');
         }
       }, 100);
-      
+
       // Simulate call connecting after 2 seconds
       setTimeout(() => {
         setCallStatus('connected');
@@ -1278,7 +1366,7 @@ const MessagesTab: React.FC = () => {
           setCallDuration(prev => prev + 1);
         }, 1000);
       }, 2000);
-      
+
     } catch (error) {
       console.error('Error accessing media devices:', error);
       alert('Could not access camera/microphone. Please ensure you have granted permission.');
@@ -1293,16 +1381,16 @@ const MessagesTab: React.FC = () => {
       localStream.getTracks().forEach(track => track.stop());
       setLocalStream(null);
     }
-    
+
     // Clear timer
     if (callTimerRef.current) {
       clearInterval(callTimerRef.current);
       callTimerRef.current = null;
     }
-    
+
     setCallStatus('ended');
     setCallDuration(0);
-    
+
     // Close modal after showing "call ended" message
     setTimeout(() => {
       setShowVideoCallModal(false);
@@ -1340,17 +1428,17 @@ const MessagesTab: React.FC = () => {
   const handleDeleteMessage = (messageId: string) => {
     // Remove from messages state
     setMessages(prev => prev.filter(msg => (msg._id || msg.id) !== messageId));
-    
+
     // Also remove from localStorage
     if (selectedConversation && user?._id) {
       const conversationKey = getNormalizedConversationKey(user._id, selectedConversation.freelancerId);
-      const storedMessages = JSON.parse(localStorage.getItem(conversationKey) || "[]");
-      const updatedMessages = storedMessages.filter((msg: any) => 
+      const storedMessages = getStoredMessages(conversationKey);
+      const updatedMessages = storedMessages.filter((msg) =>
         (msg._id || msg.id) !== messageId
       );
       localStorage.setItem(conversationKey, JSON.stringify(updatedMessages));
     }
-    
+
     setMessageMenuOpen(null);
   };
 
@@ -1371,22 +1459,52 @@ const MessagesTab: React.FC = () => {
       console.error("Message not found");
       return;
     }
-    
-    const isOwnMessage = message.senderId === user?._id || message.senderId?._id === user?._id;
+
+    const isOwnMessage = getUserId(message.senderId) === user?._id;
     if (!isOwnMessage) {
       console.error("Unauthorized: Cannot edit other user's message");
       return;
     }
-    
+
     setEditingMessageId(messageId);
-    setEditingMessageText(messageText);
     setNewMessage(messageText);
+    setMessageMenuOpen(null);
+  };
+
+  const handleReplyToMessage = (messageId: string, messageText: string) => {
+    const previewText = messageText.length > 80 ? `${messageText.slice(0, 77)}...` : messageText;
+    setReplyToMessage({ id: messageId, text: previewText });
+    setMessageMenuOpen(null);
+  };
+
+  const handleCancelReply = () => {
+    setReplyToMessage(null);
+  };
+
+  const togglePinMessage = (messageId: string) => {
+    setPinnedMessageIds((prev) =>
+      prev.includes(messageId)
+        ? prev.filter((id) => id !== messageId)
+        : [...prev, messageId]
+    );
+    setMessageMenuOpen(null);
+  };
+
+  const handleForwardMessage = (messageText: string) => {
+    if (!messageText) {
+      setMessageMenuOpen(null);
+      return;
+    }
+    const forwardPrefix = "Fwd: ";
+    setNewMessage((prev) => {
+      if (!prev) return `${forwardPrefix}${messageText}`;
+      return `${prev}\n\n${forwardPrefix}${messageText}`;
+    });
     setMessageMenuOpen(null);
   };
 
   const handleCancelEdit = () => {
     setEditingMessageId(null);
-    setEditingMessageText("");
     setNewMessage("");
   };
 
@@ -1396,29 +1514,35 @@ const MessagesTab: React.FC = () => {
 
   const handleClearChatHistory = () => {
     if (!selectedConversation || !user?._id) return;
-    
+
     // Confirm before clearing
     if (window.confirm('Are you sure you want to clear all chat history? This action cannot be undone.')) {
       // Clear messages from state
       setMessages([]);
-      
+
       // Clear from localStorage
       const conversationKey = getNormalizedConversationKey(user._id, selectedConversation.freelancerId);
+      const legacyConversationKey = `conversation_${user._id}_${selectedConversation.freelancerId}`;
       localStorage.removeItem(conversationKey);
-      
+      localStorage.removeItem(legacyConversationKey);
+
+      // Persist a cleared timestamp so old messages don't return
+      const clearedKey = getConversationClearedKey(user._id, selectedConversation.freelancerId);
+      localStorage.setItem(clearedKey, new Date().toISOString());
+
       // Update conversation list to remove last message
       setConversations((prev) => {
         return prev.map((conv) =>
           getConversationKey(conv) === conversationKey
             ? {
-                ...conv,
-                lastMessage: "",
-                lastMessageTime: new Date().toISOString(),
-              }
+              ...conv,
+              lastMessage: "",
+              lastMessageTime: new Date().toISOString(),
+            }
             : conv
         );
       });
-      
+
       setChatHeaderMenuOpen(false);
     }
   };
@@ -1467,13 +1591,13 @@ const MessagesTab: React.FC = () => {
         });
       }
     };
-    
+
     // Try immediately
     attachStream();
-    
+
     // Also try after a short delay to handle race conditions
     const timeoutId = setTimeout(attachStream, 200);
-    
+
     return () => clearTimeout(timeoutId);
   }, [localStream, showVideoCallModal, callStatus]);
 
@@ -1521,36 +1645,31 @@ const MessagesTab: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`p-3 border-b backdrop-blur-xl ${
-          darkMode 
-            ? "bg-black/40 border-cyan-500/30" 
-            : "bg-white/60 border-cyan-200"
-        }`}
+        className={`p-3 border-b backdrop-blur-xl ${darkMode
+          ? "bg-black/40 border-cyan-500/30"
+          : "bg-white/60 border-cyan-200"
+          }`}
       >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <motion.div
-              className={`p-2 rounded-lg ${
-                darkMode 
-                  ? "bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30" 
-                  : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
-              }`}
+              className={`p-2 rounded-lg ${darkMode
+                ? "bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30"
+                : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
+                }`}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <MessageSquare className={`w-4 h-4 ${
-                darkMode ? "text-cyan-400" : "text-cyan-600"
-              }`} />
+              <MessageSquare className={`w-4 h-4 ${darkMode ? "text-cyan-400" : "text-cyan-600"
+                }`} />
             </motion.div>
             <div>
-              <h2 className={`text-lg font-bold ${
-                darkMode ? "text-white" : "text-gray-900"
-              }`}>
+              <h2 className={`text-lg font-bold ${darkMode ? "text-white" : "text-gray-900"
+                }`}>
                 Messages
               </h2>
-              <p className={`text-xs ${
-                darkMode ? "text-gray-400" : "text-gray-600"
-              }`}>
+              <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-600"
+                }`}>
                 {displayConversations.length} {displayConversations.length === 1 ? "conversation" : "conversations"}
               </p>
             </div>
@@ -1561,11 +1680,10 @@ const MessagesTab: React.FC = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Conversations List */}
         <div
-          className={`w-full md:w-96 border-r-2 overflow-y-auto custom-scrollbar ${
-            darkMode 
-              ? "border-cyan-500/30 bg-black/20 backdrop-blur-xl" 
-              : "border-cyan-200 bg-gray-50/50 backdrop-blur-xl"
-          } ${selectedConversation ? "hidden md:block" : ""}`}
+          className={`w-full md:w-96 border-r-2 overflow-y-auto custom-scrollbar ${darkMode
+            ? "border-cyan-500/30 bg-black/20 backdrop-blur-xl"
+            : "border-cyan-200 bg-gray-50/50 backdrop-blur-xl"
+            } ${selectedConversation ? "hidden md:block" : ""}`}
         >
           {displayConversations.length === 0 ? (
             <motion.div
@@ -1575,26 +1693,22 @@ const MessagesTab: React.FC = () => {
             >
               <div>
                 <motion.div
-                  className={`w-24 h-24 rounded-full mx-auto mb-6 ${
-                    darkMode 
-                      ? "bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/30" 
-                      : "bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-cyan-200"
-                  } flex items-center justify-center`}
+                  className={`w-24 h-24 rounded-full mx-auto mb-6 ${darkMode
+                    ? "bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/30"
+                    : "bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-cyan-200"
+                    } flex items-center justify-center`}
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <MessageSquare className={`w-12 h-12 ${
-                    darkMode ? "text-gray-600" : "text-gray-400"
-                  }`} />
+                  <MessageSquare className={`w-12 h-12 ${darkMode ? "text-gray-600" : "text-gray-400"
+                    }`} />
                 </motion.div>
-                <p className={`text-lg font-semibold mb-2 ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}>
+                <p className={`text-lg font-semibold mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"
+                  }`}>
                   No messages yet
                 </p>
-                <p className={`text-sm ${
-                  darkMode ? "text-gray-500" : "text-gray-500"
-                }`}>
+                <p className={`text-sm ${darkMode ? "text-gray-500" : "text-gray-500"
+                  }`}>
                   Start a conversation by messaging a freelancer
                 </p>
               </div>
@@ -1608,55 +1722,49 @@ const MessagesTab: React.FC = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                   onClick={() => setSelectedConversation(conv)}
-                  className={`p-3 cursor-pointer transition-all relative group ${
-                    selectedConversation?.id === conv.id
-                      ? darkMode
-                        ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-l-2 border-cyan-500 shadow-md"
-                        : "bg-gradient-to-r from-cyan-50 to-blue-50 border-l-2 border-cyan-500 shadow-sm"
-                      : darkMode
+                  className={`p-3 cursor-pointer transition-all relative group ${selectedConversation?.id === conv.id
+                    ? darkMode
+                      ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-l-2 border-cyan-500 shadow-md"
+                      : "bg-gradient-to-r from-cyan-50 to-blue-50 border-l-2 border-cyan-500 shadow-sm"
+                    : darkMode
                       ? "hover:bg-white/5 hover:border-l hover:border-cyan-500/50"
                       : "hover:bg-gray-100/50 hover:border-l hover:border-cyan-300"
-                  }`}
+                    }`}
                   whileHover={{ x: 2, scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                 >
                   <div className="flex items-start gap-2">
                     <motion.div
-                      className={`w-10 h-10 rounded-lg ${
-                        darkMode 
-                          ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border border-cyan-500/50" 
-                          : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
-                      } flex items-center justify-center flex-shrink-0 shadow-sm`}
+                      className={`w-10 h-10 rounded-lg ${darkMode
+                        ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border border-cyan-500/50"
+                        : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
+                        } flex items-center justify-center flex-shrink-0 shadow-sm`}
                       whileHover={{ scale: 1.05 }}
                       transition={{ type: "spring", stiffness: 400 }}
                     >
-                      <span className={`text-base font-bold ${
-                        darkMode ? "text-cyan-300" : "text-cyan-700"
-                      }`}>
+                      <span className={`text-base font-bold ${darkMode ? "text-cyan-300" : "text-cyan-700"
+                        }`}>
                         {conv.freelancerName.charAt(0).toUpperCase()}
                       </span>
                     </motion.div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h3 className={`font-bold text-sm truncate ${
-                          darkMode ? "text-white" : "text-gray-900"
-                        }`}>
+                        <h3 className={`font-bold text-sm truncate ${darkMode ? "text-white" : "text-gray-900"
+                          }`}>
                           {conv.freelancerName}
                         </h3>
                         <motion.span
-                          className={`text-[10px] font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${
-                            darkMode 
-                              ? "bg-white/10 text-gray-400" 
-                              : "bg-gray-200 text-gray-600"
-                          }`}
+                          className={`text-[10px] font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${darkMode
+                            ? "bg-white/10 text-gray-400"
+                            : "bg-gray-200 text-gray-600"
+                            }`}
                           whileHover={{ scale: 1.05 }}
                         >
                           {formatTime(conv.lastMessageTime)}
                         </motion.span>
                       </div>
-                      <p className={`text-xs truncate ${
-                        darkMode ? "text-gray-400" : "text-gray-600"
-                      }`}>
+                      <p className={`text-xs truncate ${darkMode ? "text-gray-400" : "text-gray-600"
+                        }`}>
                         {conv.lastMessage || "Start a conversation..."}
                       </p>
                     </div>
@@ -1682,37 +1790,32 @@ const MessagesTab: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`p-3 border-b backdrop-blur-xl flex items-center justify-between relative z-30 ${
-                  darkMode 
-                    ? "bg-black/40 border-cyan-500/30" 
-                    : "bg-white/60 border-cyan-200"
-                }`}
+                className={`p-3 border-b backdrop-blur-xl flex items-center justify-between relative z-30 ${darkMode
+                  ? "bg-black/40 border-cyan-500/30"
+                  : "bg-white/60 border-cyan-200"
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <motion.div
-                    className={`w-10 h-10 rounded-lg ${
-                      darkMode 
-                        ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border border-cyan-500/50" 
-                        : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
-                    } flex items-center justify-center shadow-sm`}
+                    className={`w-10 h-10 rounded-lg ${darkMode
+                      ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border border-cyan-500/50"
+                      : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
+                      } flex items-center justify-center shadow-sm`}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 400 }}
                   >
-                    <span className={`text-base font-bold ${
-                      darkMode ? "text-cyan-300" : "text-cyan-700"
-                    }`}>
+                    <span className={`text-base font-bold ${darkMode ? "text-cyan-300" : "text-cyan-700"
+                      }`}>
                       {selectedConversation.freelancerName.charAt(0).toUpperCase()}
                     </span>
                   </motion.div>
                   <div>
-                    <h3 className={`font-bold text-base mb-0.5 ${
-                      darkMode ? "text-white" : "text-gray-900"
-                    }`}>
+                    <h3 className={`font-bold text-base mb-0.5 ${darkMode ? "text-white" : "text-gray-900"
+                      }`}>
                       {selectedConversation.freelancerName}
                     </h3>
-                    <p className={`text-xs ${
-                      darkMode ? "text-gray-400" : "text-gray-600"
-                    }`}>
+                    <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-600"
+                      }`}>
                       {selectedConversation.freelancerEmail}
                     </p>
                   </div>
@@ -1723,27 +1826,25 @@ const MessagesTab: React.FC = () => {
                     onClick={initiateVideoCall}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`p-2 rounded-lg transition-all ${
-                      darkMode 
-                        ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-green-400 border border-green-500/30" 
-                        : "bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 text-green-600 border border-green-200"
-                    }`}
+                    className={`p-2 rounded-lg transition-all ${darkMode
+                      ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-green-400 border border-green-500/30"
+                      : "bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 text-green-600 border border-green-200"
+                      }`}
                     title="Start Video Call"
                   >
                     <Video className="w-4 h-4" />
                   </motion.button>
-                  
+
                   {/* 3-Dot Menu Button */}
                   <div className="relative z-50">
                     <motion.button
                       onClick={() => setChatHeaderMenuOpen(!chatHeaderMenuOpen)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`p-2 rounded-lg transition-all ${
-                        darkMode 
-                          ? "bg-white/10 hover:bg-white/20 text-gray-300" 
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                      }`}
+                      className={`p-2 rounded-lg transition-all ${darkMode
+                        ? "bg-white/10 hover:bg-white/20 text-gray-300"
+                        : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                        }`}
                       title="More options"
                     >
                       <MoreVertical className="w-4 h-4" />
@@ -1757,20 +1858,18 @@ const MessagesTab: React.FC = () => {
                           initial={{ opacity: 0, scale: 0.9, y: -10 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                          className={`absolute right-0 top-full mt-1 z-50 min-w-[180px] rounded-lg shadow-xl overflow-hidden ${
-                            darkMode 
-                              ? "bg-gray-800 border border-gray-700" 
-                              : "bg-white border border-gray-200"
-                          }`}
+                          className={`absolute right-0 top-full mt-1 z-50 min-w-[180px] rounded-lg shadow-xl overflow-hidden ${darkMode
+                            ? "bg-gray-800 border border-gray-700"
+                            : "bg-white border border-gray-200"
+                            }`}
                         >
                           {/* Clear Chat History Option */}
                           <button
                             onClick={handleClearChatHistory}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
-                              darkMode 
-                                ? "text-red-400 hover:bg-red-500/20" 
-                                : "text-red-500 hover:bg-red-50"
-                            }`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${darkMode
+                              ? "text-red-400 hover:bg-red-500/20"
+                              : "text-red-500 hover:bg-red-50"
+                              }`}
                           >
                             <Trash2 className="w-4 h-4" />
                             Clear Chat History
@@ -1779,16 +1878,15 @@ const MessagesTab: React.FC = () => {
                       )}
                     </AnimatePresence>
                   </div>
-                  
+
                   <motion.button
                     onClick={() => setSelectedConversation(null)}
                     whileHover={{ scale: 1.05, rotate: 90 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`md:hidden p-2 rounded-lg transition-all ${
-                      darkMode 
-                        ? "bg-white/10 hover:bg-white/20 text-white" 
-                        : "bg-gray-100 hover:bg-gray-200 text-black"
-                    }`}
+                    className={`md:hidden p-2 rounded-lg transition-all ${darkMode
+                      ? "bg-white/10 hover:bg-white/20 text-white"
+                      : "bg-gray-100 hover:bg-gray-200 text-black"
+                      }`}
                   >
                     <X className="w-4 h-4" />
                   </motion.button>
@@ -1796,7 +1894,7 @@ const MessagesTab: React.FC = () => {
               </motion.div>
 
               {/* Messages */}
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible p-4 pb-6 space-y-3 custom-scrollbar bg-gradient-to-b from-transparent via-transparent to-transparent">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible p-4 pb-12 space-y-3 custom-scrollbar bg-gradient-to-b from-transparent via-transparent to-transparent">
                 {messages.length === 0 ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -1805,33 +1903,29 @@ const MessagesTab: React.FC = () => {
                   >
                     <div className="text-center">
                       <motion.div
-                        className={`w-20 h-20 rounded-full mx-auto mb-4 ${
-                          darkMode 
-                            ? "bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/30" 
-                            : "bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-cyan-200"
-                        } flex items-center justify-center`}
+                        className={`w-20 h-20 rounded-full mx-auto mb-4 ${darkMode
+                          ? "bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/30"
+                          : "bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-cyan-200"
+                          } flex items-center justify-center`}
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
-                        <MessageSquare className={`w-10 h-10 ${
-                          darkMode ? "text-gray-600" : "text-gray-400"
-                        }`} />
+                        <MessageSquare className={`w-10 h-10 ${darkMode ? "text-gray-600" : "text-gray-400"
+                          }`} />
                       </motion.div>
-                      <p className={`text-lg font-semibold ${
-                        darkMode ? "text-gray-400" : "text-gray-600"
-                      }`}>
+                      <p className={`text-lg font-semibold ${darkMode ? "text-gray-400" : "text-gray-600"
+                        }`}>
                         No messages yet
                       </p>
-                      <p className={`text-sm mt-2 ${
-                        darkMode ? "text-gray-500" : "text-gray-500"
-                      }`}>
+                      <p className={`text-sm mt-2 ${darkMode ? "text-gray-500" : "text-gray-500"
+                        }`}>
                         Start the conversation!
                       </p>
                     </div>
                   </motion.div>
                 ) : (
                   messages.map((msg, index) => {
-                    const isOwnMessage = msg.senderId === user?._id || msg.senderId?._id === user?._id;
+                    const isOwnMessage = getUserId(msg.senderId) === user?._id;
                     const messageId = msg._id || msg.id || `msg_${msg.createdAt}_${msg.senderId}`;
                     // Show edited text in real-time if this message is being edited
                     const messageText = editingMessageId === messageId ? newMessage : msg.message;
@@ -1839,7 +1933,8 @@ const MessagesTab: React.FC = () => {
                     const hasVoice = msg.voiceData;
                     const hasFiles = msg.files && msg.files.length > 0;
                     const voiceDuration = msg.voiceDuration || 0;
-                    
+                    const isPinned = pinnedMessageIds.includes(messageId);
+
                     return (
                       <motion.div
                         key={messageId}
@@ -1850,16 +1945,14 @@ const MessagesTab: React.FC = () => {
                       >
                         {!isOwnMessage && (
                           <motion.div
-                            className={`w-6 h-6 rounded-full ${
-                              darkMode 
-                                ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30" 
-                                : "bg-gradient-to-br from-cyan-100 to-blue-100"
-                            } flex items-center justify-center flex-shrink-0`}
+                            className={`w-6 h-6 rounded-full ${darkMode
+                              ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30"
+                              : "bg-gradient-to-br from-cyan-100 to-blue-100"
+                              } flex items-center justify-center flex-shrink-0`}
                             whileHover={{ scale: 1.05 }}
                           >
-                            <span className={`text-[10px] font-bold ${
-                              darkMode ? "text-cyan-300" : "text-cyan-700"
-                            }`}>
+                            <span className={`text-[10px] font-bold ${darkMode ? "text-cyan-300" : "text-cyan-700"
+                              }`}>
                               {selectedConversation.freelancerName.charAt(0).toUpperCase()}
                             </span>
                           </motion.div>
@@ -1872,11 +1965,10 @@ const MessagesTab: React.FC = () => {
                               onClick={() => toggleMessageMenu(messageId)}
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
-                              className={`p-1.5 rounded-full ${
-                                darkMode 
-                                  ? "bg-gray-700/80 hover:bg-gray-600 text-gray-300" 
-                                  : "bg-gray-200/80 hover:bg-gray-300 text-gray-600"
-                              }`}
+                              className={`p-1.5 rounded-full ${darkMode
+                                ? "bg-gray-700/80 hover:bg-gray-600 text-gray-300"
+                                : "bg-gray-200/80 hover:bg-gray-300 text-gray-600"
+                                }`}
                             >
                               <MoreVertical className="w-4 h-4" />
                             </motion.button>
@@ -1890,48 +1982,84 @@ const MessagesTab: React.FC = () => {
                                 initial={{ opacity: 0, scale: 0.9, y: -10 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                                className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} top-full mt-1 z-20 min-w-[140px] rounded-xl shadow-xl overflow-hidden ${
-                                  darkMode 
-                                    ? "bg-gray-800 border border-gray-700" 
-                                    : "bg-white border border-gray-200"
-                                }`}
+                                className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} top-full mt-1 z-20 min-w-[160px] rounded-xl shadow-xl overflow-hidden ${darkMode
+                                  ? "bg-gray-800 border border-gray-700"
+                                  : "bg-white border border-gray-200"
+                                  }`}
                               >
+                                {/* Reply Option */}
+                                {messageText && (
+                                  <button
+                                    onClick={() => handleReplyToMessage(messageId, messageText || '')}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${darkMode
+                                      ? "text-gray-300 hover:bg-gray-700"
+                                      : "text-gray-700 hover:bg-gray-100"
+                                      }`}
+                                  >
+                                    <Reply className="w-4 h-4" />
+                                    Reply
+                                  </button>
+                                )}
+
+                                {/* Forward Option */}
+                                {messageText && (
+                                  <button
+                                    onClick={() => handleForwardMessage(messageText || '')}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${darkMode
+                                      ? "text-gray-300 hover:bg-gray-700"
+                                      : "text-gray-700 hover:bg-gray-100"
+                                      }`}
+                                  >
+                                    <Forward className="w-4 h-4" />
+                                    Forward
+                                  </button>
+                                )}
+
+                                {/* Pin / Unpin Option */}
+                                <button
+                                  onClick={() => togglePinMessage(messageId)}
+                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${darkMode
+                                    ? "text-yellow-300 hover:bg-yellow-500/10"
+                                    : "text-yellow-700 hover:bg-yellow-50"
+                                    }`}
+                                >
+                                  <Pin className="w-4 h-4" />
+                                  {pinnedMessageIds.includes(messageId) ? "Unpin" : "Pin"}
+                                </button>
+
                                 {/* Copy Option */}
                                 <button
                                   onClick={() => handleCopyMessage(messageText || '')}
-                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
-                                    darkMode 
-                                      ? "text-gray-300 hover:bg-gray-700" 
-                                      : "text-gray-700 hover:bg-gray-100"
-                                  }`}
+                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${darkMode
+                                    ? "text-gray-300 hover:bg-gray-700"
+                                    : "text-gray-700 hover:bg-gray-100"
+                                    }`}
                                 >
                                   <Copy className="w-4 h-4" />
                                   Copy
                                 </button>
-                                
+
                                 {/* Edit Option - Only for own messages */}
                                 {isOwnMessage && messageText && !hasVoice && !hasFiles && (
                                   <button
                                     onClick={() => handleEditMessage(messageId, messageText)}
-                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
-                                      darkMode 
-                                        ? "text-cyan-400 hover:bg-cyan-500/20" 
-                                        : "text-cyan-600 hover:bg-cyan-50"
-                                    }`}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${darkMode
+                                      ? "text-cyan-400 hover:bg-cyan-500/20"
+                                      : "text-cyan-600 hover:bg-cyan-50"
+                                      }`}
                                   >
                                     <Pencil className="w-4 h-4" />
                                     Edit
                                   </button>
                                 )}
-                                
+
                                 {/* Delete Option */}
                                 <button
                                   onClick={() => handleDeleteMessage(messageId)}
-                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
-                                    darkMode 
-                                      ? "text-red-400 hover:bg-red-500/20" 
-                                      : "text-red-500 hover:bg-red-50"
-                                  }`}
+                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${darkMode
+                                    ? "text-red-400 hover:bg-red-500/20"
+                                    : "text-red-500 hover:bg-red-50"
+                                    }`}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                   Delete
@@ -1941,160 +2069,186 @@ const MessagesTab: React.FC = () => {
                           </AnimatePresence>
 
                           <motion.div
-                            className={`max-w-[75%] rounded-xl px-4 py-3 shadow-sm ${
-                              isOwnMessage
-                                ? darkMode
-                                  ? "bg-gradient-to-br from-cyan-500 to-blue-500 text-white"
-                                  : "bg-gradient-to-br from-cyan-500 to-blue-500 text-white"
-                                : darkMode
+                            className={`max-w-[75%] rounded-xl pl-12 pr-4 py-3 shadow-sm ${isOwnMessage
+                              ? darkMode
+                                ? "bg-gradient-to-br from-cyan-500 to-blue-500 text-white"
+                                : "bg-gradient-to-br from-cyan-500 to-blue-500 text-white"
+                              : darkMode
                                 ? "bg-gray-800/80 backdrop-blur-xl text-white border border-white/10"
                                 : "bg-white text-black border border-gray-200"
-                            }`}
+                              } ${isPinned ? (isOwnMessage ? "ring-2 ring-yellow-300/80" : "ring-2 ring-yellow-400/80") : ""}`}
                             whileHover={{ scale: 1.01 }}
                             transition={{ type: "spring", stiffness: 400 }}
-                            style={{ overflow: 'hidden', minHeight: 'min-content' }}
+                            style={{ minHeight: 'min-content' }}
                           >
-                            {/* Voice Message Player */}
-                          {hasVoice && (
-                            <div className={`mb-1.5 p-2 rounded-lg ${
-                              isOwnMessage 
-                                ? "bg-white/20" 
-                                : darkMode 
-                                  ? "bg-white/10" 
-                                  : "bg-gray-100"
-                            }`}>
-                              <div className="flex items-center gap-2">
-                                <div className={`p-1.5 rounded-full ${
-                                  isOwnMessage ? "bg-white/30" : darkMode ? "bg-cyan-500/30" : "bg-cyan-100"
-                                }`}>
-                                  <Mic className={`w-3 h-3 ${
-                                    isOwnMessage ? "text-white" : darkMode ? "text-cyan-400" : "text-cyan-600"
-                                  }`} />
-                                </div>
-                                <div className="flex-1">
-                                  <audio 
-                                    controls 
-                                    src={msg.voiceData} 
-                                    className="w-full h-6"
-                                    style={{ 
-                                      filter: isOwnMessage ? 'invert(1) brightness(2)' : 'none',
-                                      maxWidth: '160px'
-                                    }}
-                                  />
-                                </div>
-                                <span className={`text-[10px] ${
-                                  isOwnMessage ? "text-white/70" : darkMode ? "text-gray-400" : "text-gray-500"
-                                }`}>
-                                  {Math.floor(voiceDuration / 60)}:{(voiceDuration % 60).toString().padStart(2, '0')}
-                                </span>
+                            {isPinned && (
+                              <div className="flex items-center gap-1 mb-1 text-[10px] text-yellow-100/90 dark:text-yellow-200/90">
+                                <Pin className="w-3 h-3" />
+                                <span>Pinned message</span>
                               </div>
-                            </div>
-                          )}
-                          
-                          {/* File Attachments */}
-                          {hasFiles && (
-                            <div className="mb-1.5 space-y-1.5">
-                              {msg.files.map((file: any, fileIndex: number) => {
-                                const FileIcon = (() => {
-                                  const type = file.type?.toLowerCase() || '';
-                                  const name = file.name?.toLowerCase() || '';
-                                  if (type.startsWith('image/')) return Image;
-                                  if (type.startsWith('video/')) return Film;
-                                  if (type.startsWith('audio/')) return Music;
-                                  if (type.includes('pdf')) return FileText;
-                                  if (type.includes('zip') || type.includes('rar')) return Archive;
-                                  if (['.js', '.ts', '.py', '.java', '.html', '.css'].some(ext => name.endsWith(ext))) return Code;
-                                  return File;
-                                })();
-                                
-                                return (
-                                  <div 
-                                    key={fileIndex}
-                                    className={`flex items-center gap-1.5 p-1.5 rounded ${
-                                      isOwnMessage 
-                                        ? "bg-white/20 hover:bg-white/30" 
-                                        : darkMode 
-                                          ? "bg-white/10 hover:bg-white/20" 
-                                          : "bg-gray-100 hover:bg-gray-200"
-                                    } cursor-pointer transition-all`}
-                                    onClick={() => {
-                                      // Download file
-                                      const link = document.createElement('a');
-                                      link.href = file.dataUrl;
-                                      link.download = file.name;
-                                      link.click();
-                                    }}
-                                  >
-                                    <FileIcon className={`w-3 h-3 flex-shrink-0 ${
-                                      isOwnMessage ? "text-white" : darkMode ? "text-cyan-400" : "text-cyan-600"
-                                    }`} />
-                                    <div className="flex-1 min-w-0">
-                                      <p className={`text-[10px] font-medium truncate ${
-                                        isOwnMessage ? "text-white" : darkMode ? "text-white" : "text-gray-900"
-                                      }`}>
-                                        {file.name}
-                                      </p>
-                                      <p className={`text-[10px] ${
-                                        isOwnMessage ? "text-white/70" : darkMode ? "text-gray-400" : "text-gray-500"
-                                      }`}>
-                                        {formatFileSize(file.size)}
-                                      </p>
-                                    </div>
-                                    <span className={`text-[10px] ${
-                                      isOwnMessage ? "text-white/70" : darkMode ? "text-cyan-400" : "text-cyan-600"
+                            )}
+                            {/* Voice Message Player */}
+                            {hasVoice && (
+                              <div className={`mb-1.5 p-2.5 rounded-xl border ${isOwnMessage
+                                ? "bg-white/20 border-white/20"
+                                : darkMode
+                                  ? "bg-white/10 border-white/10"
+                                  : "bg-gray-100 border-gray-200"
+                                }`}>
+                                <div className="flex items-center gap-2">
+                                  <div className={`p-2 rounded-full ${isOwnMessage ? "bg-white/30" : darkMode ? "bg-cyan-500/30" : "bg-cyan-100"
                                     }`}>
-                                      Download
-                                    </span>
+                                    <Mic className={`w-3.5 h-3.5 ${isOwnMessage ? "text-white" : darkMode ? "text-cyan-400" : "text-cyan-600"
+                                      }`} />
                                   </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                          
-                          {/* Text Message */}
-                          {messageText && !messageText.startsWith('🎤') && !messageText.startsWith('📎') && (
-                            <div className="flex items-start gap-1">
-                              <p className="text-xs whitespace-pre-wrap break-words font-medium leading-snug flex-1">
-                                {messageText}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <audio
+                                        controls
+                                        src={msg.voiceData ?? undefined}
+                                        className="w-full h-8"
+                                        style={{
+                                          filter: isOwnMessage ? 'invert(1) brightness(2)' : 'none',
+                                          maxWidth: '220px'
+                                        }}
+                                      />
+                                    </div>
+                                    <div className="flex items-center justify-between mt-1">
+                                      <span className={`text-[10px] uppercase tracking-wide ${isOwnMessage ? "text-white/70" : darkMode ? "text-gray-400" : "text-gray-500"
+                                        }`}>
+                                        Voice message
+                                      </span>
+                                      <span className={`text-[10px] font-medium ${isOwnMessage ? "text-white/70" : darkMode ? "text-gray-400" : "text-gray-500"
+                                        }`}>
+                                        {Math.floor(voiceDuration / 60)}:{(voiceDuration % 60).toString().padStart(2, '0')}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (!msg.voiceData) return;
+                                      try {
+                                        const link = document.createElement('a');
+                                        link.href = msg.voiceData;
+                                        link.download = `voice-message-${messageId}.webm`;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                      } catch (e) {
+                                        console.error("Failed to download voice message:", e);
+                                      }
+                                    }}
+                                    className={`p-1.5 rounded-full ${isOwnMessage
+                                      ? "bg-white/30 hover:bg-white/40"
+                                      : darkMode
+                                        ? "bg-cyan-500/20 hover:bg-cyan-500/30"
+                                        : "bg-cyan-100 hover:bg-cyan-200"
+                                      }`}
+                                    title="Download voice message"
+                                  >
+                                    <Download className={`w-3 h-3 ${isOwnMessage ? "text-white" : darkMode ? "text-cyan-300" : "text-cyan-700"
+                                      }`} />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* File Attachments */}
+                            {hasFiles && (
+                              <div className="mb-1.5 space-y-1.5">
+                                {(msg.files ?? []).map((file, fileIndex) => {
+                                  const FileIcon = (() => {
+                                    const type = file.type?.toLowerCase() || '';
+                                    const name = file.name?.toLowerCase() || '';
+                                    if (type.startsWith('image/')) return Image;
+                                    if (type.startsWith('video/')) return Film;
+                                    if (type.startsWith('audio/')) return Music;
+                                    if (type.includes('pdf')) return FileText;
+                                    if (type.includes('zip') || type.includes('rar')) return Archive;
+                                    if (['.js', '.ts', '.py', '.java', '.html', '.css'].some(ext => name.endsWith(ext))) return Code;
+                                    return File;
+                                  })();
+
+                                  return (
+                                    <div
+                                      key={fileIndex}
+                                      className={`flex items-center gap-1.5 p-1.5 rounded ${isOwnMessage
+                                        ? "bg-white/20 hover:bg-white/30"
+                                        : darkMode
+                                          ? "bg-white/10 hover:bg-white/20"
+                                          : "bg-gray-100 hover:bg-gray-200"
+                                        } cursor-pointer transition-all`}
+                                      onClick={() => {
+                                        // Download file
+                                        const link = document.createElement('a');
+                                        link.href = file.dataUrl;
+                                        link.download = file.name;
+                                        link.click();
+                                      }}
+                                    >
+                                      <FileIcon className={`w-3 h-3 flex-shrink-0 ${isOwnMessage ? "text-white" : darkMode ? "text-cyan-400" : "text-cyan-600"
+                                        }`} />
+                                      <div className="flex-1 min-w-0">
+                                        <p className={`text-[10px] font-medium truncate ${isOwnMessage ? "text-white" : darkMode ? "text-white" : "text-gray-900"
+                                          }`}>
+                                          {file.name}
+                                        </p>
+                                        <p className={`text-[10px] ${isOwnMessage ? "text-white/70" : darkMode ? "text-gray-400" : "text-gray-500"
+                                          }`}>
+                                          {formatFileSize(file.size)}
+                                        </p>
+                                      </div>
+                                      <span className={`text-[10px] ${isOwnMessage ? "text-white/70" : darkMode ? "text-cyan-400" : "text-cyan-600"
+                                        }`}>
+                                        Download
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {/* Text Message */}
+                            {messageText && !messageText.startsWith('🎤') && !messageText.startsWith('📎') && (
+                              <div className="flex items-start gap-1">
+                                <p className="text-xs whitespace-pre-wrap break-words font-medium leading-snug flex-1">
+                                  {messageText}
+                                </p>
+                                {msg.isEdited && (
+                                  <span className={`text-[9px] flex-shrink-0 ${isOwnMessage ? "text-cyan-100/60" : darkMode ? "text-gray-500" : "text-gray-400"}`} title="Edited">
+                                    (edited)
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            <div className="flex items-center justify-end gap-1.5 mt-2 pt-1 w-full">
+                              <p className={`text-[10px] whitespace-nowrap flex-shrink-0 px-2 py-0.5 rounded-full ${isOwnMessage
+                                ? "text-cyan-100/90 bg-white/15"
+                                : darkMode
+                                  ? "text-gray-300 bg-white/10"
+                                  : "text-gray-600 bg-gray-100"
+                                }`}>
+                                {formatTime(timestamp)}
                               </p>
-                              {msg.isEdited && (
-                                <span className={`text-[9px] flex-shrink-0 ${isOwnMessage ? "text-cyan-100/60" : darkMode ? "text-gray-500" : "text-gray-400"}`} title="Edited">
-                                  (edited)
-                                </span>
+                              {isOwnMessage && (
+                                <CheckCircle2 className={`w-2.5 h-2.5 flex-shrink-0 ${darkMode ? "text-cyan-200/80" : "text-cyan-100/80"
+                                  }`} />
                               )}
                             </div>
-                          )}
-                          
-                          <div className="flex items-center justify-end gap-1.5 mt-2 pt-1 w-full">
-                            <p className={`text-[10px] whitespace-nowrap flex-shrink-0 ${
-                              isOwnMessage
-                                ? "text-cyan-100/80"
-                                : darkMode
-                                ? "text-gray-400"
-                                : "text-gray-500"
-                            }`}>
-                              {formatTime(timestamp)}
-                            </p>
-                            {isOwnMessage && (
-                              <CheckCircle2 className={`w-2.5 h-2.5 flex-shrink-0 ${
-                                darkMode ? "text-cyan-200/80" : "text-cyan-100/80"
-                              }`} />
-                            )}
-                          </div>
                           </motion.div>
                         </div>
                         {isOwnMessage && (
                           <motion.div
-                            className={`w-6 h-6 rounded-full ${
-                              darkMode 
-                                ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30" 
-                                : "bg-gradient-to-br from-cyan-100 to-blue-100"
-                            } flex items-center justify-center flex-shrink-0`}
+                            className={`w-6 h-6 rounded-full ${darkMode
+                              ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30"
+                              : "bg-gradient-to-br from-cyan-100 to-blue-100"
+                              } flex items-center justify-center flex-shrink-0`}
                             whileHover={{ scale: 1.05 }}
                           >
-                            <span className={`text-[10px] font-bold ${
-                              darkMode ? "text-cyan-300" : "text-cyan-700"
-                            }`}>
+                            <span className={`text-[10px] font-bold ${darkMode ? "text-cyan-300" : "text-cyan-700"
+                              }`}>
                               {user?.profile?.firstName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
                             </span>
                           </motion.div>
@@ -2110,11 +2264,10 @@ const MessagesTab: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`p-3 border-t backdrop-blur-xl ${
-                  darkMode 
-                    ? "bg-black/40 border-cyan-500/30" 
-                    : "bg-white/60 border-cyan-200"
-                }`}
+                className={`p-3 border-t backdrop-blur-xl ${darkMode
+                  ? "bg-black/40 border-cyan-500/30"
+                  : "bg-white/60 border-cyan-200"
+                  }`}
               >
                 {/* Edit Mode Indicator */}
                 {editingMessageId && (
@@ -2122,11 +2275,10 @@ const MessagesTab: React.FC = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className={`mb-2 flex items-center justify-between px-3 py-2 rounded-lg ${
-                      darkMode 
-                        ? "bg-cyan-500/20 border border-cyan-500/30" 
-                        : "bg-cyan-50 border border-cyan-200"
-                    }`}
+                    className={`mb-2 flex items-center justify-between px-3 py-2 rounded-lg ${darkMode
+                      ? "bg-cyan-500/20 border border-cyan-500/30"
+                      : "bg-cyan-50 border border-cyan-200"
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <Pencil className={`w-4 h-4 ${darkMode ? "text-cyan-400" : "text-cyan-600"}`} />
@@ -2145,6 +2297,38 @@ const MessagesTab: React.FC = () => {
                     </motion.button>
                   </motion.div>
                 )}
+                {replyToMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className={`mb-2 flex items-center justify-between px-3 py-2 rounded-lg ${darkMode
+                      ? "bg-purple-500/15 border border-purple-500/40"
+                      : "bg-purple-50 border border-purple-300"
+                      }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Reply className={`w-4 h-4 ${darkMode ? "text-purple-300" : "text-purple-600"}`} />
+                      <div className="min-w-0">
+                        <span className={`text-xs font-semibold block ${darkMode ? "text-purple-200" : "text-purple-700"}`}>
+                          Replying to
+                        </span>
+                        <span className={`text-xs truncate block ${darkMode ? "text-gray-200" : "text-gray-700"}`}>
+                          {replyToMessage.text}
+                        </span>
+                      </div>
+                    </div>
+                    <motion.button
+                      onClick={handleCancelReply}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`p-1 rounded-lg ${darkMode ? "hover:bg-purple-500/25 text-purple-200" : "hover:bg-purple-100 text-purple-700"}`}
+                      title="Cancel reply"
+                    >
+                      <X className="w-4 h-4" />
+                    </motion.button>
+                  </motion.div>
+                )}
                 {/* Attached Files Preview */}
                 <AnimatePresence>
                   {attachedFiles.length > 0 && (
@@ -2155,9 +2339,8 @@ const MessagesTab: React.FC = () => {
                       className="mb-2"
                     >
                       {/* Files Header with Count and Clear All */}
-                      <div className={`flex items-center justify-between mb-2 px-2 ${
-                        darkMode ? "text-gray-300" : "text-gray-700"
-                      }`}>
+                      <div className={`flex items-center justify-between mb-2 px-2 ${darkMode ? "text-gray-300" : "text-gray-700"
+                        }`}>
                         <div className="flex items-center gap-2">
                           <Paperclip className="w-4 h-4" />
                           <span className="text-sm font-medium">
@@ -2171,20 +2354,18 @@ const MessagesTab: React.FC = () => {
                           onClick={() => setAttachedFiles([])}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className={`text-xs font-medium px-2 py-1 rounded-lg ${
-                            darkMode 
-                              ? "text-red-400 hover:bg-red-500/20" 
-                              : "text-red-500 hover:bg-red-50"
-                          }`}
+                          className={`text-xs font-medium px-2 py-1 rounded-lg ${darkMode
+                            ? "text-red-400 hover:bg-red-500/20"
+                            : "text-red-500 hover:bg-red-50"
+                            }`}
                         >
                           Clear All
                         </motion.button>
                       </div>
-                      
+
                       {/* Scrollable Files Container */}
-                      <div className={`flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar p-1 rounded-xl ${
-                        darkMode ? "bg-white/5" : "bg-gray-50"
-                      }`}>
+                      <div className={`flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar p-1 rounded-xl ${darkMode ? "bg-white/5" : "bg-gray-50"
+                        }`}>
                         {attachedFiles.map((file, index) => {
                           const FileIcon = getFileIcon(file);
                           return (
@@ -2193,17 +2374,15 @@ const MessagesTab: React.FC = () => {
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.8 }}
-                              className={`flex items-center gap-2 px-3 py-2 rounded-xl ${
-                                darkMode 
-                                  ? "bg-white/10 border border-white/20" 
-                                  : "bg-white border border-gray-200 shadow-sm"
-                              }`}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-xl ${darkMode
+                                ? "bg-white/10 border border-white/20"
+                                : "bg-white border border-gray-200 shadow-sm"
+                                }`}
                             >
                               <FileIcon className={`w-4 h-4 flex-shrink-0 ${darkMode ? "text-cyan-400" : "text-cyan-600"}`} />
                               <div className="flex flex-col min-w-0">
-                                <span className={`text-xs font-medium truncate max-w-[100px] ${
-                                  darkMode ? "text-white" : "text-gray-900"
-                                }`} title={file.name}>
+                                <span className={`text-xs font-medium truncate max-w-[100px] ${darkMode ? "text-white" : "text-gray-900"
+                                  }`} title={file.name}>
                                   {file.name}
                                 </span>
                                 <span className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
@@ -2214,9 +2393,8 @@ const MessagesTab: React.FC = () => {
                                 onClick={() => removeAttachedFile(index)}
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
-                                className={`p-1 rounded-full flex-shrink-0 ${
-                                  darkMode ? "hover:bg-red-500/30 text-gray-400 hover:text-red-400" : "hover:bg-red-100 text-gray-500 hover:text-red-500"
-                                }`}
+                                className={`p-1 rounded-full flex-shrink-0 ${darkMode ? "hover:bg-red-500/30 text-gray-400 hover:text-red-400" : "hover:bg-red-100 text-gray-500 hover:text-red-500"
+                                  }`}
                               >
                                 <X className="w-3 h-3" />
                               </motion.button>
@@ -2237,15 +2415,14 @@ const MessagesTab: React.FC = () => {
                       exit={{ opacity: 0, height: 0 }}
                       className="mb-2"
                     >
-                      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-                        isRecording
-                          ? darkMode 
-                            ? "bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30" 
-                            : "bg-gradient-to-r from-red-50 to-orange-50 border border-red-200"
-                          : darkMode
-                            ? "bg-gradient-to-r from-green-500/20 to-cyan-500/20 border border-green-500/30"
-                            : "bg-gradient-to-r from-green-50 to-cyan-50 border border-green-200"
-                      }`}>
+                      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${isRecording
+                        ? darkMode
+                          ? "bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30"
+                          : "bg-gradient-to-r from-red-50 to-orange-50 border border-red-200"
+                        : darkMode
+                          ? "bg-gradient-to-r from-green-500/20 to-cyan-500/20 border border-green-500/30"
+                          : "bg-gradient-to-r from-green-50 to-cyan-50 border border-green-200"
+                        }`}>
                         {isRecording ? (
                           <>
                             <motion.div
@@ -2261,11 +2438,10 @@ const MessagesTab: React.FC = () => {
                               onClick={stopRecording}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              className={`p-1.5 rounded-lg ${
-                                darkMode 
-                                  ? "bg-red-500/30 hover:bg-red-500/50 text-red-400" 
-                                  : "bg-red-100 hover:bg-red-200 text-red-600"
-                              }`}
+                              className={`p-1.5 rounded-lg ${darkMode
+                                ? "bg-red-500/30 hover:bg-red-500/50 text-red-400"
+                                : "bg-red-100 hover:bg-red-200 text-red-600"
+                                }`}
                               title="Stop Recording"
                             >
                               <Square className="w-3.5 h-3.5" />
@@ -2274,11 +2450,10 @@ const MessagesTab: React.FC = () => {
                               onClick={cancelRecording}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              className={`p-1.5 rounded-lg ${
-                                darkMode 
-                                  ? "bg-gray-500/30 hover:bg-gray-500/50 text-gray-400" 
-                                  : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                              }`}
+                              className={`p-1.5 rounded-lg ${darkMode
+                                ? "bg-gray-500/30 hover:bg-gray-500/50 text-gray-400"
+                                : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                                }`}
                               title="Cancel"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -2287,9 +2462,8 @@ const MessagesTab: React.FC = () => {
                         ) : (
                           <>
                             <motion.div
-                              className={`p-1.5 rounded-full ${
-                                darkMode ? "bg-green-500/30" : "bg-green-100"
-                              }`}
+                              className={`p-1.5 rounded-full ${darkMode ? "bg-green-500/30" : "bg-green-100"
+                                }`}
                             >
                               <Mic className={`w-3.5 h-3.5 ${darkMode ? "text-green-400" : "text-green-600"}`} />
                             </motion.div>
@@ -2301,11 +2475,10 @@ const MessagesTab: React.FC = () => {
                               onClick={isPlayingRecording ? pauseRecording : playRecording}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              className={`p-1.5 rounded-lg ${
-                                darkMode 
-                                  ? "bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-400" 
-                                  : "bg-cyan-100 hover:bg-cyan-200 text-cyan-600"
-                              }`}
+                              className={`p-1.5 rounded-lg ${darkMode
+                                ? "bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-400"
+                                : "bg-cyan-100 hover:bg-cyan-200 text-cyan-600"
+                                }`}
                               title={isPlayingRecording ? "Pause" : "Play"}
                             >
                               {isPlayingRecording ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -2314,11 +2487,10 @@ const MessagesTab: React.FC = () => {
                               onClick={cancelRecording}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              className={`p-1.5 rounded-lg ${
-                                darkMode 
-                                  ? "bg-red-500/30 hover:bg-red-500/50 text-red-400" 
-                                  : "bg-red-100 hover:bg-red-200 text-red-600"
-                              }`}
+                              className={`p-1.5 rounded-lg ${darkMode
+                                ? "bg-red-500/30 hover:bg-red-500/50 text-red-400"
+                                : "bg-red-100 hover:bg-red-200 text-red-600"
+                                }`}
                               title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -2329,11 +2501,10 @@ const MessagesTab: React.FC = () => {
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               disabled={sending}
-                              className={`p-1.5 rounded-lg ${
-                                darkMode 
-                                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-sm" 
-                                  : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-sm"
-                              }`}
+                              className={`p-1.5 rounded-lg ${darkMode
+                                ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-sm"
+                                : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-sm"
+                                }`}
                               title="Send Voice Message"
                             >
                               <Send className="w-3.5 h-3.5" />
@@ -2358,15 +2529,14 @@ const MessagesTab: React.FC = () => {
                   {/* Emoji Picker Button */}
                   <motion.button
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className={`p-2 rounded-lg transition-all ${
-                      showEmojiPicker
-                        ? darkMode
-                          ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md"
-                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md"
-                        : darkMode
+                    className={`p-2 rounded-lg transition-all ${showEmojiPicker
+                      ? darkMode
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md"
+                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md"
+                      : darkMode
                         ? "bg-white/10 hover:bg-white/20 text-gray-300"
                         : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                    }`}
+                      }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     title="Add Emoji"
@@ -2378,15 +2548,14 @@ const MessagesTab: React.FC = () => {
                   <div className="relative">
                     <motion.button
                       onClick={() => fileInputRef.current?.click()}
-                      className={`p-2 rounded-lg transition-all ${
-                        attachedFiles.length > 0
-                          ? darkMode
-                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
-                            : "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
-                          : darkMode
+                      className={`p-2 rounded-lg transition-all ${attachedFiles.length > 0
+                        ? darkMode
+                          ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
+                          : "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
+                        : darkMode
                           ? "bg-white/10 hover:bg-white/20 text-gray-300"
                           : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                      }`}
+                        }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       title={`Attach Files (${attachedFiles.length} attached)`}
@@ -2408,19 +2577,18 @@ const MessagesTab: React.FC = () => {
                   {/* Voice Recording Button */}
                   <motion.button
                     onClick={isRecording ? stopRecording : startRecording}
-                    className={`p-2 rounded-lg transition-all ${
-                      isRecording
-                        ? darkMode
-                          ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md"
-                          : "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md"
-                        : audioBlob
+                    className={`p-2 rounded-lg transition-all ${isRecording
+                      ? darkMode
+                        ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md"
+                        : "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md"
+                      : audioBlob
                         ? darkMode
                           ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md"
                           : "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md"
                         : darkMode
-                        ? "bg-white/10 hover:bg-white/20 text-gray-300"
-                        : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                    }`}
+                          ? "bg-white/10 hover:bg-white/20 text-gray-300"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                      }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     title={isRecording ? "Stop Recording" : "Start Voice Recording"}
@@ -2447,12 +2615,11 @@ const MessagesTab: React.FC = () => {
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
                         className="absolute bottom-full left-0 mb-3 z-50 max-w-[calc(100vw-2rem)]"
                       >
-                        <div className={`rounded-2xl overflow-hidden shadow-2xl ${
-                          darkMode ? "bg-gray-900 border-2 border-cyan-500/30" : "bg-white border-2 border-cyan-200"
-                        }`}>
+                        <div className={`rounded-2xl overflow-hidden shadow-2xl ${darkMode ? "bg-gray-900 border-2 border-cyan-500/30" : "bg-white border-2 border-cyan-200"
+                          }`}>
                           <EmojiPicker
                             onEmojiClick={handleEmojiClick}
-                            theme={darkMode ? "dark" : "light"}
+                            theme={darkMode ? Theme.DARK : Theme.LIGHT}
                             width="100%"
                             height={350}
                             style={{ width: '100%', maxWidth: '350px', maxHeight: '400px' }}
@@ -2473,24 +2640,22 @@ const MessagesTab: React.FC = () => {
                       }
                     }}
                     placeholder="Type your message..."
-                    className={`flex-1 px-4 py-2.5 rounded-lg border text-sm backdrop-blur-xl transition-all ${
-                      darkMode
-                        ? "bg-white/5 border-cyan-500/30 text-white placeholder-gray-500 focus:border-cyan-500 focus:bg-white/10"
-                        : "bg-white/80 border-cyan-200 text-black placeholder-gray-500 focus:border-cyan-500 focus:bg-white"
-                    } focus:outline-none focus:ring-2 focus:ring-cyan-500/20`}
+                    className={`flex-1 px-4 py-2.5 rounded-lg border text-sm backdrop-blur-xl transition-all ${darkMode
+                      ? "bg-white/5 border-cyan-500/30 text-white placeholder-gray-500 focus:border-cyan-500 focus:bg-white/10"
+                      : "bg-white/80 border-cyan-200 text-black placeholder-gray-500 focus:border-cyan-500 focus:bg-white"
+                      } focus:outline-none focus:ring-2 focus:ring-cyan-500/20`}
                   />
                   <motion.button
                     onClick={handleSendMessage}
                     disabled={(!newMessage.trim() && attachedFiles.length === 0 && !audioBlob) || sending}
-                    className={`p-2.5 rounded-lg transition-all ${
-                      (newMessage.trim() || attachedFiles.length > 0 || audioBlob) && !sending
-                        ? darkMode
-                          ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-md"
-                          : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md"
-                        : darkMode
+                    className={`p-2.5 rounded-lg transition-all ${(newMessage.trim() || attachedFiles.length > 0 || audioBlob) && !sending
+                      ? darkMode
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-md"
+                        : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md"
+                      : darkMode
                         ? "bg-white/10 text-gray-500 cursor-not-allowed"
                         : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    }`}
+                      }`}
                     whileHover={(newMessage.trim() || attachedFiles.length > 0 || audioBlob) && !sending ? { scale: 1.05 } : {}}
                     whileTap={(newMessage.trim() || attachedFiles.length > 0 || audioBlob) && !sending ? { scale: 0.95 } : {}}
                     title={editingMessageId ? "Save changes" : "Send message"}
@@ -2516,26 +2681,22 @@ const MessagesTab: React.FC = () => {
             >
               <div className="text-center">
                 <motion.div
-                  className={`w-32 h-32 rounded-full mx-auto mb-6 ${
-                    darkMode 
-                      ? "bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/30" 
-                      : "bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-cyan-200"
-                  } flex items-center justify-center shadow-2xl`}
+                  className={`w-32 h-32 rounded-full mx-auto mb-6 ${darkMode
+                    ? "bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/30"
+                    : "bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-cyan-200"
+                    } flex items-center justify-center shadow-2xl`}
                   animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  <MessageSquare className={`w-16 h-16 ${
-                    darkMode ? "text-gray-600" : "text-gray-400"
-                  }`} />
+                  <MessageSquare className={`w-16 h-16 ${darkMode ? "text-gray-600" : "text-gray-400"
+                    }`} />
                 </motion.div>
-                <p className={`text-xl font-bold mb-2 ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}>
+                <p className={`text-xl font-bold mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"
+                  }`}>
                   Select a conversation
                 </p>
-                <p className={`text-sm ${
-                  darkMode ? "text-gray-500" : "text-gray-500"
-                }`}>
+                <p className={`text-sm ${darkMode ? "text-gray-500" : "text-gray-500"
+                  }`}>
                   Choose a conversation from the list to start chatting
                 </p>
               </div>
@@ -2579,7 +2740,7 @@ const MessagesTab: React.FC = () => {
                   <div className="text-center">
                     <motion.div
                       className="w-32 h-32 rounded-full mx-auto mb-4 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border-4 border-cyan-500/50 flex items-center justify-center"
-                      animate={{ 
+                      animate={{
                         scale: [1, 1.1, 1],
                         boxShadow: [
                           "0 0 0 0 rgba(6, 182, 212, 0.4)",
@@ -2596,7 +2757,7 @@ const MessagesTab: React.FC = () => {
                     <h3 className="text-2xl font-bold text-white mb-2">
                       {selectedConversation?.freelancerName}
                     </h3>
-                    <motion.p 
+                    <motion.p
                       className="text-cyan-400 text-lg font-medium"
                       animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
@@ -2635,9 +2796,8 @@ const MessagesTab: React.FC = () => {
                   autoPlay
                   muted
                   playsInline
-                  className={`w-full h-full object-cover transform scale-x-[-1] ${
-                    isVideoEnabled && localStream ? 'block' : 'hidden'
-                  }`}
+                  className={`w-full h-full object-cover transform scale-x-[-1] ${isVideoEnabled && localStream ? 'block' : 'hidden'
+                    }`}
                 />
                 {/* Show avatar when video is off */}
                 {(!isVideoEnabled || !localStream) && (
@@ -2705,11 +2865,10 @@ const MessagesTab: React.FC = () => {
                     onClick={toggleAudio}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className={`p-4 rounded-full transition-all ${
-                      isAudioEnabled
-                        ? "bg-gray-700 hover:bg-gray-600 text-white"
-                        : "bg-red-500 hover:bg-red-400 text-white"
-                    }`}
+                    className={`p-4 rounded-full transition-all ${isAudioEnabled
+                      ? "bg-gray-700 hover:bg-gray-600 text-white"
+                      : "bg-red-500 hover:bg-red-400 text-white"
+                      }`}
                     title={isAudioEnabled ? "Mute" : "Unmute"}
                   >
                     {isAudioEnabled ? (
@@ -2724,11 +2883,10 @@ const MessagesTab: React.FC = () => {
                     onClick={toggleVideo}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className={`p-4 rounded-full transition-all ${
-                      isVideoEnabled
-                        ? "bg-gray-700 hover:bg-gray-600 text-white"
-                        : "bg-red-500 hover:bg-red-400 text-white"
-                    }`}
+                    className={`p-4 rounded-full transition-all ${isVideoEnabled
+                      ? "bg-gray-700 hover:bg-gray-600 text-white"
+                      : "bg-red-500 hover:bg-red-400 text-white"
+                      }`}
                     title={isVideoEnabled ? "Turn Off Camera" : "Turn On Camera"}
                   >
                     {isVideoEnabled ? (
@@ -2757,9 +2915,9 @@ const MessagesTab: React.FC = () => {
                 <div className="mt-4 text-center">
                   <p className="text-white font-medium">{selectedConversation?.freelancerName}</p>
                   <p className="text-gray-400 text-sm">
-                    {callStatus === 'calling' ? 'Ringing...' : 
-                     callStatus === 'connected' ? 'Connected' : 
-                     callStatus === 'ended' ? 'Call Ended' : ''}
+                    {callStatus === 'calling' ? 'Ringing...' :
+                      callStatus === 'connected' ? 'Connected' :
+                        callStatus === 'ended' ? 'Call Ended' : ''}
                   </p>
                 </div>
               </motion.div>

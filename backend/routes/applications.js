@@ -54,14 +54,14 @@ router.post(
       if (!errors.isEmpty()) {
         console.log("Validation errors:", errors.array());
         console.log("Error details:", JSON.stringify(errors.array(), null, 2));
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Validation failed",
-          errors: errors.array() 
+          errors: errors.array()
         });
       }
 
       const { jobId, coverLetter, cvUrl, portfolioUrl: rawPortfolioUrl } = req.body;
-      
+
       // Process portfolio URL to ensure it has proper protocol
       let portfolioUrl = rawPortfolioUrl;
       if (portfolioUrl && portfolioUrl.trim()) {
@@ -253,7 +253,10 @@ router.put(
       };
 
       try {
-        await axios.post("http://localhost:5000/api/notifications/email", {
+        const notificationBaseUrl =
+          process.env.NOTIFICATION_BASE_URL ||
+          `http://localhost:${process.env.PORT || 5001}`;
+        await axios.post(`${notificationBaseUrl}/api/notifications/email`, {
           to: application.applicantEmail,
           subject: `Application Status Update for ${application.jobTitle}`,
           body: statusMessages[status],

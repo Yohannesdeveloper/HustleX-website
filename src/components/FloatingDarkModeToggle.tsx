@@ -19,7 +19,7 @@ const FloatingDarkModeToggle: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className={`fixed top-14 right-4 z-[9999] w-10 h-10 rounded-full shadow-2xl flex items-center justify-center transition-colors duration-300 ${darkMode
+            className={`fixed top-8 right-4 z-[9999] w-10 h-10 rounded-full shadow-2xl flex items-center justify-center transition-colors duration-300 ${darkMode
                 ? "bg-gray-800 text-yellow-400 border border-gray-700"
                 : "bg-white text-gray-700 border border-gray-200"
                 }`}

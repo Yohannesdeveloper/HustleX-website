@@ -49,7 +49,6 @@ const HiringDashboard: React.FC = () => {
     | "overview"
     | "applications"
     | "jobs"
-    | "analytics"
     | "profile"
   >("overview");
 
@@ -95,7 +94,6 @@ const HiringDashboard: React.FC = () => {
     { id: "overview" as const, label: "Overview", icon: BarChart3 },
     { id: "applications" as const, label: "Applications", icon: Users },
     { id: "jobs" as const, label: "My Jobs", icon: Briefcase },
-    { id: "analytics" as const, label: "Analytics", icon: BarChart3 },
     { id: "messages" as const, label: "Messages", icon: MessageSquare, navigate: "/chat" },
     { id: "profile" as const, label: "Profile", icon: User },
   ];
@@ -105,18 +103,18 @@ const HiringDashboard: React.FC = () => {
     const state = location.state as any;
     if (
       state?.tab &&
-      ["overview", "applications", "jobs", "analytics", "profile"].includes(state.tab)
+      ["overview", "applications", "jobs", "profile"].includes(state.tab)
     ) {
       setActiveTab(state.tab);
     }
   }, [location.state]);
 
-  // Fetch analytics data when analytics tab is selected
+  // Fetch analytics data once when user is available (for potential overview metrics)
   useEffect(() => {
-    if (activeTab === "analytics" && user) {
+    if (user) {
       fetchAnalyticsData();
     }
-  }, [activeTab, user]);
+  }, [user]);
 
   // Fetch jobs data when jobs tab is selected
   useEffect(() => {
@@ -166,9 +164,7 @@ const HiringDashboard: React.FC = () => {
       // Refresh the jobs list
       await fetchUserJobs();
       // Refresh analytics data
-      if (activeTab === "analytics") {
-        await fetchAnalyticsData();
-      }
+      await fetchAnalyticsData();
       setShowClearConfirm(false);
     } catch (error) {
       console.error("Error clearing jobs:", error);
@@ -248,9 +244,7 @@ const HiringDashboard: React.FC = () => {
       // Refresh the jobs list
       await fetchUserJobs();
       // Refresh analytics data
-      if (activeTab === "analytics") {
-        await fetchAnalyticsData();
-      }
+      await fetchAnalyticsData();
     } catch (error) {
       console.error("Error deleting job:", error);
       alert("Failed to delete job. Please try again.");
@@ -702,482 +696,6 @@ const HiringDashboard: React.FC = () => {
             </div>
           </div>
         );
-      case "analytics":
-        return (
-          <div
-            className={`min-h-screen ${
-              darkMode ? "bg-black text-white" : "bg-white text-black"
-            }`}
-          >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="mb-6 sm:mb-8">
-                  <motion.h1
-                    className={`text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r ${
-                      darkMode
-                        ? "from-blue-300 to-blue-500"
-                        : "from-blue-400 to-blue-600"
-                    } bg-clip-text text-transparent mb-2 font-inter tracking-tight leading-tight`}
-                    variants={headingVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    Hiring Analytics
-                  </motion.h1>
-                  <p
-                    className={`${
-                      darkMode ? "text-gray-400" : "text-gray-600"
-                    } text-base sm:text-lg`}
-                  >
-                    Comprehensive insights into your hiring performance
-                  </p>
-                </div>
-
-                {/* Key Metrics Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    whileHover={{
-                      scale: 1.02,
-                      boxShadow: darkMode
-                        ? "0 25px 50px rgba(255, 255, 255, 0.1)"
-                        : "0 25px 50px rgba(0, 0, 0, 0.2)",
-                    }}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                        <Briefcase className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p
-                          className={`text-2xl font-bold ${
-                            darkMode ? "text-white" : "text-black"
-                          }`}
-                        >
-                          {analyticsData.totalJobs}
-                        </p>
-                        <p
-                          className={`text-sm ${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
-                          Total Jobs
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span
-                        className={`text-xs ${
-                          darkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        Live data
-                      </span>
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    whileHover={{
-                      scale: 1.02,
-                      boxShadow: darkMode
-                        ? "0 25px 50px rgba(255, 255, 255, 0.1)"
-                        : "0 25px 50px rgba(0, 0, 0, 0.2)",
-                    }}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-green-700 rounded-xl flex items-center justify-center">
-                        <Users className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p
-                          className={`text-2xl font-bold ${
-                            darkMode ? "text-white" : "text-black"
-                          }`}
-                        >
-                          {analyticsData.totalApplications}
-                        </p>
-                        <p
-                          className={`text-sm ${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
-                          Applications
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span
-                        className={`text-xs ${
-                          darkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        Live data
-                      </span>
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    whileHover={{
-                      scale: 1.02,
-                      boxShadow: darkMode
-                        ? "0 25px 50px rgba(255, 255, 255, 0.1)"
-                        : "0 25px 50px rgba(0, 0, 0, 0.2)",
-                    }}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl flex items-center justify-center">
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p
-                          className={`text-2xl font-bold ${
-                            darkMode ? "text-white" : "text-black"
-                          }`}
-                        >
-                          {analyticsData.hiredCount}
-                        </p>
-                        <p
-                          className={`text-sm ${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
-                          Hired
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span
-                        className={`text-xs ${
-                          darkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        Live data
-                      </span>
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    whileHover={{
-                      scale: 1.02,
-                      boxShadow: darkMode
-                        ? "0 25px 50px rgba(255, 255, 255, 0.1)"
-                        : "0 25px 50px rgba(0, 0, 0, 0.2)",
-                    }}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p
-                          className={`text-2xl font-bold ${
-                            darkMode ? "text-white" : "text-black"
-                          }`}
-                        >
-                          {analyticsData.avgDaysToHire}
-                        </p>
-                        <p
-                          className={`text-sm ${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
-                          Avg. Days to Hire
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      <span
-                        className={`text-xs ${
-                          darkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        Live data
-                      </span>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Charts and Analytics */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                  {/* Application Trends */}
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.1 }}
-                  >
-                    <h3
-                      className={`text-lg font-semibold mb-4 ${
-                        darkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      Application Trends
-                    </h3>
-                    <div className="space-y-3">
-                      {analyticsData.monthlyTrends.length > 0 ? (
-                        analyticsData.monthlyTrends.map((item, index) => (
-                          <div
-                            key={item.month}
-                            className="flex items-center justify-between"
-                          >
-                            <span
-                              className={`text-sm ${
-                                darkMode ? "text-gray-300" : "text-gray-600"
-                              }`}
-                            >
-                              {item.month}
-                            </span>
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                <span
-                                  className={`text-sm ${
-                                    darkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  {item.applications}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                <span
-                                  className={`text-sm ${
-                                    darkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  {item.hired}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div
-                          className={`text-center py-8 ${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
-                          No data available yet
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-
-                  {/* Job Categories Performance */}
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                  >
-                    <h3
-                      className={`text-lg font-semibold mb-4 ${
-                        darkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      Top Performing Categories
-                    </h3>
-                    <div className="space-y-4">
-                      {analyticsData.categoryPerformance.length > 0 ? (
-                        analyticsData.categoryPerformance.map((item, index) => (
-                          <div
-                            key={item.category}
-                            className="flex items-center justify-between"
-                          >
-                            <div className="flex-1">
-                              <p
-                                className={`text-sm font-medium ${
-                                  darkMode ? "text-white" : "text-black"
-                                }`}
-                              >
-                                {item.category}
-                              </p>
-                              <p
-                                className={`text-xs ${
-                                  darkMode ? "text-gray-400" : "text-gray-600"
-                                }`}
-                              >
-                                {item.applications} applications
-                              </p>
-                            </div>
-                            <div
-                              className={`text-sm font-semibold ${
-                                parseFloat(item.conversion) >= 20
-                                  ? "text-green-500"
-                                  : parseFloat(item.conversion) >= 15
-                                  ? "text-blue-500"
-                                  : parseFloat(item.conversion) >= 10
-                                  ? "text-purple-500"
-                                  : parseFloat(item.conversion) >= 5
-                                  ? "text-orange-500"
-                                  : "text-gray-500"
-                              }`}
-                            >
-                              {item.conversion}
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div
-                          className={`text-center py-8 ${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
-                          No category data available yet
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Additional Analytics */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                  >
-                    <h4
-                      className={`text-base font-semibold mb-3 ${
-                        darkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      Response Time
-                    </h4>
-                    <div className="text-center">
-                      <p
-                        className={`text-3xl font-bold mb-1 ${
-                          darkMode ? "text-white" : "text-black"
-                        }`}
-                      >
-                        {analyticsData.responseTime}h
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          darkMode ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        Average response time
-                      </p>
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                  >
-                    <h4
-                      className={`text-base font-semibold mb-3 ${
-                        darkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      Job Views
-                    </h4>
-                    <div className="text-center">
-                      <p
-                        className={`text-3xl font-bold mb-1 ${
-                          darkMode ? "text-white" : "text-black"
-                        }`}
-                      >
-                        {analyticsData.jobViews.toLocaleString()}
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          darkMode ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        Total job views this month
-                      </p>
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    className={`${
-                      darkMode
-                        ? "bg-black/50 border-white/10"
-                        : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.5 }}
-                  >
-                    <h4
-                      className={`text-base font-semibold mb-3 ${
-                        darkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      Success Rate
-                    </h4>
-                    <div className="text-center">
-                      <p
-                        className={`text-3xl font-bold mb-1 ${
-                          darkMode ? "text-white" : "text-black"
-                        }`}
-                      >
-                        {analyticsData.successRate}%
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          darkMode ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        Application to hire rate
-                      </p>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        );
-
-
       case "profile":
         // Profile tab redirects to company profile page
         return null;

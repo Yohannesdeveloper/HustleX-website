@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { WebSocketProvider } from "./context/WebSocketContext";
 import { useAppDispatch } from "./store/hooks";
 import { checkAuth } from "./store/authSlice";
@@ -48,6 +48,7 @@ import FloatingDarkModeToggle from "./components/FloatingDarkModeToggle";
 
 function AppContent() {
   const dispatch = useAppDispatch();
+  const location = useLocation();
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -95,7 +96,8 @@ function AppContent() {
 
       {/* Global Floating Components */}
       <FloatingDarkModeToggle />
-      <FloatingChatBot />
+      {/* Hide chatbot on main chat page to avoid overlapping the send button */}
+      {location.pathname !== "/chat" && <FloatingChatBot />}
     </WebSocketProvider>
   );
 }

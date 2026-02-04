@@ -47,12 +47,12 @@ const messageSchema = new mongoose.Schema(
     voiceDuration: {
       type: Number, // Duration in seconds
     },
-    files: [{
-      name: String,
-      size: Number,
-      type: String,
-      dataUrl: String, // Base64 encoded file data
-    }],
+    // Store arbitrary file metadata (name, size, type, dataUrl, etc.)
+    // Use Mixed to be fully compatible with any client payload shape
+    files: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: [],
+    },
   },
   {
     timestamps: true,

@@ -156,6 +156,8 @@ const io = new Server(server, {
     allowedHeaders: ["Content-Type", "Authorization"],
   },
   allowEIO3: true,
+  // Increase payload size to support multiple file/voice attachments in chat
+  maxHttpBufferSize: 10 * 1024 * 1024, // 10MB
 });
 
 // Make io accessible to routes
@@ -185,7 +187,40 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", async (data) => {
     try {
       const Message = require("./models/Message");
-      const { senderId, receiverId, message, conversationId, messageType, voiceData, voiceDuration, files } = data;
+      const { senderId, receiverId, message, conversationId, messageType, voiceData, voiceDuration } = data;
+
+      // Normalize files payload – handle both structured arrays and stringified data
+      let files = [];
+      if (Array.isArray(data.files)) {
+        // Sometimes the frontend (or older clients) might send files as a single JSON string
+        if (data.files.length > 0 && typeof data.files[0] === "string") {
+          try {
+            const parsed = JSON.parse(data.files[0]);
+            if (Array.isArray(parsed)) {
+              files = parsed;
+            }
+          } catch (e) {
+            console.error("Failed to parse stringified files array:", e);
+            files = [];
+          }
+        } else {
+          files = data.files;
+        }
+      } else if (typeof data.files === "string") {
+        // Direct JSON string case
+        try {
+          const parsed = JSON.parse(data.files);
+          if (Array.isArray(parsed)) {
+            files = parsed;
+          }
+        } catch (e) {
+          console.error("Failed to parse files JSON string:", e);
+          files = [];
+        }
+      } else if (data.files && typeof data.files === "object") {
+        // Single file object case
+        files = [data.files];
+      }
 
       // Ensure conversationId is properly formatted
       const formattedConversationId = conversationId || [senderId, receiverId].sort().join("_");
