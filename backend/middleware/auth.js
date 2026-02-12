@@ -41,13 +41,17 @@ const auth = async (req, res, next) => {
 // Admin-only middleware
 const adminAuth = async (req, res, next) => {
   try {
-    // Bypass with admin code header if matches env
+    // Bypass with admin code header
     const headerCode = req.header("x-admin-code");
-    const fallbackCodes = ["BlogPost", "JobModeration"]; // frontend defaults
-    if (
-      (process.env.ADMIN_CODE && headerCode === process.env.ADMIN_CODE) ||
-      (headerCode && fallbackCodes.includes(headerCode))
-    ) {
+    // Hardcode fallback codes to ensure bypass works even if ENV is missing
+    const fallbackCodes = ["BlogPost", "JobModeration"];
+
+    // Check if header matches ANY valid code (ENV or fallback)
+    const isEnvMatch = process.env.ADMIN_CODE && headerCode === process.env.ADMIN_CODE;
+    const isFallbackMatch = headerCode && fallbackCodes.includes(headerCode);
+
+    if (isEnvMatch || isFallbackMatch) {
+      console.log("Admin auth middleware - Bypassed with code:", headerCode);
       return next();
     }
     // First check if user is authenticated

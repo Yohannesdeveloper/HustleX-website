@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaUsers, FaGlobeAfrica, FaRocket, FaHeart, FaStar, FaAward, FaHandshake, FaLightbulb } from "react-icons/fa";
 import { useTranslation } from "../hooks/useTranslation";
 import Footer from "../components/Footer";
-
+import yohannesImg from "../Images/Teams/Yohannes.png";
+import messieImg from "../Images/Teams/messie.png";
+import DagiImg from "../Images/Teams/Dagi.png";
 const AboutUs: React.FC = () => {
   const darkMode = useAppSelector((s) => s.theme.darkMode);
   const t = useTranslation();
@@ -74,19 +76,19 @@ const AboutUs: React.FC = () => {
     {
       name: "Yohannes Fikre",
       role: t.aboutUs.founderCEO,
-      image: "src/Images/Teams/Yohannes.jpg",
+      image: yohannesImg,
       bio: t.aboutUs.visionaryLeaderBio
     },
     {
       name: "Messeret Ayalew",
       role: t.aboutUs.frontendDeveloper,
-      image: "src/Images/Teams/messie.png",
+      image: messieImg,
       bio: t.aboutUs.frontendDeveloperBio
     },
     {
-      name: "Abraham Wosenyelhe",
+      name: "Dagim Debebe",
       role: t.aboutUs.fullstackDeveloper,
-      image: "src/Images/Teams/messie.png",
+      image: DagiImg,
       bio: t.aboutUs.fullstackDeveloperBio
     }
   ];
@@ -250,7 +252,7 @@ const AboutUs: React.FC = () => {
                         transition={{ duration: 0.3 }}
                       >
                         <img
-                          src="src/Images/Teams/Yohannes.jpg"
+                          src={yohannesImg}
                           alt="Founder"
                           className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover mx-auto shadow-lg border-4 border-cyan-500/30"
                         />

@@ -64,7 +64,7 @@ const CompanyProfile: React.FC = () => {
           email: companyProfile.contactEmail || '',
           foundedYear: companyProfile.foundedYear?.toString() || '',
           registrationNumber: '',
-          taxId: '',
+          taxId: companyProfile.taxId || '',
         });
 
         // Handle logo URL - ensure it's a full URL if it's a relative path
@@ -280,6 +280,10 @@ const CompanyProfile: React.FC = () => {
         return sizeMap[size] || size;
       };
 
+      // Only send http/https URLs - never base64 data URLs (they can break the request)
+      const validLogo = logoUrl || (logo && (logo.startsWith('http://') || logo.startsWith('https://')) ? logo : undefined);
+      const validTradeLicense = tradeLicenseUrl || (tradeLicense && (tradeLicense.startsWith('http://') || tradeLicense.startsWith('https://')) ? tradeLicense : undefined);
+
       // Save the company profile to the backend
       const companyProfileData = {
         companyName: companyData.companyName,
@@ -291,8 +295,9 @@ const CompanyProfile: React.FC = () => {
         contactEmail: companyData.email,
         contactPhone: companyData.phone,
         foundedYear: companyData.foundedYear ? parseInt(companyData.foundedYear) : undefined,
-        logo: logoUrl || logo, // Use uploaded URL or existing URL
-        tradeLicense: tradeLicenseUrl || tradeLicense, // Use uploaded URL or existing URL
+        logo: validLogo,
+        tradeLicense: validTradeLicense,
+        taxId: companyData.taxId?.trim() || undefined,
       };
 
       await apiService.updateCompanyProfile(companyProfileData);
@@ -306,9 +311,10 @@ const CompanyProfile: React.FC = () => {
       }, 2000);
 
       alert('Company profile saved successfully! You are now registered as a client and can access the hiring dashboard.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving company profile:', error);
-      alert('Failed to save company profile. Please try again.');
+      const errMsg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Please try again.';
+      alert(`Failed to save company profile: ${errMsg}`);
     }
   };
 

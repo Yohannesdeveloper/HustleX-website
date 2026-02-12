@@ -228,26 +228,45 @@ const categories = [
   "Cybersecurity",
   "Data Science",
   "Machine Learning & AI",
+  "AI Prompt Engineering",
+  "Blockchain & Cryptocurrency",
+  "E-commerce Development",
   "Business Intelligence",
   "Data Analysis",
   "Database Administration",
+  "Quality Assurance & Testing",
+  "Embedded Systems",
+  "Hardware Engineering",
   "UI/UX Design",
   "Graphic Design",
   "Motion Graphics",
   "3D Animation",
   "Video Editing",
+  "Photography & Videography",
+  "Music & Audio Production",
+  "Architecture & Interior Design",
+  "Fashion & Textile Design",
   "Content Writing",
   "Technical Writing",
   "Copywriting",
-  "Translation & Localization",
-  "Digital Marketing",
-  "SEO & SEM",
   "Social Media Marketing",
+  "SEO & SEM",
+  "Digital Marketing",
   "Email Marketing",
+  "Translation & Localization",
+  "Virtual Assistant",
+  "Data Entry & Admin Support",
+  "Customer Service",
+  "Technical Support",
   "Sales & Business Development",
   "Customer Success",
-  "Technical Support",
-  "Customer Service",
+  "Project Management",
+  "Product Management",
+  "Program Management",
+  "Agile Coaching",
+  "Operations Management",
+  "Supply Chain & Logistics",
+  "Logistics & Warehouse Management",
   "Human Resources Management",
   "Recruitment & Talent Acquisition",
   "Payroll & Benefits Administration",
@@ -257,26 +276,29 @@ const categories = [
   "Legal Services",
   "Contract Management",
   "Compliance & Risk Management",
-  "Project Management",
-  "Program Management",
-  "Agile Coaching",
-  "Product Management",
-  "Operations Management",
-  "Supply Chain & Logistics",
   "Healthcare & Medical Services",
   "Nursing",
   "Pharmacy",
+  "Fitness & Personal Training",
+  "Nutrition & Dietetics",
+  "Social Work & Counseling",
   "Education & Training",
   "Instructional Design",
   "Civil Engineering",
   "Mechanical Engineering",
   "Electrical Engineering",
   "Environmental Consulting",
+  "Automobile Engineering",
+  "Farming & Agriculture",
+  "Veterinary Services",
   "Event Planning",
   "Public Relations",
   "Market Research",
   "Real Estate Management",
   "Hospitality & Tourism",
+  "Security Services",
+  "Manufacturing & Production",
+  "Printing & Publishing",
   "Other",
 ];
 
@@ -301,8 +323,19 @@ const jobSites = [
   "LinkedIn",
   "Indeed",
   "Glassdoor",
+  "Upwork",
+  "Freelancer",
+  "Fiverr",
+  "Toptal",
+  "Remote.co",
+  "We Work Remotely",
+  "SimplyHired",
+  "ZipRecruiter",
   "Monster",
   "CareerBuilder",
+  "Stack Overflow Jobs",
+  "Behance",
+  "Dribbble",
   "Other",
 ];
 
@@ -320,6 +353,21 @@ const jobSectors = [
   "Media & Entertainment",
   "Government",
   "Non-profit",
+  "Agriculture",
+  "Legal",
+  "Real Estate",
+  "Telecommunications",
+  "Aerospace",
+  "Automotive",
+  "Fashion",
+  "Food & Beverage",
+  "Mining",
+  "Pharmaceutical",
+  "Sports",
+  "Tourism",
+  "Architecture",
+  "Logistics",
+  "Insurance",
   "Other",
 ];
 
@@ -363,8 +411,8 @@ const currencies = [
 
 const skillsOptions = [
   // Web/Frontend
-  "HTML",
-  "CSS",
+  "HTML5",
+  "CSS3",
   "JavaScript",
   "TypeScript",
   "React",
@@ -373,6 +421,13 @@ const skillsOptions = [
   "Nuxt.js",
   "Angular",
   "Svelte",
+  "Redux",
+  "Tailwind CSS",
+  "Bootstrap",
+  "Material UI",
+  "Styled Components",
+  "Web3.js",
+  "Solid.js",
   // Backend
   "Node.js",
   "Express",
@@ -384,73 +439,144 @@ const skillsOptions = [
   "Ruby on Rails",
   "PHP",
   "Laravel",
+  "Symfony",
   "Go",
   "Java",
   "Spring Boot",
+  "C#",
+  ".NET Core",
+  "C++",
+  "C",
+  "Rust",
+  "Elixir",
+  "GraphQL",
+  "REST API",
 
   // Mobile
   "React Native",
   "Flutter",
   "Android (Kotlin)",
+  "Android (Java)",
   "iOS (Swift)",
+  "iOS (Objective-C)",
+  "Ionic",
+  "Xamarin",
 
-  // Data/ML
+  // Data/ML/AI
   "SQL",
   "NoSQL",
   "MongoDB",
   "PostgreSQL",
   "MySQL",
+  "Redis",
+  "Elasticsearch",
   "Data Analysis",
   "Pandas",
   "NumPy",
+  "Scikit-learn",
   "TensorFlow",
   "PyTorch",
+  "Keras",
   "Machine Learning",
+  "Deep Learning",
+  "Natural Language Processing (NLP)",
+  "Computer Vision",
   "Data Engineering",
+  "Big Data",
+  "Spark",
+  "Hadoop",
+  "R",
+  "Tableau",
+  "Power BI",
+  "AI Prompt Engineering",
 
   // DevOps/Cloud
   "Docker",
   "Kubernetes",
   "CI/CD",
+  "GitHub Actions",
+  "Jenkins",
   "AWS",
   "Azure",
   "GCP",
+  "Terraform",
+  "Ansible",
   "Linux",
+  "Nginx",
+  "Serverless",
 
-  // Design/Content
-  "UI/UX",
+  // Design/Creative
+  "UI/UX Design",
   "Figma",
   "Adobe XD",
   "Photoshop",
   "Illustrator",
+  "After Effects",
+  "Premiere Pro",
+  "InDesign",
+  "Canva",
   "Graphic Design",
   "Motion Graphics",
-  "3D",
+  "3D Modeling",
+  "Blender",
+  "Maya",
+  "Cinema 4D",
   "Video Editing",
+  "Photography",
+  "Videography",
+
+  // Writing/Content
   "Content Writing",
   "Copywriting",
   "Technical Writing",
+  "Blog Writing",
+  "Creative Writing",
+  "Editing & Proofreading",
+  "SEO Writing",
+  "Ghostwriting",
+  "Translation",
+  "Transcription",
 
   // Marketing/Business
   "SEO",
   "SEM",
-  "Social Media",
+  "Google Ads",
+  "Facebook Ads",
+  "Social Media Management",
   "Email Marketing",
   "Marketing Automation",
+  "Growth Hacking",
   "Project Management",
   "Agile/Scrum",
   "Product Management",
   "Sales",
+  "Lead Generation",
   "Customer Success",
+  "CRM",
+  "Business Analysis",
+  "Financial Modeling",
 
   // Security
   "Cybersecurity",
+  "Ethical Hacking",
   "Penetration Testing",
+  "Information Security",
+  "Network Security",
 
-  // Other
+  // Other/Specialized
   "QA/Testing",
+  "Automated Testing",
   "Game Development",
+  "Unity",
+  "Unreal Engine",
   "Blockchain",
+  "Smart Contracts",
+  "Solidity",
+  "Solana",
+  "Excel/VBA",
+  "Virtual Assistant",
+  "Data Entry",
+  "Customer Support",
   "Other",
 ];
 
@@ -731,28 +857,14 @@ const PostJob: React.FC = () => {
 
           /* Date picker icon styling */
           input[type="date"]::-webkit-calendar-picker-indicator {
-            color: #06b6d4 !important;
-            background-color: transparent !important;
+            filter: ${darkMode ? "invert(1) brightness(1.5)" : "none"};
             cursor: pointer;
-            opacity: 1 !important;
-          }
-
-          input[type="date"]::-webkit-calendar-picker-indicator:hover {
-            color: #0891b2 !important;
-          }
-
-          input[type="date"]::-moz-calendar-picker-indicator {
-            color: #06b6d4 !important;
-            cursor: pointer;
-          }
-
-          input[type="date"]::-moz-calendar-picker-indicator:hover {
-            color: #0891b2 !important;
           }
 
           /* Additional fallback for some browsers */
           input[type="date"] {
-            color-scheme: dark light;
+            color-scheme: ${darkMode ? "dark" : "light"};
+            color: ${darkMode ? "white" : "black"};
           }
         `}
       </style>

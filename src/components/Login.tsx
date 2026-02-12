@@ -89,24 +89,12 @@ const Login: React.FC = () => {
       let finalRedirectPath = redirectPath;
 
       if (!searchParams.get("redirect")) {
-        // Check if user has multiple roles - if so, go to role selection
-        if (loggedInUser.roles && loggedInUser.roles.length > 1) {
-          finalRedirectPath = "/role-selection";
-        } else if (loggedInUser.currentRole === "freelancer") {
-          if (loggedInUser.profile?.isProfileComplete) {
-            finalRedirectPath = "/dashboard/freelancer";
-          } else {
-            finalRedirectPath = "/freelancer-profile-setup";
-          }
-        } else if (loggedInUser.currentRole === "client") {
-          if (loggedInUser.hasCompanyProfile) {
-            finalRedirectPath = "/dashboard/hiring";
-          } else {
-            finalRedirectPath = "/dashboard/hiring"; // Don't redirect to company profile
-          }
+        // Navigate based on role
+        if (loggedInUser.currentRole === "client") {
+          finalRedirectPath = "/dashboard/hiring";
         } else {
-          // No current role set, go to role selection
-          finalRedirectPath = "/role-selection";
+          // Default to freelancer dashboard for freelancer or other roles
+          finalRedirectPath = "/dashboard/freelancer";
         }
       }
 
@@ -121,44 +109,38 @@ const Login: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-300 ${
-        darkMode
-          ? "bg-gradient-to-br from-black via-gray-900 to-black-900 text-white"
-          : "bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900"
-      }`}
+      className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-300 ${darkMode
+        ? "bg-gradient-to-br from-black via-gray-900 to-black-900 text-white"
+        : "bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900"
+        }`}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className={`absolute w-[500px] h-[500px]  blur-3xl rounded-full top-1/4 left-1/4  ${
-            darkMode ? "opacity-20" : "opacity-10"
-          }`}
+          className={`absolute w-[500px] h-[500px]  blur-3xl rounded-full top-1/4 left-1/4  ${darkMode ? "opacity-20" : "opacity-10"
+            }`}
         />
         <div
-          className={`absolute w-[300px] h-[300px]  blur-3xl rounded-full bottom-1/4 right-1/4  ${
-            darkMode ? "opacity-15" : "opacity-8"
-          }`}
+          className={`absolute w-[300px] h-[300px]  blur-3xl rounded-full bottom-1/4 right-1/4  ${darkMode ? "opacity-15" : "opacity-8"
+            }`}
         />
       </div>
 
       <div
-        className={`relative z-10 backdrop-blur-xl border rounded-3xl shadow-2xl p-10 w-full max-w-md ${
-          darkMode
-            ? "bg-black/40 border-cyan-500/20 shadow-cyan-500/10"
-            : "bg-white/80 border-cyan-500/10 shadow-cyan-500/5"
-        }`}
+        className={`relative z-10 backdrop-blur-xl border rounded-3xl shadow-2xl p-10 w-full max-w-md ${darkMode
+          ? "bg-black/40 border-cyan-500/20 shadow-cyan-500/10"
+          : "bg-white/80 border-cyan-500/10 shadow-cyan-500/5"
+          }`}
       >
         <h2
-          className={`text-3xl font-bold mb-6 text-center drop-shadow-lg ${
-            darkMode ? "text-cyan-400" : "text-cyan-600"
-          }`}
+          className={`text-3xl font-bold mb-6 text-center drop-shadow-lg ${darkMode ? "text-cyan-400" : "text-cyan-600"
+            }`}
         >
           Login
         </h2>
 
         {signupMessage && (
-          <div className={`p-4 rounded-xl border mb-4 ${
-            darkMode ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-cyan-50 border-cyan-200'
-          }`}>
+          <div className={`p-4 rounded-xl border mb-4 ${darkMode ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-cyan-50 border-cyan-200'
+            }`}>
             <p className={`text-sm ${darkMode ? 'text-cyan-300' : 'text-cyan-700'}`}>
               {signupMessage}
             </p>
@@ -167,44 +149,39 @@ const Login: React.FC = () => {
 
         <button
           disabled
-          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-4 transition-all duration-300 opacity-50 cursor-not-allowed border ${
-            darkMode
-              ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
-              : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
-          }`}
+          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-4 transition-all duration-300 opacity-50 cursor-not-allowed border ${darkMode
+            ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
+            : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
+            }`}
         >
           <FcGoogle className="text-xl" /> {t.login.signInWithGoogle} {t.login.comingSoon}
         </button>
 
         <button
           disabled
-          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-6 transition-all duration-300 opacity-50 cursor-not-allowed border ${
-            darkMode
-              ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
-              : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
-          }`}
+          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-6 transition-all duration-300 opacity-50 cursor-not-allowed border ${darkMode
+            ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
+            : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
+            }`}
         >
           <FaApple className="text-xl" /> {t.login.signInWithApple} {t.login.comingSoon}
         </button>
 
         <div
-          className={`my-6 text-center relative ${
-            darkMode ? "text-gray-300" : "text-gray-600"
-          }`}
+          className={`my-6 text-center relative ${darkMode ? "text-gray-300" : "text-gray-600"
+            }`}
         >
           <div className="absolute inset-0 flex items-center">
             <div
-              className={`w-full border-t ${
-                darkMode ? "border-gray-600/50" : "border-gray-300/50"
-              }`}
+              className={`w-full border-t ${darkMode ? "border-gray-600/50" : "border-gray-300/50"
+                }`}
             ></div>
           </div>
           <div
-            className={`relative px-4 ${
-              darkMode ? "bg-black/40" : "bg-white/80"
-            }`}
+            className={`relative px-4 ${darkMode ? "bg-black/40" : "bg-white/80"
+              }`}
           >
-             Use your email
+            Use your email
           </div>
         </div>
 
@@ -214,11 +191,10 @@ const Login: React.FC = () => {
             placeholder={t.login.email}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${
-              darkMode
-                ? "bg-gray-900/50 text-white border-gray-700/50 placeholder:text-gray-400"
-                : "bg-white/50 text-gray-900 border-gray-300/50 placeholder:text-gray-500"
-            }`}
+            className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${darkMode
+              ? "bg-gray-900/50 text-white border-gray-700/50 placeholder:text-gray-400"
+              : "bg-white/50 text-gray-900 border-gray-300/50 placeholder:text-gray-500"
+              }`}
             required
           />
           <input
@@ -226,11 +202,10 @@ const Login: React.FC = () => {
             placeholder={t.login.password}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${
-              darkMode
-                ? "bg-gray-900/50 text-white border-gray-700/50 placeholder:text-gray-400"
-                : "bg-white/50 text-gray-900 border-gray-300/50 placeholder:text-gray-500"
-            }`}
+            className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${darkMode
+              ? "bg-gray-900/50 text-white border-gray-700/50 placeholder:text-gray-400"
+              : "bg-white/50 text-gray-900 border-gray-300/50 placeholder:text-gray-500"
+              }`}
             required
           />
 
@@ -238,11 +213,10 @@ const Login: React.FC = () => {
             <button
               type="button"
               onClick={handleForgotPassword}
-              className={`text-sm transition-colors duration-300 underline ${
-                darkMode
-                  ? "text-cyan-400 hover:text-cyan-300"
-                  : "text-cyan-600 hover:text-cyan-500"
-              }`}
+              className={`text-sm transition-colors duration-300 underline ${darkMode
+                ? "text-cyan-400 hover:text-cyan-300"
+                : "text-cyan-600 hover:text-cyan-500"
+                }`}
             >
               {t.login.forgotPassword}
             </button>
@@ -261,31 +235,27 @@ const Login: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
-              darkMode
-                ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
-                : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
-            }`}
+            className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${darkMode
+              ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+              : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+              }`}
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
         <p
-          className={`text-center mt-6 text-sm ${
-            darkMode ? "text-gray-300" : "text-gray-600"
-          }`}
+          className={`text-center mt-6 text-sm ${darkMode ? "text-gray-300" : "text-gray-600"
+            }`}
         >
           {t.login.dontHaveAccount}{" "}
           <a
-            href={`/signup${
-              location.search ? `?${location.search.split("?")[1]}` : ""
-            }`}
-            className={`underline transition-colors duration-300 ${
-              darkMode
-                ? "text-cyan-400 hover:text-cyan-300"
-                : "text-cyan-600 hover:text-cyan-500"
-            }`}
+            href={`/signup${location.search ? `?${location.search.split("?")[1]}` : ""
+              }`}
+            className={`underline transition-colors duration-300 ${darkMode
+              ? "text-cyan-400 hover:text-cyan-300"
+              : "text-cyan-600 hover:text-cyan-500"
+              }`}
           >
             {t.login.signUp}
           </a>

@@ -26,6 +26,7 @@ import {
   FaPlayCircle,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "../hooks/useTranslation";
 
 interface Article {
   id: string;
@@ -73,13 +74,7 @@ const HelpCenter: React.FC = () => {
       desc: t.helpCenter.usingHustleXDesc,
       color: "from-purple-500 to-pink-500",
     },
-    {
-      id: "billing",
-      icon: <FaCreditCard />,
-      title: t.helpCenter.billingPayments,
-      desc: t.helpCenter.billingPaymentsDesc,
-      color: "from-green-500 to-teal-500",
-    },
+
     {
       id: "security",
       icon: <FaShieldAlt />,
@@ -366,6 +361,166 @@ Remember: Quality over quantity. A well-crafted proposal beats 10 generic ones!`
       views: 2340,
       helpful: 198,
     },
+    {
+      id: "7",
+      title: "How to hire the perfect freelancer",
+      category: "client",
+      content: `Finding the right talent is crucial for project success. Follow this guide to hire effectively:
+
+1. **Review Proposals Carefully**:
+   - Look for personalized responses, not generic copy-paste templates.
+   - Check if they addressed your specific requirements and questions.
+   - Review their relevant experience and past project examples.
+
+2. **Check Profiles & Portfolios**:
+   - Verify their skills and expertise tags.
+   - Look at their portfolio for quality and style compatibility.
+   - Read reviews from other clients to gauge reliability and communication.
+
+3. **Interview Candidates**:
+   - Shortlist 2-3 top candidates.
+   - Schedule a quick chat or video call to discuss the project.
+   - Ask about their approach, availability, and communication style.
+   - Clarify expectations, deadlines, and deliverables.
+
+4. **Send an Offer**:
+   - Once you've selected a freelancer, click "Hire" on their proposal.
+   - Define the project scope, milestones, and payment terms clearly.
+   - Fund the first milestone to start the contract.
+
+5. **Onboarding**:
+   - Share necessary access, files, and brand guidelines immediately.
+   - Set up a kickoff meeting or send a detailed briefing message.
+
+Taking time to vet candidates saves time and ensures a smoother project workflow!`,
+      tags: ["hiring", "client", "tips"],
+      views: 840,
+      helpful: 55,
+    },
+    {
+      id: "8",
+      title: "Managing projects and milestones",
+      category: "client",
+      content: `Effective project management ensures timely delivery and high-quality results. Here's how to manage your contracts on HustleX:
+
+**1. Clear Communication**:
+- Establish a communication schedule (e.g., weekly updates).
+- Use the HustleX chat for all project-related discussions to keep a record.
+- Be responsive to freelancer queries to avoid bottlenecks.
+
+**2. Managing Milestones**:
+- **Review**: When a freelancer submits work, review it promptly.
+- **Feedback**: Provide specific, constructive feedback if revisions are needed.
+- **Approval**: Only approve a milestone when you are satisfied with the deliverable.
+- **Next Steps**: Activate the next milestone immediately to keep momentum.
+
+**3. Scope Creep**:
+- Stick to the original project scope.
+- If you need additional work, create a new milestone or bonus payment for the extra tasks.
+
+**4. Ending the Contract**:
+- Once all work is completed and paid for, end the contract.
+- Leave detailed feedback and a rating—it helps the freelancer and the community.
+
+Organized management leads to happy freelancers and successful projects!`,
+      tags: ["management", "milestones", "client"],
+      views: 720,
+      helpful: 48,
+    },
+    {
+      id: "9",
+      title: "Navigating invoices and financial reports",
+      category: "billing",
+      content: `Keep track of your finances easily with HustleX's billing tools.
+
+**For Clients:**
+- **Invoices**: Automatically generated for every payment made.
+- **Download**: Access and download PDF invoices from the "Billings & Earnings" section.
+- **History**: View your complete transaction history, including deposits, escrow funding, and payments.
+
+**For Freelancers:**
+- **Earnings Reports**: Track your income by project, client, or time period.
+- **Pending Funds**: View funds currently in escrow or clearing.
+- **Withdrawal History**: Keep a record of all your payouts.
+- **Tax Info**: Download annual earnings summaries for tax purposes.
+
+**Disputes & Refunds**:
+- If a project is cancelled, funds in escrow are returned to the client (subject to dispute resolution).
+- Refund invoices are generated for record-keeping.
+
+Maintain good financial records by checking your billing dashboard regularly.`,
+      tags: ["billing", "invoices", "finance"],
+      views: 650,
+      helpful: 42,
+    },
+    {
+      id: "10",
+      title: "Search tips: Finding the best jobs",
+      category: "using-hustlex",
+      content: `Dominate the job search with these advanced tips for freelancers:
+
+1. **Use Filters Effectively**:
+   - **Category**: Narrow down to your specific niche (e.g., Web Development > React).
+   - **Experience Level**: Filter by Entry, Intermediate, or Expert to match your skills.
+   - **Budget**: Set a minimum budget to find high-value projects.
+   - **Job Type**: Choose between Fixed-Price or Hourly based on your preference.
+
+2. **Advanced Search**:
+   - Use keywords specific to your skills (e.g., "Figma", "Redux", "SEO").
+   - Use boolean operators (e.g., "React AND Node" or "Writer NOT Blog") if supported.
+
+3. **Save Searches**:
+   - Save your best filter configurations to quickly check for new matching jobs daily.
+
+4. **Check "Newest" First**:
+   - Apply early! The first few good proposals often get the most attention.
+   - Refresh the feed regularly during business hours in target client time zones.
+
+5. **Read Client History**:
+   - Before applying, check the client's rating and reviews from other freelancers.
+   - Look for clients with verified payment methods and a history of hiring.
+
+Smart searching saves time and connects you with better clients!`,
+      tags: ["search", "jobs", "freelancer"],
+      views: 1100,
+      helpful: 95,
+    },
+    {
+      id: "11",
+      title: "Understanding the Dispute Resolution Process",
+      category: "security",
+      content: `While rare, disagreements can happen. HustleX provides a structured dispute proccess to ensure fairness.
+
+**When to open a dispute:**
+- The freelancer is unresponsive or failed to deliver agreed work.
+- The client refuses to release payment for completed work.
+- The work delivered is significantly different from the project scope.
+
+**The Process:**
+1. **Phase 1: Negotiation**:
+   - You open a dispute from the contract page.
+   - Both parties discuss the issue in the Dispute Center.
+   - Most issues are resolved here by mutual agreement (e.g., partial refund, extended deadline).
+
+2. **Phase 2: Mediation**:
+   - If no agreement is reached within 7 days, a HustleX Mediation Specialist joins.
+   - The specialist reviews the contract, messages, and work submitted.
+   - They propose a non-binding solution based on platform policies.
+
+3. **Phase 3: Arbitration**:
+   - If mediation fails, the case can go to final arbitration.
+   - A binding decision is made. (Note: fees may apply for arbitration).
+
+**Tips for Success**:
+- **Document Everything**: Keep all communication on HustleX.
+- **Be Clear**: Define scope and deliverables clearly in the contract.
+- **Be Professional**: Remain calm and factual during discussions.
+
+We are here to ensure a fair outcome for everyone.`,
+      tags: ["dispute", "security", "protection"],
+      views: 530,
+      helpful: 120,
+    },
   ];
 
   const faqs: FAQ[] = [
@@ -383,30 +538,8 @@ Remember: Quality over quantity. A well-crafted proposal beats 10 generic ones!`
 The entire process takes less than 5 minutes.`,
       category: "getting-started",
     },
-    {
-      id: "faq2",
-      question: "How does the payment system work?",
-      answer: `HustleX uses a secure escrow system:
-1. Client funds the project into escrow
-2. Project is divided into milestones
-3. Freelancer completes work for each milestone
-4. Client reviews and approves the work
-5. Payment is released to the freelancer
-6. Freelancer can withdraw funds to their bank account
 
-All payments are secure and protected. We support multiple payment methods including credit cards, bank transfers, and mobile money.`,
-      category: "billing",
-    },
-    {
-      id: "faq3",
-      question: "What fees does HustleX charge?",
-      answer: `HustleX charges a service fee:
-- For Freelancers: 10% service fee on completed projects
-- For Clients: No additional fees beyond the project cost
 
-The service fee helps us maintain the platform, provide customer support, and ensure secure transactions. All fees are clearly displayed before you accept a project or hire a freelancer.`,
-      category: "billing",
-    },
     {
       id: "faq4",
       question: "How do I find the right freelancer for my project?",
@@ -577,22 +710,20 @@ However, make sure you can deliver quality work on time for all projects. Overco
                   className="mt-8 max-w-3xl mx-auto"
                 >
                   <div
-                    className={`flex items-center gap-4 rounded-2xl p-4 border-2 shadow-lg ${
-                      darkMode
-                        ? "bg-black/60 border-cyan-500/30 focus-within:border-cyan-500"
-                        : "bg-white border-cyan-200 focus-within:border-cyan-500"
-                    } transition-colors`}
+                    className={`flex items-center gap-4 rounded-2xl p-4 border-2 shadow-lg ${darkMode
+                      ? "bg-black/60 border-cyan-500/30 focus-within:border-cyan-500"
+                      : "bg-white border-cyan-200 focus-within:border-cyan-500"
+                      } transition-colors`}
                   >
                     <FaSearch className={`text-xl ${darkMode ? "text-cyan-400" : "text-cyan-600"}`} />
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder="Search articles, FAQs, tutorials, or topics..."
-                      className={`flex-1 outline-none bg-transparent text-lg ${
-                        darkMode
-                          ? "text-white placeholder:text-white/50"
-                          : "text-black placeholder:text-black/50"
-                      }`}
+                      className={`flex-1 outline-none bg-transparent text-lg ${darkMode
+                        ? "text-white placeholder:text-white/50"
+                        : "text-black placeholder:text-black/50"
+                        }`}
                     />
                     {query && (
                       <button
@@ -620,13 +751,12 @@ However, make sure you can deliver quality work on time for all projects. Overco
                 <div className="max-w-7xl mx-auto flex flex-wrap gap-3">
                   <button
                     onClick={() => setSelectedCategory(null)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                      !selectedCategory
-                        ? "bg-cyan-600 text-white"
-                        : darkMode
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition ${!selectedCategory
+                      ? "bg-cyan-600 text-white"
+                      : darkMode
                         ? "bg-white/10 text-white hover:bg-white/20"
                         : "bg-black/10 text-black hover:bg-black/20"
-                    }`}
+                      }`}
                   >
                     All Categories
                   </button>
@@ -634,13 +764,12 @@ However, make sure you can deliver quality work on time for all projects. Overco
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategory(cat.id)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                        selectedCategory === cat.id
-                          ? "bg-cyan-600 text-white"
-                          : darkMode
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedCategory === cat.id
+                        ? "bg-cyan-600 text-white"
+                        : darkMode
                           ? "bg-white/10 text-white hover:bg-white/20"
                           : "bg-black/10 text-black hover:bg-black/20"
-                      }`}
+                        }`}
                     >
                       {cat.title}
                     </button>
@@ -650,7 +779,7 @@ However, make sure you can deliver quality work on time for all projects. Overco
             )}
 
             {/* Categories Grid */}
-            {!query && (
+            {!query && !selectedCategory && (
               <motion.section
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -675,11 +804,10 @@ However, make sure you can deliver quality work on time for all projects. Overco
                           setQuery("");
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
-                        className={`p-6 rounded-2xl border cursor-pointer group transition-all ${
-                          darkMode
-                            ? "bg-black/50 border-white/10 hover:border-cyan-500/50 hover:bg-black/70"
-                            : "bg-white border-black/10 hover:border-cyan-500/50 hover:bg-gray-50"
-                        } shadow-lg hover:shadow-xl`}
+                        className={`p-6 rounded-2xl border cursor-pointer group transition-all ${darkMode
+                          ? "bg-black/50 border-white/10 hover:border-cyan-500/50 hover:bg-black/70"
+                          : "bg-white border-black/10 hover:border-cyan-500/50 hover:bg-gray-50"
+                          } shadow-lg hover:shadow-xl`}
                       >
                         <div
                           className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br ${cat.color} text-white text-xl group-hover:scale-110 transition-transform`}
@@ -702,12 +830,36 @@ However, make sure you can deliver quality work on time for all projects. Overco
             )}
 
             {/* Search Results - Articles */}
-            {query && filteredArticles.length > 0 && (
+            {(query || selectedCategory) && filteredArticles.length > 0 && (
               <motion.section
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="px-6 py-8"
               >
+                {selectedCategory && !query && (
+                  <div className="max-w-7xl mx-auto mb-8">
+                    <button
+                      onClick={() => setSelectedCategory(null)}
+                      className={`flex items-center gap-2 mb-4 text-sm font-medium ${darkMode ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-700"
+                        }`}
+                    >
+                      <FaArrowRight className="rotate-180" /> Back to Categories
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-lg ${darkMode ? "bg-white/10" : "bg-black/5"}`}>
+                        {categories.find(c => c.id === selectedCategory)?.icon}
+                      </div>
+                      <div>
+                        <h2 className={`text-3xl font-bold ${darkMode ? "text-white" : "text-black"}`}>
+                          {categories.find(c => c.id === selectedCategory)?.title}
+                        </h2>
+                        <p className={`${darkMode ? "text-white/70" : "text-black/70"}`}>
+                          {categories.find(c => c.id === selectedCategory)?.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="max-w-7xl mx-auto">
                   <h2 className={`text-2xl sm:text-3xl font-bold mb-6 ${darkMode ? "text-white" : "text-black"}`}>
                     Articles ({filteredArticles.length})
@@ -718,16 +870,14 @@ However, make sure you can deliver quality work on time for all projects. Overco
                         key={article.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`rounded-xl border overflow-hidden ${
-                          darkMode
-                            ? "bg-black/50 border-white/10"
-                            : "bg-white border-black/10"
-                        } shadow-lg`}
+                        className={`rounded-xl border overflow-hidden ${darkMode
+                          ? "bg-black/50 border-white/10"
+                          : "bg-white border-black/10"
+                          } shadow-lg`}
                       >
                         <div
-                          className={`p-6 cursor-pointer ${
-                            darkMode ? "hover:bg-white/5" : "hover:bg-black/5"
-                          } transition-colors`}
+                          className={`p-6 cursor-pointer ${darkMode ? "hover:bg-white/5" : "hover:bg-black/5"
+                            } transition-colors`}
                           onClick={() => toggleArticle(article.id)}
                         >
                           <div className="flex items-start justify-between gap-4">
@@ -735,11 +885,10 @@ However, make sure you can deliver quality work on time for all projects. Overco
                               <div className="flex items-center gap-3 mb-2">
                                 <FaBookOpen className={`${darkMode ? "text-cyan-400" : "text-cyan-600"}`} />
                                 <span
-                                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                    darkMode
-                                      ? "bg-cyan-500/20 text-cyan-400"
-                                      : "bg-cyan-100 text-cyan-700"
-                                  }`}
+                                  className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode
+                                    ? "bg-cyan-500/20 text-cyan-400"
+                                    : "bg-cyan-100 text-cyan-700"
+                                    }`}
                                 >
                                   {
                                     categories.find((c) => c.id === article.category)
@@ -780,22 +929,20 @@ However, make sure you can deliver quality work on time for all projects. Overco
                               className="overflow-hidden"
                             >
                               <div
-                                className={`px-6 pb-6 border-t ${
-                                  darkMode ? "border-white/10 bg-black/30" : "border-black/10 bg-gray-50"
-                                }`}
+                                className={`px-6 pb-6 border-t ${darkMode ? "border-white/10 bg-black/30" : "border-black/10 bg-gray-50"
+                                  }`}
                               >
-                              <div className={`mt-4 ${darkMode ? "text-white/90" : "text-black/90"} leading-relaxed whitespace-pre-line`}>
-                                {article.content}
-                              </div>
+                                <div className={`mt-4 ${darkMode ? "text-white/90" : "text-black/90"} leading-relaxed whitespace-pre-line`}>
+                                  {article.content}
+                                </div>
                                 <div className="flex flex-wrap gap-2 mt-4">
                                   {article.tags.map((tag) => (
                                     <span
                                       key={tag}
-                                      className={`px-3 py-1 rounded-full text-xs ${
-                                        darkMode
-                                          ? "bg-white/10 text-white/80"
-                                          : "bg-black/10 text-black/80"
-                                      }`}
+                                      className={`px-3 py-1 rounded-full text-xs ${darkMode
+                                        ? "bg-white/10 text-white/80"
+                                        : "bg-black/10 text-black/80"
+                                        }`}
                                     >
                                       #{tag}
                                     </span>
@@ -812,8 +959,8 @@ However, make sure you can deliver quality work on time for all projects. Overco
               </motion.section>
             )}
 
-            {/* Popular Articles (when no search) */}
-            {!query && (
+            {/* Popular Articles (when no search and no category selected) */}
+            {!query && !selectedCategory && (
               <motion.section
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -834,17 +981,15 @@ However, make sure you can deliver quality work on time for all projects. Overco
                         viewport={{ once: true }}
                         transition={{ delay: i * 0.1, duration: 0.4 }}
                         onClick={() => toggleArticle(article.id)}
-                        className={`p-6 rounded-xl border cursor-pointer transition-all ${
-                          darkMode
-                            ? "bg-black/50 border-white/10 hover:border-cyan-500/50 hover:bg-black/70"
-                            : "bg-white border-black/10 hover:border-cyan-500/50 hover:bg-gray-50"
-                        } shadow-lg hover:shadow-xl`}
+                        className={`p-6 rounded-xl border cursor-pointer transition-all ${darkMode
+                          ? "bg-black/50 border-white/10 hover:border-cyan-500/50 hover:bg-black/70"
+                          : "bg-white border-black/10 hover:border-cyan-500/50 hover:bg-gray-50"
+                          } shadow-lg hover:shadow-xl`}
                       >
                         <div className="flex items-start gap-4">
                           <div
-                            className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                              darkMode ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-600"
-                            }`}
+                            className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${darkMode ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-600"
+                              }`}
                           >
                             <FaBookOpen />
                           </div>
@@ -880,27 +1025,25 @@ However, make sure you can deliver quality work on time for all projects. Overco
             >
               <div className="max-w-7xl mx-auto">
                 <h2 className={`text-3xl sm:text-4xl font-bold mb-8 ${darkMode ? "text-white" : "text-black"}`}>
-                  {query ? `${t.helpCenter.frequentlyAskedQuestions} (${filteredFAQs.length})` : t.helpCenter.frequentlyAskedQuestions}
+                  {(query || selectedCategory) ? `${t.helpCenter.frequentlyAskedQuestions} (${filteredFAQs.length})` : t.helpCenter.frequentlyAskedQuestions}
                 </h2>
                 <div className="space-y-4">
-                  {(query ? filteredFAQs : faqs).map((faq, i) => (
+                  {((query || selectedCategory) ? filteredFAQs : faqs).map((faq, i) => (
                     <motion.div
                       key={faq.id}
                       initial={{ y: 20, opacity: 0 }}
                       whileInView={{ y: 0, opacity: 1 }}
                       viewport={{ once: true }}
                       transition={{ delay: i * 0.05, duration: 0.4 }}
-                      className={`rounded-xl border overflow-hidden ${
-                        darkMode
-                          ? "bg-black/50 border-white/10"
-                          : "bg-white border-black/10"
-                      } shadow-lg`}
+                      className={`rounded-xl border overflow-hidden ${darkMode
+                        ? "bg-black/50 border-white/10"
+                        : "bg-white border-black/10"
+                        } shadow-lg`}
                     >
                       <button
                         onClick={() => toggleFAQ(faq.id)}
-                        className={`w-full p-6 text-left flex items-center justify-between gap-4 ${
-                          darkMode ? "hover:bg-white/5" : "hover:bg-black/5"
-                        } transition-colors`}
+                        className={`w-full p-6 text-left flex items-center justify-between gap-4 ${darkMode ? "hover:bg-white/5" : "hover:bg-black/5"
+                          } transition-colors`}
                       >
                         <div className="flex items-start gap-4 flex-1">
                           <FaQuestionCircle
@@ -926,9 +1069,8 @@ However, make sure you can deliver quality work on time for all projects. Overco
                             className="overflow-hidden"
                           >
                             <div
-                              className={`px-6 pb-6 pl-14 border-t ${
-                                darkMode ? "border-white/10 bg-black/30" : "border-black/10 bg-gray-50"
-                              }`}
+                              className={`px-6 pb-6 pl-14 border-t ${darkMode ? "border-white/10 bg-black/30" : "border-black/10 bg-gray-50"
+                                }`}
                             >
                               <p className={`${darkMode ? "text-white/90" : "text-black/90"} leading-relaxed whitespace-pre-line`}>
                                 {faq.answer}
@@ -944,7 +1086,7 @@ However, make sure you can deliver quality work on time for all projects. Overco
             </motion.section>
 
             {/* Video Tutorials */}
-            {!query && (
+            {!query && !selectedCategory && (
               <motion.section
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -958,11 +1100,10 @@ However, make sure you can deliver quality work on time for all projects. Overco
                       Video Tutorials
                     </h2>
                     <button
-                      className={`px-4 py-2 rounded-full text-sm font-medium ${
-                        darkMode
-                          ? "bg-white/10 text-white hover:bg-white/20"
-                          : "bg-black/10 text-black hover:bg-black/20"
-                      } transition`}
+                      className={`px-4 py-2 rounded-full text-sm font-medium ${darkMode
+                        ? "bg-white/10 text-white hover:bg-white/20"
+                        : "bg-black/10 text-black hover:bg-black/20"
+                        } transition`}
                     >
                       View All
                     </button>
@@ -975,16 +1116,14 @@ However, make sure you can deliver quality work on time for all projects. Overco
                         whileInView={{ y: 0, opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ delay: i * 0.1, duration: 0.4 }}
-                        className={`rounded-xl border overflow-hidden ${
-                          darkMode
-                            ? "bg-black/50 border-white/10 hover:border-cyan-500/50"
-                            : "bg-white border-black/10 hover:border-cyan-500/50"
-                        } shadow-lg hover:shadow-xl transition-all cursor-pointer group`}
+                        className={`rounded-xl border overflow-hidden ${darkMode
+                          ? "bg-black/50 border-white/10 hover:border-cyan-500/50"
+                          : "bg-white border-black/10 hover:border-cyan-500/50"
+                          } shadow-lg hover:shadow-xl transition-all cursor-pointer group`}
                       >
                         <div
-                          className={`h-48 flex items-center justify-center bg-gradient-to-br ${
-                            categories.find((c) => c.id === tut.category)?.color || "from-gray-500 to-gray-600"
-                          } relative`}
+                          className={`h-48 flex items-center justify-center bg-gradient-to-br ${categories.find((c) => c.id === tut.category)?.color || "from-gray-500 to-gray-600"
+                            } relative`}
                         >
                           <FaPlayCircle className="text-6xl text-white/80 group-hover:text-white group-hover:scale-110 transition-transform" />
                           <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded text-sm">
@@ -993,11 +1132,10 @@ However, make sure you can deliver quality work on time for all projects. Overco
                         </div>
                         <div className="p-5">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium mb-3 inline-block ${
-                              darkMode
-                                ? "bg-cyan-500/20 text-cyan-400"
-                                : "bg-cyan-100 text-cyan-700"
-                            }`}
+                            className={`px-3 py-1 rounded-full text-xs font-medium mb-3 inline-block ${darkMode
+                              ? "bg-cyan-500/20 text-cyan-400"
+                              : "bg-cyan-100 text-cyan-700"
+                              }`}
                           >
                             {
                               categories.find((c) => c.id === tut.category)
@@ -1025,11 +1163,10 @@ However, make sure you can deliver quality work on time for all projects. Overco
             >
               <div className="max-w-7xl mx-auto">
                 <div
-                  className={`p-8 sm:p-12 rounded-2xl border text-center ${
-                    darkMode
-                      ? "bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-white/10"
-                      : "bg-gradient-to-br from-cyan-50 to-blue-50 border-black/10"
-                  } shadow-xl`}
+                  className={`p-8 sm:p-12 rounded-2xl border text-center ${darkMode
+                    ? "bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-white/10"
+                    : "bg-gradient-to-br from-cyan-50 to-blue-50 border-black/10"
+                    } shadow-xl`}
                 >
                   <motion.div
                     initial={{ scale: 0.9 }}
@@ -1057,11 +1194,10 @@ However, make sure you can deliver quality work on time for all projects. Overco
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => navigate("/faq")}
-                        className={`px-8 py-4 rounded-full font-semibold inline-flex items-center justify-center gap-3 shadow-lg ${
-                          darkMode
-                            ? "bg-white/10 hover:bg-white/20 text-white border-2 border-white/20"
-                            : "bg-black/10 hover:bg-black/20 text-black border-2 border-black/20"
-                        } transition`}
+                        className={`px-8 py-4 rounded-full font-semibold inline-flex items-center justify-center gap-3 shadow-lg ${darkMode
+                          ? "bg-white/10 hover:bg-white/20 text-white border-2 border-white/20"
+                          : "bg-black/10 hover:bg-black/20 text-black border-2 border-black/20"
+                          } transition`}
                       >
                         <FaQuestionCircle /> View FAQ
                       </motion.button>

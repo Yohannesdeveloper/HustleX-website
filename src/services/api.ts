@@ -40,28 +40,19 @@ class ApiService {
     // Always attach latest token from localStorage to every request
     axios.interceptors.request.use((config) => {
       const latestToken = localStorage.getItem("token");
-      if (latestToken) {
-        config.headers = config.headers || {};
-        config.headers["Authorization"] = `Bearer ${latestToken}`;
+      if (latestToken && config.headers) {
+        config.headers.Authorization = `Bearer ${latestToken}`;
       }
+
       // Attach admin code if provided
       const adminCode = localStorage.getItem("adminCode");
-      if (adminCode) {
-        config.headers = config.headers || {};
-        (config.headers as any)["x-admin-code"] = adminCode;
+      if (adminCode && config.headers) {
+        config.headers['x-admin-code'] = adminCode;
       }
-
-      // Throttle requests to prevent 429 errors
-      const now = Date.now();
-      const timeSinceLastRequest = now - this.lastRequestTime;
-      if (timeSinceLastRequest < this.minRequestInterval) {
-        const delay = this.minRequestInterval - timeSinceLastRequest;
-        // For throttling, we need to make it async, but axios interceptors expect sync
-        // We'll handle throttling differently
-      }
-      this.lastRequestTime = Date.now();
 
       return config;
+    }, (error) => {
+      return Promise.reject(error);
     });
 
     // Auto-clear token on 401 to avoid stuck sessions
@@ -264,7 +255,7 @@ class ApiService {
     pagination: { current: number; pages: number; total: number };
   }> {
     // Jobs endpoint is public, don't require authentication
-    const response = await axios.get(`${this.baseUrl}/jobs`, { 
+    const response = await axios.get(`${this.baseUrl}/jobs`, {
       params,
       headers: this.token ? { Authorization: `Bearer ${this.token}` } : {}
     });
@@ -331,7 +322,10 @@ class ApiService {
     isActive?: boolean;
     applicationCount?: number;
   }): Promise<{ message: string; job: Job }> {
-    const response = await axios.post(`${this.baseUrl}/jobs`, jobData);
+    const token = localStorage.getItem("token") || this.token;
+    const response = await axios.post(`${this.baseUrl}/jobs`, jobData, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
     return response.data as { message: string; job: Job };
   }
 
@@ -390,10 +384,13 @@ class ApiService {
     cvUrl?: string;
   }): Promise<Application> {
     // Application submission requires authentication
-    if (!this.token) {
+    const token = localStorage.getItem("token") || this.token;
+    if (!token) {
       throw new Error("Authentication required to submit application");
     }
-    const response = await axios.post(`${this.baseUrl}/applications`, data);
+    const response = await axios.post(`${this.baseUrl}/applications`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     const payload = response.data as {
       message: string;
       application: Application;
@@ -742,7 +739,7 @@ class ApiService {
     try {
       const response = await axios.get(`${this.baseUrl}/users/freelancers`);
       const freelancers = (response.data.freelancers || []) as FreelancerWithStatus[];
-      
+
       // Add mock status for now (can be replaced with real status from backend)
       return freelancers.map((freelancer) => ({
         ...freelancer,
@@ -766,7 +763,7 @@ class ApiService {
     try {
       const response = await axios.get(`${this.baseUrl}/users/freelancers/${freelancerId}`);
       const freelancer = response.data.freelancer;
-      
+
       return {
         url: freelancer.profile?.portfolioUrl || freelancer.profile?.portfolio || "",
         projects: [],

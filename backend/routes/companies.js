@@ -36,6 +36,7 @@ router.post("/profile", auth, async (req, res) => {
       tradeLicense,
       verificationData,
       jobPositionAlternatives,
+      taxId,
     } = req.body;
 
     // Validate required fields
@@ -66,6 +67,7 @@ router.post("/profile", auth, async (req, res) => {
       tradeLicense,
       verificationData,
       jobPositionAlternatives,
+      taxId,
     };
 
     // Remove undefined and empty string fields (except for required companyName)

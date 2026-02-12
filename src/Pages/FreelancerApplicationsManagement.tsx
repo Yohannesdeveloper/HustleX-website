@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import apiService from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import {
     Briefcase,
@@ -219,6 +220,17 @@ const FreelancerApplicationsManagement: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilter, setActiveFilter] = useState<"all" | "pending" | "in_review" | "hired" | "rejected">("all");
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const location = useLocation();
+
+    // Handle redirection state (e.g., from JobDetails)
+    useEffect(() => {
+        const state = location.state as any;
+        if (state?.previewApplicationId) {
+            setExpandedId(state.previewApplicationId);
+            // Optionally clear the state so it doesn't re-expand on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         const fetchApps = async () => {

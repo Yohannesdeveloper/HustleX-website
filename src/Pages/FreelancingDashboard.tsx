@@ -24,6 +24,7 @@ import {
   FileText,
 } from "lucide-react";
 import FreelancerApplicationsManagement from "./FreelancerApplicationsManagement";
+import FloatingDarkModeToggle from "../components/FloatingDarkModeToggle";
 
 // Animation for individual letters in headings
 const letterVariants = {
@@ -409,6 +410,7 @@ const FreelancingDashboard: React.FC = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-2 sm:gap-8 overflow-x-auto scrollbar-hide pb-2">
+            <div className="flex items-center gap-2 sm:gap-8 overflow-x-auto flex-1">
             {tabs.map((tab) => (
               <motion.button
                 key={tab.id}
@@ -454,8 +456,12 @@ const FreelancingDashboard: React.FC = () => {
                 <span className="xs:hidden">{tab.label.split(" ")[0]}</span>
               </motion.button>
             ))}
+            </div>
+            <div className="flex-shrink-0 ml-4">
+              <FloatingDarkModeToggle />
+            </div>
           </div>
-        </div>
+         </div>
       </motion.div>
 
       {/* Tab Content */}
@@ -475,13 +481,6 @@ const FreelancingDashboard: React.FC = () => {
                 variants={headingVariants}
                 initial="hidden"
                 animate="visible"
-                whileHover={{
-                  scale: 1.05,
-                  textShadow: darkMode
-                    ? "0 0 8px rgba(255, 255, 255, 0.8)"
-                    : "0 0 8px rgba(59, 130, 246, 0.8)",
-                  transition: { duration: 0.3 },
-                }}
               >
                 Freelance Dashboard
               </motion.h1>
@@ -720,92 +719,6 @@ const FreelancingDashboard: React.FC = () => {
                 </div>
               </motion.div>
             </div>
-
-            {/* Quick Actions */}
-            <motion.div
-              className={`${darkMode
-                ? "bg-black/50 border-white/10"
-                : "bg-white/80 border-black/10"
-                } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm mb-8`}
-            >
-              <motion.h2
-                className={`text-lg sm:text-xl font-semibold bg-gradient-to-r ${darkMode
-                  ? "from-blue-300 to-blue-500"
-                  : "from-blue-400 to-blue-600"
-                  } bg-clip-text text-transparent mb-3 sm:mb-4 font-inter tracking-tight`}
-                variants={headingVariants}
-                initial="hidden"
-                animate="visible"
-                whileHover={{
-                  scale: 1.05,
-                  textShadow: darkMode
-                    ? "0 0 8px rgba(255, 255, 255, 0.8)"
-                    : "0 0 8px rgba(59, 130, 246, 0.8)",
-                  transition: { duration: 0.3 },
-                }}
-              >
-                Quick Actions
-              </motion.h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                <motion.button
-                  onClick={() => setActiveTab("browseJobs")}
-                  className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border ${darkMode
-                    ? "border-white/10 hover:bg-white/10"
-                    : "border-black/10 hover:bg-gray-50"
-                    } rounded-lg transition-all duration-300 shadow-md`}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Briefcase
-                    className={`w-4 h-4 sm:w-5 sm:h-5 ${darkMode ? "text-white" : "text-gray-600"
-                      }`}
-                  />
-                  <div className="text-left">
-                    <p
-                      className={`font-medium text-sm sm:text-base ${darkMode ? "text-white" : "text-gray-900"
-                        }`}
-                    >
-                      Browse Jobs
-                    </p>
-                    <p
-                      className={`${darkMode ? "text-gray-400" : "text-gray-600"
-                        } text-xs sm:text-sm`}
-                    >
-                      Find new opportunities
-                    </p>
-                  </div>
-                </motion.button>
-
-                <motion.button
-                  onClick={() => setActiveTab("myApplications")}
-                  className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border ${darkMode
-                    ? "border-white/10 hover:bg-white/10"
-                    : "border-black/10 hover:bg-gray-50"
-                    } rounded-lg transition-all duration-300 shadow-md`}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FileText
-                    className={`w-4 h-4 sm:w-5 sm:h-5 ${darkMode ? "text-white" : "text-gray-600"
-                      }`}
-                  />
-                  <div className="text-left">
-                    <p
-                      className={`font-medium text-sm sm:text-base ${darkMode ? "text-white" : "text-gray-900"
-                        }`}
-                    >
-                      Manage Applications
-                    </p>
-                    <p
-                      className={`${darkMode ? "text-gray-400" : "text-gray-600"
-                        } text-xs sm:text-sm`}
-                    >
-                      Track your sent proposals
-                    </p>
-                  </div>
-                </motion.button>
-              </div>
-            </motion.div>
 
             {/* Recent Activity */}
             <motion.div

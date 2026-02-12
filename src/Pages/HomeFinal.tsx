@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { toggleTheme } from "../store/themeSlice";
+
 import { setLanguage, type Language } from "../store/languageSlice";
 import {
   motion,
@@ -8,6 +8,7 @@ import {
 } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import FloatingChatBot from "../components/FloatingChatBot";
+import FloatingDarkModeToggle from "../components/FloatingDarkModeToggle";
 import { useTranslation } from "../hooks/useTranslation";
 import { useAuth } from "../store/hooks";
 
@@ -15,14 +16,14 @@ import { useAuth } from "../store/hooks";
 import howItWorksVideo from "./videos/HowItWorks.mp4";
 
 // Essential icons only
-import { FaSun, FaMoon, FaBars, FaTimes, FaUser, FaGlobe } from "react-icons/fa";
+import { FaBars, FaTimes, FaUser, FaGlobe } from "react-icons/fa";
 
 // Import image
 import heroBackground from "../Images/Herobg.jpg";
 import avatar1 from "../Images/Freelancers/Yohannes.png";
 import avatar2 from "../Images/Freelancers/Samuel.png";
 import avatar3 from "../Images/Freelancers/messie.png";
-import avatar4 from "../Images/Freelancers/Messi.jpg";
+import avatar4 from "../Images/Freelancers/Dagi.png";
 import avatar5 from "../Images/testimonials/Messay.jpg";
 import beuLogo from "../assets/logos/beu.png";
 // Functional icons
@@ -40,7 +41,6 @@ import {
   FaShieldAlt,
   FaLayerGroup,
   FaFacebook,
-  FaTwitter,
   FaLinkedin,
   FaInstagram,
   FaYoutube,
@@ -49,7 +49,15 @@ import {
   FaStar,
   FaHeart,
   FaAward,
+  FaRobot,
+  FaVideo,
+  FaShoppingCart,
+  FaHeadset,
+  FaHeartbeat,
+  FaBalanceScale,
+  FaBuilding,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -86,9 +94,7 @@ const Home = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  const toggleDarkMode = () => {
-    dispatch(toggleTheme());
-  };
+
 
   const handleLanguageChange = (lang: Language) => {
     dispatch(setLanguage(lang));
@@ -288,6 +294,16 @@ const Home = () => {
                       </button>
                     </div>
                   )}
+
+                  {/* Dark mode quick toggle + attached profile/menu */}
+                  <div className="flex items-center gap-2">
+
+
+                    {/* Attached menu with profile + dark mode */}
+                    <div className="flex items-center">
+                      <FloatingDarkModeToggle />
+                    </div>
+                  </div>
 
                   {/* Language Selector */}
                   <div className="relative" ref={languageMenuRef}>
@@ -583,7 +599,7 @@ const Home = () => {
                   >
                     <motion.button
                       onClick={() =>
-                        navigate("/signup?redirect=/role-selection")
+                        navigate("/signup?redirect=/job-listings")
                       }
                       className="px-8 sm:px-10 md:px-12 lg:px-14 py-4 sm:py-5 md:py-6 rounded-full text-white font-bold text-base sm:text-lg md:text-xl shadow-2xl transition-all duration-300 relative overflow-hidden group bg-cyan-600 hover:bg-cyan-700 hover:shadow-cyan-500/30 w-full sm:w-auto"
                       whileHover={{ scale: 1.05, y: -3 }}
@@ -914,7 +930,7 @@ const Home = () => {
                   transition={{ duration: 0.8, delay: 1.2 }}
                 >
                   <motion.button
-                    onClick={() => navigate("/login?redirect=/role-selection")}
+                    onClick={() => navigate("/login?redirect=/job-listings")}
                     className={`px-8 sm:px-12 py-4 sm:py-6 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 text-white font-bold text-lg sm:text-xl rounded-full shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 relative overflow-hidden group`}
                     whileHover={{
                       scale: 1.05,
@@ -1240,6 +1256,83 @@ const Home = () => {
                       title: t.categories.adminSupport,
                       count: "500+",
                       color: "from-orange-500 to-red-600",
+                    },
+                    {
+                      icon: (
+                        <FaRobot
+                          className={`text-2xl sm:text-3xl ${darkMode ? "text-white" : "text-black"
+                            }`}
+                        />
+                      ),
+                      title: t.categories.aiAndData,
+                      count: "400+",
+                      color: "from-blue-600 to-cyan-400",
+                    },
+                    {
+                      icon: (
+                        <FaVideo
+                          className={`text-2xl sm:text-3xl ${darkMode ? "text-white" : "text-black"
+                            }`}
+                        />
+                      ),
+                      title: t.categories.videoAndAudio,
+                      count: "350+",
+                      color: "from-red-600 to-pink-500",
+                    },
+                    {
+                      icon: (
+                        <FaShoppingCart
+                          className={`text-2xl sm:text-3xl ${darkMode ? "text-white" : "text-black"
+                            }`}
+                        />
+                      ),
+                      title: t.categories.ecommerce,
+                      count: "900+",
+                      color: "from-orange-600 to-yellow-500",
+                    },
+                    {
+                      icon: (
+                        <FaHeadset
+                          className={`text-2xl sm:text-3xl ${darkMode ? "text-white" : "text-black"
+                            }`}
+                        />
+                      ),
+                      title: t.categories.customerSupport,
+                      count: "600+",
+                      color: "from-teal-600 to-green-500",
+                    },
+                    {
+                      icon: (
+                        <FaHeartbeat
+                          className={`text-2xl sm:text-3xl ${darkMode ? "text-white" : "text-black"
+                            }`}
+                        />
+                      ),
+                      title: t.categories.lifestyleAndHealth,
+                      count: "200+",
+                      color: "from-pink-600 to-rose-400",
+                    },
+                    {
+                      icon: (
+                        <FaBalanceScale
+                          className={`text-2xl sm:text-3xl ${darkMode ? "text-white" : "text-black"
+                            }`}
+                        />
+                      ),
+                      title: t.categories.financeAndLegal,
+                      count: "400+",
+                      color: "from-slate-700 to-blue-900",
+                    },
+                    {
+                      icon: (
+                        <FaBuilding
+                          className={`text-2xl sm:text-3xl ${darkMode ? "text-white" : "text-black"
+                            }`}
+                        />
+                      ),
+                      title: t.categories.engineeringAndArch,
+                      count: "300+",
+                      color: "from-amber-700 to-orange-800",
                     },
                   ].map((category, idx) => (
                     <motion.div
@@ -1567,19 +1660,9 @@ const Home = () => {
                         ? "bg-black border-white/10 hover:bg-white/5"
                         : "bg-white border-black/10 hover:bg-white"
                         } border flex flex-col shadow-xl md:shadow-2xl relative overflow-hidden group`}
-                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      whileHover={{
-                        scale: 1.05,
-                        y: -10,
-                        boxShadow: "0 25px 50px rgba(0, 0, 0, 0.4)",
-                      }}
-                      transition={{
-                        delay: idx * 0.2,
-                        duration: 0.6,
-                        type: "spring",
-                        stiffness: 200,
-                      }}
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: idx * 0.2 }}
                     >
                       <div className="flex-grow relative z-10">
                         <motion.div
@@ -1710,7 +1793,7 @@ const Home = () => {
                       title: t.footer.forClients,
                       links: [
                         { text: t.footer.howToHire, href: "HowItWorks" },
-                        { text: t.footer.talentMarketplace, href: "#" },
+
                       ],
                     },
                     {
@@ -1724,7 +1807,7 @@ const Home = () => {
                       title: t.footer.company,
                       links: [
                         { text: t.footer.aboutUs, href: "/about-us" },
-                        { text: t.footer.careers, href: "#" },
+
                         { text: t.footer.contactUs, href: "/contact-us" },
                       ],
                     },
@@ -1803,11 +1886,12 @@ const Home = () => {
                           icon: <FaFacebook />,
                           color: "hover:text-blue-400",
                           label: "Facebook",
+                          href: "https://www.facebook.com/share/14YUagDZDNE/",
                         },
                         {
-                          icon: <FaTwitter />,
+                          icon: <FaXTwitter />,
                           color: "hover:text-cyan-400",
-                          label: "Twitter",
+                          label: "X",
                         },
                         {
                           icon: <FaLinkedin />,
@@ -1854,12 +1938,13 @@ const Home = () => {
               </div>
             </motion.footer>
           </>
-        )}
-      </AnimatePresence>
+        )
+        }
+      </AnimatePresence >
 
       {/* Floating Chat Bot */}
-      <FloatingChatBot />
-    </div>
+      < FloatingChatBot />
+    </div >
   );
 };
 

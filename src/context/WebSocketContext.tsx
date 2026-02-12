@@ -78,11 +78,33 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             error.message?.includes("ECONNREFUSED")) {
             if (errorCountRef.current === 1) {
               console.warn("WebSocket: Backend server appears to be offline. Connection will retry automatically.");
+              console.warn("WebSocket attempted URL:", currentUrl);
             }
           } else {
             console.error("WebSocket connection error:", error.message || error);
+            console.error("WebSocket attempted URL:", currentUrl);
           }
         }
+
+        // If we detect connection errors that suggest the URL is wrong (stale port cache),
+        // try to run port detection and reconnect to the discovered backend URL.
+        // We only attempt this a limited number of times to avoid loops.
+        (async () => {
+          try {
+            // Only run for connect errors that look like the server is unreachable
+            const msg = (error && error.message) || "";
+            if (msg.includes("ECONNREFUSED") || msg.includes("timeout") || msg.includes("NetworkError")) {
+              const detectedUrl = await getBackendUrl();
+              if (detectedUrl && detectedUrl !== currentUrl) {
+                console.log(`🔄 Detected backend at ${detectedUrl}. Reconnecting WebSocket...`);
+                currentUrl = detectedUrl;
+                connect(detectedUrl);
+              }
+            }
+          } catch (e) {
+            console.warn("WebSocket port detection reconnect failed:", e);
+          }
+        })();
       });
 
       newSocket.on("newApplication", (data: any) => {

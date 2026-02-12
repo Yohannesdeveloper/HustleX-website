@@ -60,6 +60,10 @@ const companySchema = new mongoose.Schema(
       representative: String,
       submittedAt: Date,
     },
+    taxId: {
+      type: String,
+      trim: true,
+    },
     jobPositionAlternatives: [{
       title: String,
       category: String,

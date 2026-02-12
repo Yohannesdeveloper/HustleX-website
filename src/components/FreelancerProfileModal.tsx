@@ -4,7 +4,7 @@ import { useAppSelector } from "../store/hooks";
 import {
   X,
   MapPin,
-  DollarSign,
+
   Mail,
   Phone,
   Calendar,
@@ -61,9 +61,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
     <AnimatePresence>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <motion.div
-          className={`${
-            darkMode ? "bg-gray-900 border-white/10" : "bg-white border-black/10"
-          } border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl`}
+          className={`${darkMode ? "bg-gray-900 border-white/10" : "bg-white border-black/10"
+            } border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl`}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
@@ -71,18 +70,16 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
         >
           {/* Header */}
           <div
-            className={`sticky top-0 z-10 ${
-              darkMode ? "bg-gray-900/95 backdrop-blur-sm" : "bg-white/95 backdrop-blur-sm"
-            } border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}
+            className={`sticky top-0 z-10 ${darkMode ? "bg-gray-900/95 backdrop-blur-sm" : "bg-white/95 backdrop-blur-sm"
+              } border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}
           >
             <div className="max-w-5xl mx-auto px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <div
-                      className={`w-16 h-16 rounded-full ${
-                        darkMode ? "bg-cyan-500/20" : "bg-cyan-100"
-                      } flex items-center justify-center text-2xl font-bold`}
+                      className={`w-16 h-16 rounded-full ${darkMode ? "bg-cyan-500/20" : "bg-cyan-100"
+                        } flex items-center justify-center text-2xl font-bold`}
                     >
                       {fullName.charAt(0).toUpperCase()}
                     </div>
@@ -118,11 +115,10 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                   {onMessage && (
                     <motion.button
                       onClick={onMessage}
-                      className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
-                        darkMode
+                      className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${darkMode
                           ? "bg-cyan-600 hover:bg-cyan-500 text-white"
                           : "bg-cyan-600 hover:bg-cyan-700 text-white"
-                      }`}
+                        }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -132,9 +128,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                   )}
                   <button
                     onClick={onClose}
-                    className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                      darkMode ? "text-white" : "text-black"
-                    }`}
+                    className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${darkMode ? "text-white" : "text-black"
+                      }`}
                   >
                     <X className="w-6 h-6" />
                   </button>
@@ -149,9 +144,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
               <div className="space-y-6">
                 {/* Bio Section */}
                 <div
-                  className={`rounded-lg border p-6 ${
-                    darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                  }`}
+                  className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                    }`}
                 >
                   <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
                     <Briefcase className="w-5 h-5" />
@@ -163,9 +157,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                 {/* Portfolio Section */}
                 {portfolioUrl && (
                   <div
-                    className={`rounded-lg border p-6 ${
-                      darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                    }`}
+                    className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                      }`}
                   >
                     <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
                       <Globe className="w-5 h-5" />
@@ -175,11 +168,10 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                       href={portfolioUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-                        darkMode
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${darkMode
                           ? "bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30"
                           : "bg-cyan-100 text-cyan-600 hover:bg-cyan-200"
-                      } transition-colors`}
+                        } transition-colors`}
                     >
                       View Portfolio
                       <ExternalLink className="w-4 h-4" />
@@ -190,9 +182,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                 {/* Skills Section */}
                 {skills.length > 0 && (
                   <div
-                    className={`rounded-lg border p-6 ${
-                      darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                    }`}
+                    className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                      }`}
                   >
                     <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
                       <Award className="w-5 h-5" />
@@ -202,11 +193,10 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                       {skills.map((skill, index) => (
                         <span
                           key={index}
-                          className={`px-3 py-1 rounded-full text-sm ${
-                            darkMode
+                          className={`px-3 py-1 rounded-full text-sm ${darkMode
                               ? "bg-cyan-500/20 text-cyan-400"
                               : "bg-cyan-100 text-cyan-700"
-                          }`}
+                            }`}
                         >
                           {skill}
                         </span>
@@ -219,9 +209,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {(yearsOfExperience || experience) && (
                     <div
-                      className={`rounded-lg border p-6 ${
-                        darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                      }`}
+                      className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                        }`}
                     >
                       <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                         <Clock className="w-5 h-5" />
@@ -242,9 +231,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
 
                   {education && (
                     <div
-                      className={`rounded-lg border p-6 ${
-                        darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                      }`}
+                      className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                        }`}
                     >
                       <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                         <Award className="w-5 h-5" />
@@ -260,9 +248,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                 {/* Certifications */}
                 {certifications.length > 0 && (
                   <div
-                    className={`rounded-lg border p-6 ${
-                      darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                    }`}
+                    className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                      }`}
                   >
                     <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
                       <Star className="w-5 h-5" />
@@ -281,12 +268,11 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                   </div>
                 )}
 
-                {/* Availability & Rates */}
+                {/* Availability & Location */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div
-                    className={`rounded-lg border p-6 ${
-                      darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                    }`}
+                    className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                      }`}
                   >
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                       <Calendar className="w-5 h-5" />
@@ -298,38 +284,21 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                   </div>
 
                   <div
-                    className={`rounded-lg border p-6 ${
-                      darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                    }`}
+                    className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                      }`}
                   >
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                      <DollarSign className="w-5 h-5" />
-                      Rate
+                      <MapPin className="w-5 h-5" />
+                      Location
                     </h3>
-                    <p className={`${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                      {monthlyRate} {currency}/month
-                    </p>
+                    <p className={`${darkMode ? "text-gray-300" : "text-gray-700"}`}>{location}</p>
                   </div>
-                </div>
-
-                {/* Location */}
-                <div
-                  className={`rounded-lg border p-6 ${
-                    darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                  }`}
-                >
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
-                    Location
-                  </h3>
-                  <p className={`${darkMode ? "text-gray-300" : "text-gray-700"}`}>{location}</p>
                 </div>
 
                 {/* Contact & Social Links */}
                 <div
-                  className={`rounded-lg border p-6 ${
-                    darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                  }`}
+                  className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                    }`}
                 >
                   <h3 className="text-xl font-semibold mb-3">Contact & Links</h3>
                   <div className="space-y-3">
@@ -386,9 +355,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                 {/* CV Download */}
                 {cvUrl && (
                   <div
-                    className={`rounded-lg border p-6 ${
-                      darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
-                    }`}
+                    className={`rounded-lg border p-6 ${darkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                      }`}
                   >
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                       <FileText className="w-5 h-5" />
@@ -397,11 +365,10 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                     <a
                       href={cvUrl}
                       download
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-                        darkMode
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${darkMode
                           ? "bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30"
                           : "bg-cyan-100 text-cyan-600 hover:bg-cyan-200"
-                      } transition-colors`}
+                        } transition-colors`}
                     >
                       <Download className="w-4 h-4" />
                       Download CV

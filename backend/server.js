@@ -126,13 +126,29 @@ function writePortToFile(port) {
     url: `http://localhost:${port}`,
     timestamp: new Date().toISOString()
   };
-  const portFilePath = path.join(__dirname, "..", "port.json");
-  try {
-    fs.writeFileSync(portFilePath, JSON.stringify(portInfo, null, 2));
-    console.log(`📝 Port info written to port.json`);
-  } catch (error) {
-    console.error("Error writing port to file:", error);
-  }
+
+  // Locations to write port.json
+  const paths = [
+    path.join(__dirname, "..", "port.json"),
+    path.join(__dirname, "..", "public", "port.json")
+  ];
+
+  paths.forEach(p => {
+    try {
+      // Ensure directory exists
+      const dir = path.dirname(p);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      fs.writeFileSync(p, JSON.stringify(portInfo, null, 2));
+      console.log(`📝 Port info written to ${path.basename(p)} at ${p}`);
+    } catch (error) {
+      // Only log if it's not a "no such file or directory" error for the public folder
+      // (which might not exist in some environments)
+      console.error(`Error writing port to ${p}:`, error.message);
+    }
+  });
 }
 
 // Initialize port detection

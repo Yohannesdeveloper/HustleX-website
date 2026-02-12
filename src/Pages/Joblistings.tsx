@@ -89,26 +89,45 @@ const categories = [
   "Cybersecurity",
   "Data Science",
   "Machine Learning & AI",
+  "AI Prompt Engineering",
+  "Blockchain & Cryptocurrency",
+  "E-commerce Development",
   "Business Intelligence",
   "Data Analysis",
   "Database Administration",
+  "Quality Assurance & Testing",
+  "Embedded Systems",
+  "Hardware Engineering",
   "UI/UX Design",
   "Graphic Design",
   "Motion Graphics",
   "3D Animation",
   "Video Editing",
+  "Photography & Videography",
+  "Music & Audio Production",
+  "Architecture & Interior Design",
+  "Fashion & Textile Design",
   "Content Writing",
   "Technical Writing",
   "Copywriting",
-  "Translation & Localization",
-  "Digital Marketing",
-  "SEO & SEM",
   "Social Media Marketing",
+  "SEO & SEM",
+  "Digital Marketing",
   "Email Marketing",
+  "Translation & Localization",
+  "Virtual Assistant",
+  "Data Entry & Admin Support",
+  "Customer Service",
+  "Technical Support",
   "Sales & Business Development",
   "Customer Success",
-  "Technical Support",
-  "Customer Service",
+  "Project Management",
+  "Product Management",
+  "Program Management",
+  "Agile Coaching",
+  "Operations Management",
+  "Supply Chain & Logistics",
+  "Logistics & Warehouse Management",
   "Human Resources Management",
   "Recruitment & Talent Acquisition",
   "Payroll & Benefits Administration",
@@ -118,26 +137,29 @@ const categories = [
   "Legal Services",
   "Contract Management",
   "Compliance & Risk Management",
-  "Project Management",
-  "Program Management",
-  "Agile Coaching",
-  "Product Management",
-  "Operations Management",
-  "Supply Chain & Logistics",
   "Healthcare & Medical Services",
   "Nursing",
   "Pharmacy",
+  "Fitness & Personal Training",
+  "Nutrition & Dietetics",
+  "Social Work & Counseling",
   "Education & Training",
   "Instructional Design",
   "Civil Engineering",
   "Mechanical Engineering",
   "Electrical Engineering",
   "Environmental Consulting",
+  "Automobile Engineering",
+  "Farming & Agriculture",
+  "Veterinary Services",
   "Event Planning",
   "Public Relations",
   "Market Research",
   "Real Estate Management",
   "Hospitality & Tourism",
+  "Security Services",
+  "Manufacturing & Production",
+  "Printing & Publishing",
   "Other",
 ];
 
@@ -163,15 +185,44 @@ const jobTypes = [
   "Freelance",
   "Temporary",
   "Internship",
+  "Remote",
+  "On-site",
+  "Hybrid",
+];
+const jobSectors = [
+  "Technology & IT",
+  "Healthcare & Medical",
+  "Education & Training",
+  "Finance & Accounting",
+  "Marketing & Advertising",
+  "Manufacturing & Industrial",
+  "Construction & Real Estate",
+  "Retail & E-commerce",
+  "Hospitality & Tourism",
+  "Legal & Professional Services",
+  "Agriculture & Forestry",
+  "Energy & Mining",
+  "Government & Public Sector",
+  "Non-Profit & NGO",
+  "Media & Entertainment",
+  "Transportation & Logistics",
+  "Telecommunications",
+  "Aerospace & Defense",
+  "Arts & Culture",
+  "Other"
 ];
 const jobSites = ["Remote", "On-site", "Hybrid"];
 const experienceLevels = [
+  "Internship",
   "Entry Level",
   "Junior",
   "Mid-level",
   "Senior",
   "Lead",
+  "Manager",
+  "Director",
   "Executive",
+  "Expert",
 ];
 const educationLevels = [
   "High School",
@@ -180,6 +231,7 @@ const educationLevels = [
   "Master's Degree",
   "PhD",
   "Professional Certification",
+  "Vocational Training",
   "No Formal Education Required",
 ];
 const genderOptions = ["Any", "Male", "Female", "Non-binary"];
@@ -219,6 +271,7 @@ const JobListings: React.FC = () => {
   const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
   const [selectedJobSites, setSelectedJobSites] = useState<string[]>([]);
+  const [selectedJobSectors, setSelectedJobSectors] = useState<string[]>([]);
   const [selectedExperienceLevels, setSelectedExperienceLevels] = useState<
     string[]
   >([]);
@@ -254,6 +307,7 @@ const JobListings: React.FC = () => {
     budgetRange: false,
     duration: false,
     visibility: false,
+    jobSector: false,
   });
 
   // Font Import
@@ -462,6 +516,12 @@ const JobListings: React.FC = () => {
       );
     }
 
+    if (selectedJobSectors.length) {
+      filtered = filtered.filter(
+        (job) => job.jobSector && selectedJobSectors.includes(job.jobSector)
+      );
+    }
+
     if (selectedExperienceLevels.length) {
       filtered = filtered.filter(
         (job) =>
@@ -524,6 +584,7 @@ const JobListings: React.FC = () => {
     selectedJobTypes,
     selectedJobSites,
     selectedExperienceLevels,
+    selectedJobSectors,
     selectedEducationLevels,
     selectedGenders,
     selectedVisibility,
@@ -634,6 +695,7 @@ const JobListings: React.FC = () => {
     setSelectedEducationLevels([]);
     setSelectedGenders([]);
     setSelectedVisibility([]);
+    setSelectedJobSectors([]);
     setSearchTitle("");
   };
 

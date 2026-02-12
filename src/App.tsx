@@ -27,10 +27,11 @@ import ContactUs from "./Pages/ContactUs";
 import FAQ from "./Pages/FAQ";
 import HelpCenter from "./Pages/HelpCenter";
 import Pricing from "./Pages/Pricing";
-import Payment from "./Pages/Payment";
-import SantimPayWizard from "./Pages/SantimPayWizard";
+
+import PaymentWizard from "./Pages/PaymentWizard";
 import API from "./Pages/API";
 import JobAdmin from "./Pages/JobAdmin";
+import SubscriptionAdmin from "./Pages/SubscriptionAdmin";
 import JobModeration from "./Pages/JobModeration";
 
 import FreelancerProfileWizard from "./components/FreelancerProfileWizard";
@@ -39,12 +40,11 @@ import ProfileSetupRouter from "./components/ProfileSetupRouter";
 import AccountSettings from "./Pages/AccountSettings";
 import CompanyProfile from "./Pages/CompanyProfile";
 
-import RoleSelection from "./Pages/RoleSelection";
+
 import ApplicationsManagementMongo from "./Pages/ApplicationsManagementMongo";
 import ForgotPasswordOtp from "./components/ForgotPasswordOtp";
 import ChatInterface from "./components/ChatInterface";
 import FloatingChatBot from "./components/FloatingChatBot";
-import FloatingDarkModeToggle from "./components/FloatingDarkModeToggle";
 
 function AppContent() {
   const dispatch = useAppDispatch();
@@ -72,6 +72,7 @@ function AppContent() {
         <Route path="/edit-job/:id" element={<PageLayout><EditJobMongo /></PageLayout>} />
         <Route path="/admin/blog" element={<PageLayout><BlogAdmin /></PageLayout>} />
         <Route path="/admin/job" element={<PageLayout><JobAdmin /></PageLayout>} />
+        <Route path="/admin/subscriptions" element={<PageLayout><SubscriptionAdmin /></PageLayout>} />
         <Route path="/jobs/moderation" element={<PageLayout><JobModeration /></PageLayout>} />
         <Route path="/blog/post" element={<PageLayout><BlogPost /></PageLayout>} />
         <Route path="/blog" element={<PageLayout><Blog /></PageLayout>} />
@@ -83,21 +84,19 @@ function AppContent() {
         <Route path="/faq" element={<PageLayout><FAQ /></PageLayout>} />
         <Route path="/help-center" element={<PageLayout><HelpCenter /></PageLayout>} />
         <Route path="/pricing" element={<PageLayout><Pricing /></PageLayout>} />
-        <Route path="/payment" element={<PageLayout><Payment /></PageLayout>} />
-        <Route path="/santim-pay" element={<SantimPayWizard />} />
+
+        <Route path="/payment-wizard" element={<PaymentWizard />} />
         <Route path="/api" element={<PageLayout><API /></PageLayout>} />
         <Route path="/freelancer-profile-setup" element={<FreelancerProfileWizard />} />
         <Route path="/profile-setup" element={<PageLayout><ProfileSetupRouter /></PageLayout>} />
         <Route path="/company-profile" element={<PageLayout><CompanyProfile /></PageLayout>} />
-        <Route path="/role-selection" element={<PageLayout><RoleSelection /></PageLayout>} />
+
         <Route path="/applications-management" element={<PageLayout><ApplicationsManagementMongo /></PageLayout>} />
         <Route path="/chat" element={<ChatInterface />} />
       </Routes>
 
       {/* Global Floating Components */}
-      <FloatingDarkModeToggle />
-      {/* Hide chatbot on main chat page to avoid overlapping the send button */}
-      {location.pathname !== "/chat" && <FloatingChatBot />}
+      {/* Floating components moved into their relevant parents (e.g. Navbar) */}
     </WebSocketProvider>
   );
 }

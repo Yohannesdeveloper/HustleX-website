@@ -203,9 +203,10 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
     console.log("Filtering freelancers. Total:", freelancers.length);
     const filtered = freelancers.filter((freelancer) => {
       // Filter out the current user to prevent self-messaging
-      if (user?._id && freelancer._id === user._id) {
-        return false;
-      }
+      // Commented out to allow freelancers to see their own profile in list
+      // if (user?._id && freelancer._id === user._id) {
+      //   return false;
+      // }
 
       const profile = freelancer.profile || {};
       const fullName = `${profile.firstName || ""} ${profile.lastName || ""}`.trim().toLowerCase();

@@ -158,6 +158,18 @@ const EditJob = () => {
         transition={{ duration: 0.7 }}
         className="w-full max-w-3xl bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl p-10"
       >
+        <style>
+          {`
+            input[type="date"]::-webkit-calendar-picker-indicator {
+              filter: invert(1) brightness(1.5);
+              cursor: pointer;
+            }
+            input[type="date"] {
+              color-scheme: dark;
+              color: white;
+            }
+          `}
+        </style>
         <h2 className="text-4xl font-extrabold text-accent text-center mb-8 drop-shadow">
           ✏️ Edit Job
         </h2>

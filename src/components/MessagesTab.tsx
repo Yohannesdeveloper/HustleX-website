@@ -4,11 +4,12 @@ import { useAppSelector } from "../store/hooks";
 import { useAuth } from "../store/hooks";
 import { useLocation } from "react-router-dom";
 import { useWebSocket } from "../context/WebSocketContext";
-import { Send, MessageSquare, X, Smile, CheckCircle2, Paperclip, Mic, MicOff, Video, FileText, Image, File, Trash2, Play, Pause, Square, Music, Film, Archive, Code, Database, FileSpreadsheet, Presentation, MoreVertical, Copy, Forward, Reply, Pencil, Download, Pin } from "lucide-react";
+import { Send, MessageSquare, X, Smile, CheckCircle2, Paperclip, Mic, MicOff, Video, FileText, Image, File, Trash2, Play, Pause, Square, Music, Film, Archive, Code, Database, FileSpreadsheet, Presentation, MoreVertical, Copy, Forward, Reply, Pencil, Download, Pin, User } from "lucide-react";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
 import apiService from "../services/api";
 import { FreelancerWithStatus } from "../types";
+import FreelancerProfileModal from "./FreelancerProfileModal";
 
 interface Conversation {
   id: string;
@@ -192,6 +193,7 @@ const MessagesTab: React.FC = () => {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [replyToMessage, setReplyToMessage] = useState<{ id: string; text: string } | null>(null);
   const [pinnedMessageIds, setPinnedMessageIds] = useState<string[]>([]);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const messageMenuRef = useRef<HTMLDivElement>(null);
   const chatHeaderMenuRef = useRef<HTMLDivElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -1800,17 +1802,21 @@ const MessagesTab: React.FC = () => {
                     className={`w-10 h-10 rounded-lg ${darkMode
                       ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border border-cyan-500/50"
                       : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
-                      } flex items-center justify-center shadow-sm`}
+                      } flex items-center justify-center shadow-sm cursor-pointer`}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 400 }}
+                    onClick={() => setShowProfileModal(true)}
                   >
                     <span className={`text-base font-bold ${darkMode ? "text-cyan-300" : "text-cyan-700"
                       }`}>
                       {selectedConversation.freelancerName.charAt(0).toUpperCase()}
                     </span>
                   </motion.div>
-                  <div>
-                    <h3 className={`font-bold text-base mb-0.5 ${darkMode ? "text-white" : "text-gray-900"
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => setShowProfileModal(true)}
+                  >
+                    <h3 className={`font-bold text-base mb-0.5 hover:underline ${darkMode ? "text-white" : "text-gray-900"
                       }`}>
                       {selectedConversation.freelancerName}
                     </h3>
@@ -1863,6 +1869,22 @@ const MessagesTab: React.FC = () => {
                             : "bg-white border border-gray-200"
                             }`}
                         >
+
+                          {/* View Profile Option */}
+                          <button
+                            onClick={() => {
+                              setShowProfileModal(true);
+                              setChatHeaderMenuOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${darkMode
+                              ? "text-gray-300 hover:bg-white/10"
+                              : "text-gray-700 hover:bg-gray-50"
+                              }`}
+                          >
+                            <User className="w-4 h-4" />
+                            View Profile
+                          </button>
+
                           {/* Clear Chat History Option */}
                           <button
                             onClick={handleClearChatHistory}
@@ -2397,6 +2419,8 @@ const MessagesTab: React.FC = () => {
                                   }`}
                               >
                                 <X className="w-3 h-3" />
+
+
                               </motion.button>
                             </motion.div>
                           );
@@ -2925,6 +2949,13 @@ const MessagesTab: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Profile Modal */}
+      {showProfileModal && selectedConversation && selectedConversation.freelancer && (
+        <FreelancerProfileModal
+          freelancer={selectedConversation.freelancer}
+          onClose={() => setShowProfileModal(false)}
+        />
+      )}
     </div>
   );
 };

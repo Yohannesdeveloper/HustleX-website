@@ -412,9 +412,9 @@ const JobDetailsMongo: React.FC = () => {
 
       // Delay navigation to let animation play
       setTimeout(() => {
-        navigate("/dashboard/hiring", {
+        navigate("/dashboard/freelancer", {
           state: {
-            tab: "applications",
+            tab: "myApplications",
             previewApplicationId: application._id,
             focusJobId: job._id,
           },

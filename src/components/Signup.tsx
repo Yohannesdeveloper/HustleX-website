@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
@@ -27,10 +27,11 @@ const Signup: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedRoleForLogin, setSelectedRoleForLogin] = useState<string | null>(null);
   const [showLoginForm, setShowLoginForm] = useState(false);
+  const emailCheckTimeout = useRef<number | null>(null);
 
   // Get redirect path from URL params
   const searchParams = new URLSearchParams(location.search);
-  const redirectPath = searchParams.get("redirect") || "/job-listings";
+  const redirectPath = searchParams.get("redirect");
 
   const checkExistingUser = async (emailToCheck: string) => {
     if (!emailToCheck || !emailToCheck.includes('@')) {
@@ -44,24 +45,21 @@ const Signup: React.FC = () => {
       // Check if user exists by attempting to get user data
       const apiUrl = import.meta.env.VITE_API_URL || getBackendApiUrlSync();
       const checkUrl = `${apiUrl}/auth/check-user?email=${encodeURIComponent(emailToCheck)}`;
-      
-      console.log('Checking existing user:', checkUrl);
+
       const response = await fetch(checkUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
       if (response.status === 429) {
         // Rate limited - don't show error, just stop checking
         setCheckingUser(false);
         return;
       }
-      
+
       if (response.ok) {
         const userData = await response.json();
-        console.log('Existing user found:', userData);
         if (userData.user) {
           setExistingUser(userData.user);
           setShowCreateForm(false);
@@ -95,12 +93,18 @@ const Signup: React.FC = () => {
     const newEmail = e.target.value;
     setEmail(newEmail);
     setExistingUser(null); // Reset existing user when email changes
-    // Debounce the check - increased to 1000ms to reduce API calls
-    setTimeout(() => {
-      if (newEmail === e.target.value && newEmail.includes('@')) {
+
+    // Clear any pending checks so we only fire once after the user stops typing
+    if (emailCheckTimeout.current) {
+      window.clearTimeout(emailCheckTimeout.current);
+    }
+
+    // Debounce the check - 800ms after the last keystroke
+    emailCheckTimeout.current = window.setTimeout(() => {
+      if (newEmail && newEmail.includes("@")) {
         checkExistingUser(newEmail);
       }
-    }, 1000);
+    }, 800);
   };
 
   const handleAccountSelection = async (selectedRole: string) => {
@@ -127,10 +131,10 @@ const Signup: React.FC = () => {
     setIsLoading(true);
     try {
       const loggedInUser = await login(email, password);
-      
+
       // Determine the role to use (selected role or current role)
       const targetRole = selectedRoleForLogin || loggedInUser?.currentRole || 'freelancer';
-      
+
       // If adding a new role, add it after login
       if (selectedRoleForLogin && !existingUser.roles?.includes(selectedRoleForLogin)) {
         try {
@@ -148,48 +152,29 @@ const Signup: React.FC = () => {
           // Continue anyway
         }
       }
-      
+
       // Navigate based on role and profile completion status
-      // For EXISTING users (who already had this role), skip profile setup
-      // Use both loggedInUser and existingUser data to check profile completion
-      const isExistingUserWithRole = existingUser?.roles?.includes(targetRole);
-      
-      if (targetRole === 'freelancer') {
-        // Check if freelancer profile is complete from multiple sources
-        const hasFreelancerProfile = loggedInUser?.profile?.isProfileComplete || 
-                                     loggedInUser?.profile?.freelancerProfileCompleted ||
-                                     existingUser?.profile?.isProfileComplete ||
-                                     existingUser?.profile?.freelancerProfileCompleted ||
-                                     existingUser?.hasFreelancerProfile;
-        
-        // If existing user already had freelancer role, go to dashboard (they have profile)
-        if (hasFreelancerProfile || isExistingUserWithRole) {
-          navigate('/dashboard/freelancer', { replace: true });
-        } else {
-          // Only new freelancers need to set up profile
-          navigate('/freelancer-profile-setup', { replace: true });
-        }
-      } else if (targetRole === 'client') {
-        // Check if client/company profile is complete from multiple sources
-        const hasClientProfile = loggedInUser?.hasCompanyProfile ||
-                                 existingUser?.hasCompanyProfile ||
-                                 existingUser?.companyProfile;
-        
-        // If existing user already had client role, go to dashboard (they have profile)
-        if (hasClientProfile || isExistingUserWithRole) {
-          navigate('/dashboard/hiring', { replace: true });
-        } else {
-          // Only new clients need to set up profile
-          navigate('/company-profile', { replace: true });
-        }
-      } else {
-        // Fallback to redirect path
+      // Priority 1: Use explicit redirect path if provided (e.g. from pricing/payment)
+      if (redirectPath && redirectPath !== "/job-listings") {
         navigate(redirectPath, { replace: true });
+        return;
+      }
+
+      // Priority 2: Force profile setup for new roles/accounts
+      // Priority 3: Fallback to role-specific dashboard
+      const isExistingUserWithRole = existingUser?.roles?.includes(targetRole);
+
+      if (targetRole === 'freelancer') {
+        navigate('/dashboard/freelancer', { replace: true });
+      } else if (targetRole === 'client') {
+        navigate('/dashboard/hiring', { replace: true });
+      } else {
+        navigate("/job-listings", { replace: true });
       }
     } catch (err: any) {
       console.error('Login error:', err);
       let errorMessage = "Invalid email or password. Please try again.";
-      
+
       if (err) {
         if (typeof err === 'string') {
           errorMessage = err;
@@ -203,7 +188,7 @@ const Signup: React.FC = () => {
           errorMessage = err.toString();
         }
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -260,17 +245,24 @@ const Signup: React.FC = () => {
       });
 
       console.log("Registration successful");
-      // Redirect to appropriate wizard based on role
+
+      // Priority 1: Use explicit redirect path if provided (e.g. from pricing/payment)
+      if (redirectPath && redirectPath !== "/job-listings") {
+        navigate(redirectPath, { replace: true });
+        return;
+      }
+
+      // Priority 2: Redirect to appropriate dashboard based on role
       if (role === 'freelancer') {
-        navigate('/freelancer-profile-setup', { replace: true });
+        navigate('/dashboard/freelancer', { replace: true });
       } else if (role === 'client') {
-        navigate('/company-profile', { replace: true });
+        navigate('/dashboard/hiring', { replace: true });
       } else {
-        navigate(`/profile-setup?role=${role}`, { replace: true });
+        navigate('/job-listings', { replace: true });
       }
     } catch (err: any) {
       let errorMessage = t.signup.failedToCreateAccount;
-      
+
       if (err) {
         if (typeof err === 'string') {
           errorMessage = err;
@@ -284,8 +276,17 @@ const Signup: React.FC = () => {
           errorMessage = err.error.message;
         }
       }
-      
-      setError(errorMessage);
+
+      // If backend says the user already exists, trigger the existing-account flow
+      if (errorMessage?.toLowerCase().includes("user already exists")) {
+        setError(t.signup.accountAlreadyExists);
+        if (email && email.includes("@")) {
+          checkExistingUser(email);
+        }
+      } else {
+        setError(errorMessage);
+      }
+
       console.error('Registration error:', err);
     } finally {
       setIsLoading(false);
@@ -294,81 +295,71 @@ const Signup: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-300 ${
-        darkMode
-          ? "bg-gradient-to-br from-black via-gray-900 to-black-900 text-white"
-          : "bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900"
-      }`}
+      className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-300 ${darkMode
+        ? "bg-gradient-to-br from-black via-gray-900 to-black-900 text-white"
+        : "bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900"
+        }`}
     >
       {/* Animated background orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className={`absolute w-[500px] h-[500px] rounded-full top-1/4 left-1/4  ${
-            darkMode ? "opacity-20" : "opacity-10"
-          }`}
+          className={`absolute w-[500px] h-[500px] rounded-full top-1/4 left-1/4  ${darkMode ? "opacity-20" : "opacity-10"
+            }`}
         />
         <div
-          className={`absolute w-[300px] h-[300px]  rounded-full bottom-1/4 right-1/4  ${
-            darkMode ? "opacity-15" : "opacity-8"
-          }`}
+          className={`absolute w-[300px] h-[300px]  rounded-full bottom-1/4 right-1/4  ${darkMode ? "opacity-15" : "opacity-8"
+            }`}
         />
       </div>
 
       <div
-        className={`relative z-10 backdrop-blur-xl border rounded-3xl shadow-2xl p-10 w-full max-w-md ${
-          darkMode
-            ? "bg-black/40 border-cyan-500/20 shadow-cyan-500/10"
-            : "bg-white/80 border-cyan-500/10 shadow-cyan-500/5"
-        }`}
+        className={`relative z-10 backdrop-blur-xl border rounded-3xl shadow-2xl p-10 w-full max-w-md ${darkMode
+          ? "bg-black/40 border-cyan-500/20 shadow-cyan-500/10"
+          : "bg-white/80 border-cyan-500/10 shadow-cyan-500/5"
+          }`}
       >
         <h2
-          className={`text-3xl font-bold mb-6 text-center drop-shadow-lg ${
-            darkMode ? "text-cyan-400" : "text-cyan-600"
-          }`}
+          className={`text-3xl font-bold mb-6 text-center drop-shadow-lg ${darkMode ? "text-cyan-400" : "text-cyan-600"
+            }`}
         >
           {t.signup.createAccount}
         </h2>
 
         <button
           disabled
-          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-4 transition-all duration-300 opacity-50 cursor-not-allowed border ${
-            darkMode
-              ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
-              : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
-          }`}
+          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-4 transition-all duration-300 opacity-50 cursor-not-allowed border ${darkMode
+            ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
+            : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
+            }`}
         >
           <FcGoogle className="text-xl" /> Sign up with Google (Coming Soon)
         </button>
 
         <button
           disabled
-          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-6 transition-all duration-300 opacity-50 cursor-not-allowed border ${
-            darkMode
-              ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
-              : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
-          }`}
+          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-6 transition-all duration-300 opacity-50 cursor-not-allowed border ${darkMode
+            ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
+            : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
+            }`}
         >
           <FaApple className="text-xl" /> {t.signup.signUpWithApple} {t.signup.comingSoon}
         </button>
 
         <div
-          className={`my-6 text-center relative ${
-            darkMode ? "text-gray-300" : "text-gray-600"
-          }`}
+          className={`my-6 text-center relative ${darkMode ? "text-gray-300" : "text-gray-600"
+            }`}
         >
           <div className="absolute inset-0 flex items-center">
             <div
-              className={`w-full border-t ${
-                darkMode ? "border-gray-600/50" : "border-gray-300/50"
-              }`}
+              className={`w-full border-t ${darkMode ? "border-gray-600/50" : "border-gray-300/50"
+                }`}
             ></div>
           </div>
           <div
-            className={`relative px-4 ${
-              darkMode ? "bg-black/40" : "bg-white/80"
-            }`}
+            className={`relative px-4 ${darkMode ? "bg-black/40" : "bg-white/80"
+              }`}
           >
-             Use your email
+            Use your email
           </div>
         </div>
 
@@ -379,11 +370,17 @@ const Signup: React.FC = () => {
             placeholder={t.signup.email}
             value={email}
             onChange={handleEmailChange}
-            className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${
-              darkMode
-                ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-            }`}
+            autoComplete="email"
+            name="email"
+            onBlur={() => {
+              if (email && email.includes("@")) {
+                checkExistingUser(email);
+              }
+            }}
+            className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+              ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+              : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+              }`}
             required
           />
           {checkingUser && (
@@ -395,112 +392,101 @@ const Signup: React.FC = () => {
 
         {/* Login Form for Existing Users */}
         {existingUser && showLoginForm && (
-            <div className={`p-4 rounded-xl border ${darkMode ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100/50 border-gray-300/50'}`}>
-              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                Sign In
-              </h3>
-              <p className={`text-sm mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                {selectedRoleForLogin && !existingUser.roles?.includes(selectedRoleForLogin)
-                  ? t.signup.signInToAddRole.replace("{role}", selectedRoleForLogin)
-                  : t.signup.signInToContinue.replace("{role}", selectedRoleForLogin || existingUser.roles?.[0] || 'user')}
-              </p>
-              
-              <form onSubmit={handleLogin} className="space-y-4">
-                <input
-                  type="email"
-                  value={email}
-                  disabled
-                  className={`w-full px-4 py-3 border rounded-xl transition-all opacity-60 ${
-                    darkMode
-                      ? "bg-gray-800/50 border-gray-600/50 text-white"
-                      : "bg-white/50 border-gray-300/50 text-gray-900"
-                  }`}
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${
-                    darkMode
-                      ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                      : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                  }`}
-                />
-                
-                <button
-                  type="button"
-                  onClick={() => navigate('/forgot-password')}
-                  className={`text-sm text-left ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-500'}`}
-                >
-                  {t.signup.forgotPassword}
-                </button>
+          <div className={`p-4 rounded-xl border ${darkMode ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100/50 border-gray-300/50'}`}>
+            <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+              Sign In
+            </h3>
+            <p className={`text-sm mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {selectedRoleForLogin && !existingUser.roles?.includes(selectedRoleForLogin)
+                ? t.signup.signInToAddRole.replace("{role}", selectedRoleForLogin)
+                : t.signup.signInToContinue.replace("{role}", selectedRoleForLogin || existingUser.roles?.[0] || 'user')}
+            </p>
 
-                {error && (
-                  <p className="text-red-400 text-sm font-semibold bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                    {error}
-                  </p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    darkMode
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
-                      : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+            <form onSubmit={handleLogin} className="space-y-4">
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                name="password"
+                required
+                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                  ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                  : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
                   }`}
-                >
-                  {isLoading ? "Signing In..." : "Sign In"}
-                </button>
+              />
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowLoginForm(false);
-                    setSelectedRoleForLogin(null);
-                    setPassword("");
-                    setError(null);
-                  }}
-                  className={`w-full text-sm ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'}`}
-                >
-                  {t.signup.backToAccountSelection}
-                </button>
-              </form>
-            </div>
-          )}
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className={`text-sm text-left ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-500'}`}
+              >
+                {t.signup.forgotPassword}
+              </button>
+
+              {error && (
+                <p className="text-red-400 text-sm font-semibold bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${darkMode
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+                  : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+                  }`}
+              >
+                {isLoading ? "Signing In..." : "Sign In"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLoginForm(false);
+                  setSelectedRoleForLogin(null);
+                  setPassword("");
+                  setError(null);
+                }}
+                className={`w-full text-sm ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'}`}
+              >
+                {t.signup.backToAccountSelection}
+              </button>
+            </form>
+          </div>
+        )}
 
         {/* Existing Accounts Selection */}
         {existingUser && !showLoginForm && (
-            <div className={`p-4 rounded-xl border mb-4 ${darkMode ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100/50 border-gray-300/50'}`}>
-              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                Account Found
-              </h3>
-              <p className={`text-sm mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                {t.signup.accountExistsMessage || "An account with this email already exists. Please sign in or add a new role."}
-              </p>
+          <div className={`p-4 rounded-xl border mb-4 ${darkMode ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100/50 border-gray-300/50'}`}>
+            <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+              Account Found
+            </h3>
+            <p className={`text-sm mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {t.signup.accountExistsMessage || "An account with this email already exists. Please sign in or add a new role."}
+            </p>
 
-              {/* Existing Roles */}
-              <div className="space-y-2 mb-4">
-                <h4 className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Continue with existing role:
-                </h4>
-                {existingUser.roles && existingUser.roles.length > 0 ? (
-                  existingUser.roles.map((role: string) => (
+            {/* Existing Roles */}
+            <div className="space-y-2 mb-4">
+              <h4 className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Continue with existing role:
+              </h4>
+              {existingUser.roles && existingUser.roles.length > 0 ? (
+                existingUser.roles.map((role: string) => (
                   <button
                     key={role}
                     onClick={() => handleAccountSelection(role)}
                     disabled={isLoading}
-                    className={`w-full p-3 rounded-lg border transition-all text-left ${
-                      role === 'freelancer'
-                        ? darkMode
-                          ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
-                          : 'bg-cyan-500/5 border-cyan-500/20 text-cyan-600 hover:bg-cyan-500/10'
-                        : darkMode
-                          ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
-                          : 'bg-green-500/5 border-green-500/20 text-green-600 hover:bg-green-500/10'
-                    } disabled:opacity-50`}
+                    className={`w-full p-3 rounded-lg border transition-all text-left ${role === 'freelancer'
+                      ? darkMode
+                        ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
+                        : 'bg-cyan-500/5 border-cyan-500/20 text-cyan-600 hover:bg-cyan-500/10'
+                      : darkMode
+                        ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
+                        : 'bg-green-500/5 border-green-500/20 text-green-600 hover:bg-green-500/10'
+                      } disabled:opacity-50`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -511,70 +497,68 @@ const Signup: React.FC = () => {
                           </span>
                         )}
                       </div>
-                        <span className="text-sm">
+                      <span className="text-sm">
                         {role === 'freelancer' ? '💼' : '🏢'} {t.signup.signIn}
                       </span>
                     </div>
                   </button>
-                  ))
-                ) : (
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    No roles found for this account.
-                  </p>
+                ))
+              ) : (
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  No roles found for this account.
+                </p>
+              )}
+            </div>
+
+            {/* Add New Role Option */}
+            <div className={`pt-3 border-t ${darkMode ? 'border-gray-600/50' : 'border-gray-300/50'}`}>
+              <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Or add a new role to your account:
+              </h4>
+              <div className="space-y-2">
+                {!existingUser.roles?.includes('freelancer') && (
+                  <button
+                    onClick={() => handleAddRole('freelancer')}
+                    disabled={isLoading}
+                    className={`w-full p-3 rounded-lg border transition-all text-left ${darkMode
+                      ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
+                      : 'bg-cyan-500/5 border-cyan-500/20 text-cyan-600 hover:bg-cyan-500/10'
+                      } disabled:opacity-50`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{t.signup.addFreelancerRole}</span>
+                        <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {t.signup.offerServices}
+                        </span>
+                      </div>
+                      <span className="text-sm">💼 {t.signup.add}</span>
+                    </div>
+                  </button>
+                )}
+                {!existingUser.roles?.includes('client') && (
+                  <button
+                    onClick={() => handleAddRole('client')}
+                    disabled={isLoading}
+                    className={`w-full p-3 rounded-lg border transition-all text-left ${darkMode
+                      ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
+                      : 'bg-green-500/5 border-green-500/20 text-green-600 hover:bg-green-500/10'
+                      } disabled:opacity-50`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{t.signup.addClientRole}</span>
+                        <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {t.signup.hireFreelancersAndPost}
+                        </span>
+                      </div>
+                      <span className="text-sm">🏢 {t.signup.add}</span>
+                    </div>
+                  </button>
                 )}
               </div>
-
-              {/* Add New Role Option */}
-              <div className={`pt-3 border-t ${darkMode ? 'border-gray-600/50' : 'border-gray-300/50'}`}>
-                <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Or add a new role to your account:
-                </h4>
-                <div className="space-y-2">
-                  {!existingUser.roles?.includes('freelancer') && (
-                    <button
-                      onClick={() => handleAddRole('freelancer')}
-                      disabled={isLoading}
-                      className={`w-full p-3 rounded-lg border transition-all text-left ${
-                        darkMode
-                          ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
-                          : 'bg-cyan-500/5 border-cyan-500/20 text-cyan-600 hover:bg-cyan-500/10'
-                      } disabled:opacity-50`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="font-medium">{t.signup.addFreelancerRole}</span>
-                          <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {t.signup.offerServices}
-                          </span>
-                        </div>
-                        <span className="text-sm">💼 {t.signup.add}</span>
-                      </div>
-                    </button>
-                  )}
-                  {!existingUser.roles?.includes('client') && (
-                    <button
-                      onClick={() => handleAddRole('client')}
-                      disabled={isLoading}
-                      className={`w-full p-3 rounded-lg border transition-all text-left ${
-                        darkMode
-                          ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
-                          : 'bg-green-500/5 border-green-500/20 text-green-600 hover:bg-green-500/10'
-                      } disabled:opacity-50`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="font-medium">{t.signup.addClientRole}</span>
-                          <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {t.signup.hireFreelancersAndPost}
-                          </span>
-                        </div>
-                        <span className="text-sm">🏢 {t.signup.add}</span>
-                      </div>
-                    </button>
-                  )}
-                </div>
-              </div>
             </div>
+          </div>
         )}
 
         {/* Create Account Form */}
@@ -586,24 +570,26 @@ const Signup: React.FC = () => {
                 placeholder="First Name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                autoComplete="given-name"
+                name="firstName"
                 required
-                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${
-                  darkMode
-                    ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                    : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                }`}
+                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                  ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                  : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                  }`}
               />
               <input
                 type="text"
                 placeholder={t.signup.lastName}
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                autoComplete="family-name"
+                name="lastName"
                 required
-                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${
-                  darkMode
-                    ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                    : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                }`}
+                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                  ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                  : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                  }`}
               />
             </div>
 
@@ -613,32 +599,33 @@ const Signup: React.FC = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+                name="password"
                 required
-                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${
-                  darkMode
-                    ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                    : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                }`}
+                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                  ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                  : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                  }`}
               />
               <input
                 type="password"
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                name="confirmPassword"
                 required
-                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${
-                  darkMode
-                    ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                    : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                }`}
+                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                  ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                  : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                  }`}
               />
             </div>
 
             <div className="space-y-2">
               <label
-                className={`text-sm ${
-                  darkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 {t.signup.iWantTo}
               </label>
@@ -646,28 +633,26 @@ const Signup: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRole("freelancer")}
-                  className={`px-4 py-3 rounded-xl border transition-all ${
-                    role === "freelancer"
-                      ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
-                      : darkMode
+                  className={`px-4 py-3 rounded-xl border transition-all ${role === "freelancer"
+                    ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
+                    : darkMode
                       ? "bg-gray-800/50 border-gray-600/50 text-gray-300 hover:border-gray-500/50"
                       : "bg-gray-100/50 border-gray-300/50 text-gray-600 hover:border-gray-400/50"
-                  }`}
+                    }`}
                 >
-                 Find Work
+                  Find Work
                 </button>
                 <button
                   type="button"
                   onClick={() => setRole("client")}
-                  className={`px-4 py-3 rounded-xl border transition-all ${
-                    role === "client"
-                      ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
-                      : darkMode
+                  className={`px-4 py-3 rounded-xl border transition-all ${role === "client"
+                    ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
+                    : darkMode
                       ? "bg-gray-800/50 border-gray-600/50 text-gray-300 hover:border-gray-500/50"
                       : "bg-gray-100/50 border-gray-300/50 text-gray-600 hover:border-gray-400/50"
-                  }`}
+                    }`}
                 >
-                   {t.signup.hireFreelancers}
+                  {t.signup.hireFreelancers}
                 </button>
               </div>
             </div>
@@ -681,11 +666,10 @@ const Signup: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
-                darkMode
-                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
-                  : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
-              }`}
+              className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${darkMode
+                ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+                : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+                }`}
             >
               {isLoading ? "Creating Account..." : "Create Account"}
             </button>
@@ -694,9 +678,8 @@ const Signup: React.FC = () => {
 
         {!existingUser && (
           <p
-            className={`text-center mt-6 text-sm whitespace-nowrap ${
-              darkMode ? "text-gray-300" : "text-gray-600"
-            }`}
+            className={`text-center mt-6 text-sm whitespace-nowrap ${darkMode ? "text-gray-300" : "text-gray-600"
+              }`}
           >
             {t.signup.alreadyHaveAccount}
           </p>

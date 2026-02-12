@@ -5,6 +5,7 @@ const { auth, adminAuth } = require("../middleware/auth");
 const { checkSubscriptionForJobPosting, getUserJobPostingStatus } = require("../middleware/subscription");
 const nodemailer = require("nodemailer");
 const User = require("../models/User");
+const postJobToTelegram = require("../postToTelegram");
 
 const router = express.Router();
 
@@ -120,6 +121,9 @@ router.post(
         description: req.body.description,
         budget: req.body.budget,
         category: req.body.category,
+        jobSector: req.body.jobSector ?? undefined,
+        jobSite: req.body.jobSite ?? undefined,
+        compensationType: req.body.compensationType ?? undefined,
         company: req.body.company ?? undefined,
         jobType: req.body.jobType ?? undefined,
         workLocation: req.body.workLocation ?? undefined,
@@ -246,8 +250,11 @@ router.put("/:id/approve", adminAuth, async (req, res) => {
       }
     } catch (mailErr) {
       console.error("Failed to send approval email:", mailErr.message);
-      // continue without failing the request
     }
+
+    // ✅ Post the approved job to your Telegram channel
+    postJobToTelegram(job);
+
     res.json({ message: "Job approved", job });
   } catch (error) {
     console.error("Approve job error:", error);
@@ -289,7 +296,6 @@ router.put("/:id/decline", adminAuth, async (req, res) => {
       }
     } catch (mailErr) {
       console.error("Failed to send decline email:", mailErr.message);
-      // continue without failing the request
     }
     res.json({ message: "Job declined", job });
   } catch (error) {

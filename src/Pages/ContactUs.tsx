@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAppSelector } from "../store/hooks";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaYoutube, FaTelegramPlane } from "react-icons/fa";
+import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaFacebook, FaLinkedin, FaInstagram, FaYoutube, FaTelegramPlane } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "../hooks/useTranslation";
 import { getBackendApiUrlSync } from "../utils/portDetector";
@@ -90,7 +91,7 @@ const ContactUs: React.FC = () => {
       icon: <FaMapMarkerAlt className="text-2xl" />,
       title: t.contactUs.office,
       details: "Addis Ababa, Ethiopia",
-     // description: "Bole Medhanealem, Millennium Hall"
+      // description: "Bole Medhanealem, Millennium Hall"
     },
     {
       icon: <FaClock className="text-2xl" />,
@@ -102,7 +103,7 @@ const ContactUs: React.FC = () => {
 
   const socialLinks = [
     { icon: <FaFacebook />, name: "Facebook", color: "hover:text-blue-500", href: "#" },
-    { icon: <FaTwitter />, name: "Twitter", color: "hover:text-cyan-500", href: "#" },
+    { icon: <FaXTwitter />, name: "X", color: "hover:text-cyan-500", href: "#" },
     { icon: <FaLinkedin />, name: "LinkedIn", color: "hover:text-blue-600", href: "#" },
     { icon: <FaInstagram />, name: "Instagram", color: "hover:text-pink-500", href: "#" },
     { icon: <FaYoutube />, name: "YouTube", color: "hover:text-red-600", href: "https://youtube.com/@HustleXet" },
@@ -111,49 +112,41 @@ const ContactUs: React.FC = () => {
 
   return (
     <div
-      className={`relative min-h-screen transition-colors duration-300 ${
-        darkMode ? "bg-black" : "bg-white"
-      } ${darkMode ? "text-white" : "text-black"} font-inter`}
+      className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
+        } ${darkMode ? "text-white" : "text-black"} font-inter`}
     >
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className={`absolute w-[800px] h-[800px] ${
-            darkMode
+          className={`absolute w-[800px] h-[800px] ${darkMode
               ? "bg-gradient-to-br from-cyan-900 via-blue-900 to-purple-900"
               : "bg-gradient-to-br from-cyan-100 via-blue-100 to-purple-100"
-          } ${
-            darkMode ? "opacity-10" : "opacity-5"
-          } blur-3xl rounded-full top-0 left-0 `}
+            } ${darkMode ? "opacity-10" : "opacity-5"
+            } blur-3xl rounded-full top-0 left-0 `}
         />
         <div
-          className={`absolute w-[600px] h-[600px] ${
-            darkMode
+          className={`absolute w-[600px] h-[600px] ${darkMode
               ? "bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900"
               : "bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100"
-          } ${
-            darkMode ? "opacity-10" : "opacity-5"
-          } blur-3xl rounded-full bottom-0 right-0 `}
+            } ${darkMode ? "opacity-10" : "opacity-5"
+            } blur-3xl rounded-full bottom-0 right-0 `}
         />
         <div
-          className={`absolute w-[400px] h-[400px] ${
-            darkMode
+          className={`absolute w-[400px] h-[400px] ${darkMode
               ? "bg-gradient-to-br from-cyan-800 via-blue-800 to-purple-800"
               : "bg-gradient-to-br from-cyan-200 via-blue-200 to-purple-200"
-          } ${
-            darkMode ? "opacity-15" : "opacity-5"
-          } blur-3xl rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 `}
+            } ${darkMode ? "opacity-15" : "opacity-5"
+            } blur-3xl rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 `}
         />
       </div>
 
       <div className="relative z-10">
         {/* Header */}
         <motion.header
-          className={`sticky top-0 z-10 ${
-            darkMode
+          className={`sticky top-0 z-10 ${darkMode
               ? "bg-black/60 border-white/10"
               : "bg-white/60 border-black/10"
-          } backdrop-blur-md`}
+            } backdrop-blur-md`}
           initial={{ opacity: 0, y: -100 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, type: "spring", stiffness: 100 }}
@@ -184,9 +177,8 @@ const ContactUs: React.FC = () => {
                       HustleX
                     </span>
                   </h2>
-                  <p className={`text-lg sm:text-xl max-w-4xl mx-auto leading-relaxed ${
-                    darkMode ? "text-gray-300" : "text-gray-600"
-                  }`}>
+                  <p className={`text-lg sm:text-xl max-w-4xl mx-auto leading-relaxed ${darkMode ? "text-gray-300" : "text-gray-600"
+                    }`}>
                     {t.contactUs.haveQuestions}
                   </p>
                 </motion.section>
@@ -202,11 +194,10 @@ const ContactUs: React.FC = () => {
                     {contactInfo.map((info, index) => (
                       <motion.div
                         key={index}
-                        className={`p-6 rounded-2xl text-center ${
-                          darkMode
+                        className={`p-6 rounded-2xl text-center ${darkMode
                             ? "bg-black border-white/10"
                             : "bg-white border-black/10"
-                        } border shadow-xl`}
+                          } border shadow-xl`}
                         initial={{ opacity: 0, y: 50, scale: 0.8 }}
                         whileInView={{ opacity: 1, y: 0, scale: 1 }}
                         whileHover={{
@@ -228,14 +219,12 @@ const ContactUs: React.FC = () => {
                           {info.icon}
                         </motion.div>
                         <h4 className="text-xl font-bold mb-2">{info.title}</h4>
-                        <p className={`text-lg font-semibold mb-1 ${
-                          darkMode ? "text-gray-300" : "text-gray-700"
-                        }`}>
+                        <p className={`text-lg font-semibold mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"
+                          }`}>
                           {info.details}
                         </p>
-                        <p className={`text-sm ${
-                          darkMode ? "text-gray-400" : "text-gray-600"
-                        }`}>
+                        <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"
+                          }`}>
                           {info.description}
                         </p>
                       </motion.div>
@@ -265,9 +254,8 @@ const ContactUs: React.FC = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1, duration: 0.5 }}
                           >
-                            <label className={`block text-sm font-medium mb-2 ${
-                              darkMode ? "text-gray-300" : "text-gray-700"
-                            }`}>
+                            <label className={`block text-sm font-medium mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"
+                              }`}>
                               {t.contactUs.fullName} *
                             </label>
                             <input
@@ -276,11 +264,10 @@ const ContactUs: React.FC = () => {
                               value={formData.name}
                               onChange={handleInputChange}
                               required
-                              className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${
-                                darkMode
+                              className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${darkMode
                                   ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
                                   : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                              }`}
+                                }`}
                               placeholder={t.contactUs.yourFullName}
                             />
                           </motion.div>
@@ -290,9 +277,8 @@ const ContactUs: React.FC = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2, duration: 0.5 }}
                           >
-                            <label className={`block text-sm font-medium mb-2 ${
-                              darkMode ? "text-gray-300" : "text-gray-700"
-                            }`}>
+                            <label className={`block text-sm font-medium mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"
+                              }`}>
                               {t.contactUs.emailAddress} *
                             </label>
                             <input
@@ -301,11 +287,10 @@ const ContactUs: React.FC = () => {
                               value={formData.email}
                               onChange={handleInputChange}
                               required
-                              className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${
-                                darkMode
+                              className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${darkMode
                                   ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
                                   : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                              }`}
+                                }`}
                               placeholder={t.contactUs.yourEmailPlaceholder}
                             />
                           </motion.div>
@@ -316,9 +301,8 @@ const ContactUs: React.FC = () => {
                           whileInView={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3, duration: 0.5 }}
                         >
-                          <label className={`block text-sm font-medium mb-2 ${
-                            darkMode ? "text-gray-300" : "text-gray-700"
-                          }`}>
+                          <label className={`block text-sm font-medium mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"
+                            }`}>
                             {t.contactUs.subject} *
                           </label>
                           <select
@@ -326,11 +310,10 @@ const ContactUs: React.FC = () => {
                             value={formData.subject}
                             onChange={handleInputChange}
                             required
-                            className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${
-                              darkMode
+                            className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 ${darkMode
                                 ? "bg-black/50 border-gray-700/50 text-white"
                                 : "bg-white/10 border-gray-300/50 text-black"
-                            }`}
+                              }`}
                           >
                             <option value="">{t.contactUs.selectSubject}</option>
                             <option value="general">{t.contactUs.generalInquiry}</option>
@@ -347,9 +330,8 @@ const ContactUs: React.FC = () => {
                           whileInView={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.4, duration: 0.5 }}
                         >
-                          <label className={`block text-sm font-medium mb-2 ${
-                            darkMode ? "text-gray-300" : "text-gray-700"
-                          }`}>
+                          <label className={`block text-sm font-medium mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"
+                            }`}>
                             {t.contactUs.message} *
                           </label>
                           <textarea
@@ -358,11 +340,10 @@ const ContactUs: React.FC = () => {
                             onChange={handleInputChange}
                             required
                             rows={6}
-                            className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 resize-none ${
-                              darkMode
+                            className={`w-full p-4 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 resize-none ${darkMode
                                 ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
                                 : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                            }`}
+                              }`}
                             placeholder={t.contactUs.tellUsHowWeCanHelp}
                           />
                         </motion.div>
@@ -370,11 +351,10 @@ const ContactUs: React.FC = () => {
                         <motion.button
                           type="submit"
                           disabled={isSubmitting}
-                          className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg ${
-                            isSubmitting
+                          className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg ${isSubmitting
                               ? "bg-gray-600 text-gray-300 cursor-not-allowed"
                               : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 shadow-cyan-500/25"
-                          }`}
+                            }`}
                           whileHover={{ scale: isSubmitting ? 1 : 1.02, y: isSubmitting ? 0 : -2 }}
                           whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                           initial={{ opacity: 0, y: 20 }}
@@ -396,11 +376,10 @@ const ContactUs: React.FC = () => {
                     >
                       <div>
                         <h3 className="text-3xl font-bold mb-6">{t.contactUs.visitOurOffice}</h3>
-                        <div className={`p-6 rounded-2xl ${
-                          darkMode
+                        <div className={`p-6 rounded-2xl ${darkMode
                             ? "bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-white/10"
                             : "bg-gradient-to-br from-cyan-50 to-blue-50 border-black/10"
-                        } border`}>
+                          } border`}>
                           <div className="rounded-lg overflow-hidden mb-4">
                             <div className="relative" style={{ paddingBottom: "56.25%", height: 0 }}>
                               <iframe
@@ -417,9 +396,8 @@ const ContactUs: React.FC = () => {
                           </div>
                           <div className="space-y-3">
                             <h4 className="text-xl font-semibold">{t.contactUs.hustleXHQ}</h4>
-                            <p className={`text-sm leading-relaxed ${
-                              darkMode ? "text-gray-300" : "text-gray-600"
-                            }`}>
+                            <p className={`text-sm leading-relaxed ${darkMode ? "text-gray-300" : "text-gray-600"
+                              }`}>
                               {t.contactUs.officeLocationDescription}
                             </p>
                             <a
@@ -444,11 +422,10 @@ const ContactUs: React.FC = () => {
                               href={social.href}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={`p-3 rounded-full transition-all duration-300 ${
-                                darkMode
+                              className={`p-3 rounded-full transition-all duration-300 ${darkMode
                                   ? "bg-white/10 hover:bg-white/20"
                                   : "bg-black/10 hover:bg-black/20"
-                              } ${social.color}`}
+                                } ${social.color}`}
                               whileHover={{ scale: 1.1, y: -2 }}
                               whileTap={{ scale: 0.95 }}
                               initial={{ opacity: 0, y: 20 }}
@@ -466,11 +443,10 @@ const ContactUs: React.FC = () => {
 
                 {/* FAQ Section */}
                 <motion.section
-                  className={`p-8 sm:p-12 rounded-2xl text-center ${
-                    darkMode
+                  className={`p-8 sm:p-12 rounded-2xl text-center ${darkMode
                       ? "bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-white/10"
                       : "bg-gradient-to-br from-cyan-50 to-blue-50 border-black/10"
-                  } border`}
+                    } border`}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8 }}
@@ -478,17 +454,15 @@ const ContactUs: React.FC = () => {
                   <h3 className="text-2xl sm:text-3xl font-bold mb-4">
                     {t.contactUs.needQuickAnswers}
                   </h3>
-                  <p className={`mb-8 text-lg max-w-2xl mx-auto ${
-                    darkMode ? "text-gray-300" : "text-gray-600"
-                  }`}>
+                  <p className={`mb-8 text-lg max-w-2xl mx-auto ${darkMode ? "text-gray-300" : "text-gray-600"
+                    }`}>
                     {t.contactUs.checkOutFAQ}
                   </p>
                   <motion.button
-                    className={`px-8 py-4 rounded-full font-semibold transition-all duration-300 ${
-                      darkMode
+                    className={`px-8 py-4 rounded-full font-semibold transition-all duration-300 ${darkMode
                         ? "bg-cyan-600 hover:bg-cyan-700 text-white"
                         : "bg-cyan-600 hover:bg-cyan-700 text-white"
-                    } shadow-lg`}
+                      } shadow-lg`}
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/faq')}

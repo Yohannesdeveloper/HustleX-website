@@ -6,13 +6,13 @@ import { useAuth } from "../store/hooks";
 import { useTranslation } from "../hooks/useTranslation";
 import {
   FaFacebook,
-  FaTwitter,
   FaLinkedin,
   FaInstagram,
   FaYoutube,
   FaTelegramPlane,
   FaHeart,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 const Footer: React.FC = () => {
   const darkMode = useAppSelector((s) => s.theme.darkMode);
@@ -22,11 +22,10 @@ const Footer: React.FC = () => {
 
   return (
     <motion.footer
-      className={`pt-16 sm:pt-20 pb-6 sm:pb-8 ${
-        darkMode
-          ? "bg-gradient-to-br from-black/95 to-gray-900/95"
-          : "bg-gradient-to-br from-gray-800 to-gray-900"
-      } text-white relative overflow-hidden`}
+      className={`pt-16 sm:pt-20 pb-6 sm:pb-8 ${darkMode
+        ? "bg-gradient-to-br from-black/95 to-gray-900/95"
+        : "bg-gradient-to-br from-gray-800 to-gray-900"
+        } text-white relative overflow-hidden`}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
     >
@@ -130,11 +129,12 @@ const Footer: React.FC = () => {
                   icon: <FaFacebook />,
                   color: "hover:text-blue-400",
                   label: "Facebook",
+                  href: "https://www.facebook.com/share/14YUagDZDNE/",
                 },
                 {
-                  icon: <FaTwitter />,
+                  icon: <FaXTwitter />,
                   color: "hover:text-cyan-400",
-                  label: "Twitter",
+                  label: "X",
                 },
                 {
                   icon: <FaLinkedin />,

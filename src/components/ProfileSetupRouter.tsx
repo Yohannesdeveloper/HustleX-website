@@ -30,13 +30,13 @@ const ProfileSetupRouter: React.FC = () => {
 
       // Check if user has completed freelancer profile (check multiple fields)
       const hasFreelancerProfile = user.profile?.freelancerProfileCompleted ||
-                                   user.profile?.isProfileComplete ||
-                                   (user.profile?.skills && user.profile?.skills.length > 0);
+        user.profile?.isProfileComplete ||
+        (user.profile?.skills && user.profile?.skills.length > 0);
       const hasClientProfile = user.hasCompanyProfile || user.companyProfile;
 
       // If user has both roles and both profiles are complete, go to role selection
       if (hasFreelancerRole && hasClientRole && hasFreelancerProfile && hasClientProfile) {
-        navigate('/role-selection', { replace: true });
+        navigate('/dashboard/freelancer', { replace: true });
         return;
       }
 
@@ -69,7 +69,7 @@ const ProfileSetupRouter: React.FC = () => {
       // Only show wizard if user is NEW and explicitly needs to set up profile
       // Check if this is a new signup (signupRole param present) vs existing user navigation
       const isNewSignup = signupRole !== null && signupRole !== undefined;
-      
+
       // If user has freelancer role but no profile, only show wizard for new signups
       if (hasFreelancerRole && !hasFreelancerProfile) {
         if (isNewSignup && signupRole === 'freelancer') {
@@ -113,12 +113,12 @@ const ProfileSetupRouter: React.FC = () => {
   // Determine which wizard to show based on user's roles and signup role
   // Only show wizard for NEW signups, not existing users
   const isNewSignup = signupRole !== null && signupRole !== undefined;
-  
+
   const hasFreelancerProfile = user?.profile?.freelancerProfileCompleted ||
-                               user?.profile?.isProfileComplete ||
-                               (user?.profile?.skills && user?.profile?.skills.length > 0);
+    user?.profile?.isProfileComplete ||
+    (user?.profile?.skills && user?.profile?.skills.length > 0);
   const hasClientProfile = user?.hasCompanyProfile || user?.companyProfile;
-  
+
   const shouldShowFreelancerWizard = user?.roles?.includes('freelancer') &&
     !hasFreelancerProfile && isNewSignup && signupRole === 'freelancer';
 
@@ -141,8 +141,8 @@ const ProfileSetupRouter: React.FC = () => {
     return <ClientProfileWizard />;
   }
 
-  // Fallback - redirect to role selection if something goes wrong
-  navigate('/role-selection', { replace: true });
+  // Fallback - redirect to dashboard if something goes wrong
+  navigate('/dashboard/freelancer', { replace: true });
   return null;
 };
 

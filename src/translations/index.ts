@@ -53,6 +53,13 @@ export interface Translations {
     consulting: string;
     adminSupport: string;
     eliteFreelancers: string;
+    aiAndData: string;
+    videoAndAudio: string;
+    ecommerce: string;
+    customerSupport: string;
+    lifestyleAndHealth: string;
+    financeAndLegal: string;
+    engineeringAndArch: string;
   };
 
   // Testimonials
@@ -158,6 +165,9 @@ export interface Translations {
     stepPhoneNumber: string;
     stepPaymentProcess: string;
     stepConfirmation: string;
+    confirmPayment: string;
+    paymentPendingApproval: string;
+    selectBank: string;
   };
 
   // Stats
@@ -461,6 +471,8 @@ export interface Translations {
     canIChangePlansLaterAnswer: string;
     isThereAContract: string;
     isThereAContractAnswer: string;
+    whatPaymentMethodsDoYouAccept: string;
+    whatPaymentMethodsDoYouAcceptAnswer: string;
     doYouOfferRefunds: string;
     doYouOfferRefundsAnswer: string;
   };
@@ -525,6 +537,13 @@ const translations: Record<Language, Translations> = {
       consulting: "Consulting",
       adminSupport: "Admin Support",
       eliteFreelancers: "Elite Freelancers",
+      aiAndData: "AI & Data Science",
+      videoAndAudio: "Video & Audio",
+      ecommerce: "E-commerce",
+      customerSupport: "Customer Support",
+      lifestyleAndHealth: "Lifestyle & Health",
+      financeAndLegal: "Finance & Legal",
+      engineeringAndArch: "Engineering & Architecture",
     },
     testimonials: {
       title: "What Our Users Say",
@@ -622,6 +641,9 @@ const translations: Record<Language, Translations> = {
       stepPhoneNumber: "Phone Number",
       stepPaymentProcess: "Payment in Process",
       stepConfirmation: "Confirmation",
+      confirmPayment: "I have completed payment",
+      paymentPendingApproval: "Payment submitted for review. Your subscription will be active once approved.",
+      selectBank: "Select your payment method",
     },
     stats: {
       happyClients: "Happy Clients",
@@ -673,6 +695,8 @@ const translations: Record<Language, Translations> = {
       canIChangePlansLaterAnswer: "Yes! You can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.",
       isThereAContract: "Is there a contract?",
       isThereAContractAnswer: "No contracts! You can cancel your subscription at any time with no penalties.",
+      whatPaymentMethodsDoYouAccept: "What payment methods do you accept?",
+      whatPaymentMethodsDoYouAcceptAnswer: "Currently, we support Telebirr, CBE Birr, and Awash Bank for mobile payments. We are working to add more local and international payment methods soon.",
       doYouOfferRefunds: "Do you offer refunds?",
       doYouOfferRefundsAnswer: "Yes, we offer a 30-day money-back guarantee for all paid plans.",
     },
@@ -967,6 +991,13 @@ const translations: Record<Language, Translations> = {
       consulting: "ምክክር",
       adminSupport: "የአስተዳደር ድጋፍ",
       eliteFreelancers: "ከፍተኛ ነጻ ሰራተኞች",
+      aiAndData: "አርቲፊሻል ኢንተለጀንስ እና ዳታ",
+      videoAndAudio: "ቪዲዮ እና ኦዲዮ",
+      ecommerce: "ኢ-ኮሜርስ",
+      customerSupport: "የደንበኞች ድጋፍ",
+      lifestyleAndHealth: "የአኗኗር ዘይቤ እና ጤና",
+      financeAndLegal: "ፋይናንስ እና ህግ",
+      engineeringAndArch: "መሐንዲስነት እና አርክቴክቸር",
     },
     testimonials: {
       title: "የተጠቃሚዎቻችን ምን ይላሉ",
@@ -1064,6 +1095,9 @@ const translations: Record<Language, Translations> = {
       stepPhoneNumber: "የስልክ ቁጥር",
       stepPaymentProcess: "ክፍያ በሂደት ላይ",
       stepConfirmation: "ማረጋገጫ",
+      confirmPayment: "ክፍያ ፈጽሜያለሁ",
+      paymentPendingApproval: "ክፍያው ለግምገማ ቀርቧል። እርስዎ ከጸደቀ በኋላ ምዝገባዎ ንቁ ይሆናል።",
+      selectBank: "የክፍያ ዘዴዎን ይምረጡ",
     },
     stats: {
       happyClients: "ደስ የሚሉ ደንበኞች",
@@ -1115,6 +1149,8 @@ const translations: Record<Language, Translations> = {
       canIChangePlansLaterAnswer: "አዎ! ዕቅድዎን በማንኛውም ጊዜ ማሻሻል ወይም መቀነስ ይችላሉ። ለውጦቹ በሚቀጥለው የክፍያ ዑደትዎ ውስጥ ይንጸባረቃሉ።",
       isThereAContract: "ውል አለ?",
       isThereAContractAnswer: "ውሎች የሉም! ምዝገባዎን በማንኛውም ጊዜ ያለ ቅጣት ማቋረጥ ይችላሉ።",
+      whatPaymentMethodsDoYouAccept: "ምን ዓይነት የክፍያ መንገዶችን ይቀበላሉ?",
+      whatPaymentMethodsDoYouAcceptAnswer: "በአሁኑ ጊዜ ለሞባይል ክፍያ ቴሌብርን፣ ሲቢኢ ብርን እና አዋሽ ባንክን እንደግፋለን። በቅርቡ ተጨማሪ የአገር ውስጥ እና ዓለም አቀፍ የክፍያ መንገዶችን ለመጨመር እየሰራን ነው።",
       doYouOfferRefunds: "መመለሻ ትሰጣላችሁ?",
       doYouOfferRefundsAnswer: "አዎ፣ ለሁሉም የተከፈሉ ዕቅዶች 30 ቀናት የገንዘብ መመለሻ ዋስትና እንሰጣለን።",
     },
@@ -1411,6 +1447,13 @@ const translations: Record<Language, Translations> = {
       consulting: "ምክክር",
       adminSupport: "ድጋፍ አስተዳደር",
       eliteFreelancers: "ዝለዓለ ነጻ ሰራሕተኛታት",
+      aiAndData: "AI ን ዳታን",
+      videoAndAudio: "ቪድዮን ኦድዮን",
+      ecommerce: "ኢ-ኮሜርስ",
+      customerSupport: "ደንበኛታት ድጋፍ",
+      lifestyleAndHealth: "ኣነባብራን ጥዕናን",
+      financeAndLegal: "ፋይናንስን ሕግን",
+      engineeringAndArch: "ምህንድስናን አርክቴክቸርን",
     },
     testimonials: {
       title: "ተጠቃሚታትና እንታይ ይብሉ",
@@ -1508,6 +1551,9 @@ const translations: Record<Language, Translations> = {
       stepPhoneNumber: "ቁጽሪ ስልኪ",
       stepPaymentProcess: "ክፍሊት ኣብ ሂደት",
       stepConfirmation: "ምርግጋጽ",
+      confirmPayment: "ክፍሊት ፈጽመ",
+      paymentPendingApproval: "ክፍሊት ንግምገማ ቀሪቡ። እቲ ምዝገባ ምስ ጸደቀ ንጡፍ ክኸውን እዩ።",
+      selectBank: "ናይ ክፍሊት መዳይ ምረጽ",
     },
     stats: {
       happyClients: "ደስ ዝብሉ ደንበኛታት",
@@ -1559,6 +1605,8 @@ const translations: Record<Language, Translations> = {
       canIChangePlansLaterAnswer: "እወ! ዕቅድኻ ኣብ ዝዀነ እዋን ክትሓድስ ወይ ክትቐንስ ትኽእል ኢኻ። ለውጢታት ኣብ ዝቕጽል ዑደት ክፍሊትኻ ይንጸባረቁ።",
       isThereAContract: "ውሕል ኣሎ?",
       isThereAContractAnswer: "ውሕላት የለን! ምዝገባኻ ኣብ ዝዀነ እዋን ዘይቅጻት ክትቋርጽ ትኽእል ኢኻ።",
+      whatPaymentMethodsDoYouAccept: "እንታይ ዓይነት ናይ ክፍሊት መዳይ ትቕበሉ?",
+      whatPaymentMethodsDoYouAcceptAnswer: "ሕዚ ንሞባይል ክፍሊት ቴሌብር፣ CBE Birr ን አዋሽ ባንክን ንድግፍ ኢና። ኣብ ቀረባ እዋን ተወሳኺ ናይ ዓዲ ውሽጥን ዓለም ለኸን ናይ ክፍሊት መዳይ ንምውሳኽ ንሰርሕ ኣለና።",
       doYouOfferRefunds: "መመለሲ ትህቡ?",
       doYouOfferRefundsAnswer: "እወ፣ ንኹሎም ዝከፈሉ ዕቅድታት 30 መዓልቲ ዋስትና መመለሲ ገንዘብ ንህብ።",
     },
@@ -1853,6 +1901,13 @@ const translations: Record<Language, Translations> = {
       consulting: "Gorsa",
       adminSupport: "Gargaarsa Bulchiinsa",
       eliteFreelancers: "Hojjattoota Bilisaa Ol'aantummaa",
+      aiAndData: "AI fi Data",
+      videoAndAudio: "Viidiyoo fi Oodiyoo",
+      ecommerce: "E-commerce",
+      customerSupport: "Deeggarsa Maamiltootaa",
+      lifestyleAndHealth: "Haala Jireenyaa fi Fayyaa",
+      financeAndLegal: "Faayinaansii fi Seera",
+      engineeringAndArch: "Injinariingii fi Arkiteektar",
     },
     testimonials: {
       title: "Fayyadamiin Keenyas Maal Jettu?",
@@ -1950,6 +2005,9 @@ const translations: Record<Language, Translations> = {
       stepPhoneNumber: "Lakkoofsi Bilbila",
       stepPaymentProcess: "Kaffaltiinsa Hojjii Keessaa",
       stepConfirmation: "Mirkaneessuu",
+      confirmPayment: "Kaffaltii raawwadheera",
+      paymentPendingApproval: "Kaffaltiin gamaaggamaaf dhiyaateera. Galmeen keessan erga mirkanaa'ee booda hojii irra oola.",
+      selectBank: "Mala kaffaltii keessan filadhaa",
     },
     stats: {
       happyClients: "Daldaltoota Gammadaa",
@@ -2001,6 +2059,8 @@ const translations: Record<Language, Translations> = {
       canIChangePlansLaterAnswer: "Eeyyeen! Karaa keessan yeroo kamillee guddisuu ykn gadi buusuu ni dandeessu. Jijjiiramni kana booda karaa kaffaltii keessan keessatti mul'ata.",
       isThereAContract: "Hiramni jira?",
       isThereAContractAnswer: "Hiramni hin jiru! Galma keessan yeroo kamillee kaffaltiin ala dhaabbachuu ni dandeessu.",
+      whatPaymentMethodsDoYouAccept: "Mala kaffaltii akkamii fudhattu?",
+      whatPaymentMethodsDoYouAcceptAnswer: "Yeroo ammaa kaffaltii mobaayilaatiif Telebirr, CBE Birr fi Awash Bank ni deeggarra. Dhiyeenyatti mala kaffaltii naannoo fi idil-addunyaa dabalataa dabaluuf hojjechaa jirra.",
       doYouOfferRefunds: "Deebii kaffaltii ni kennituu?",
       doYouOfferRefundsAnswer: "Eeyyeen, karaa kaffaltii hundaaaf warrummaan deebii kaffaltii guyyaa 30 kennina.",
     },

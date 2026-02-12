@@ -167,12 +167,12 @@ const EditJobMongo: React.FC = () => {
 
       try {
         const jobData = await apiService.getJob(id);
-        
+
         // Check if current user is the job owner
-        const jobOwnerId = typeof jobData.postedBy === 'string' 
-          ? jobData.postedBy 
+        const jobOwnerId = typeof jobData.postedBy === 'string'
+          ? jobData.postedBy
           : jobData.postedBy?._id;
-        
+
         if (jobOwnerId !== user?._id) {
           alert("You don't have permission to edit this job.");
           navigate("/job-listings");
@@ -214,7 +214,7 @@ const EditJobMongo: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
-    
+
     setIsSubmitting(true);
 
     try {
@@ -274,9 +274,8 @@ const EditJobMongo: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        darkMode ? "bg-black text-white" : "bg-white text-black"
-      } px-6 py-12 flex flex-col items-center`}
+      className={`min-h-screen ${darkMode ? "bg-black text-white" : "bg-white text-black"
+        } px-6 py-12 flex flex-col items-center`}
     >
       {/* Font Import */}
       <link
@@ -291,6 +290,18 @@ const EditJobMongo: React.FC = () => {
             letter-spacing: 0.02em;
             line-height: 1.2;
           }
+
+          /* Date picker icon styling */
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: ${darkMode ? "invert(1) brightness(1.5)" : "none"};
+            cursor: pointer;
+          }
+
+          /* Additional fallback for some browsers */
+          input[type="date"] {
+            color-scheme: ${darkMode ? "dark" : "light"};
+            color: ${darkMode ? "white" : "black"};
+          }
         `}
       </style>
 
@@ -299,11 +310,10 @@ const EditJobMongo: React.FC = () => {
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate("/job-listings")}
-            className={`flex items-center gap-3 px-4 py-2 rounded-xl font-inter transition-all duration-300 border shadow-[0_4px_6px_rgba(0,0,0,0.3)] ${
-              darkMode
-                ? "bg-black/40 text-cyan-400 border-cyan-500/20 hover:text-cyan-300 hover:border-cyan-400/40"
-                : "bg-white/40 text-cyan-600 border-cyan-500/10 hover:text-cyan-500 hover:border-cyan-400/20"
-            }`}
+            className={`flex items-center gap-3 px-4 py-2 rounded-xl font-inter transition-all duration-300 border shadow-[0_4px_6px_rgba(0,0,0,0.3)] ${darkMode
+              ? "bg-black/40 text-cyan-400 border-cyan-500/20 hover:text-cyan-300 hover:border-cyan-400/40"
+              : "bg-white/40 text-cyan-600 border-cyan-500/10 hover:text-cyan-500 hover:border-cyan-400/20"
+              }`}
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Jobs
@@ -318,9 +328,8 @@ const EditJobMongo: React.FC = () => {
         className="w-full max-w-5xl mb-12"
       >
         <motion.h2
-          className={`text-4xl font-bold bg-gradient-to-r ${
-            darkMode ? "from-blue-300 to-blue-500" : "from-blue-400 to-blue-600"
-          } bg-clip-text text-transparent text-center font-inter tracking-tight`}
+          className={`text-4xl font-bold bg-gradient-to-r ${darkMode ? "from-blue-300 to-blue-500" : "from-blue-400 to-blue-600"
+            } bg-clip-text text-transparent text-center font-inter tracking-tight`}
           variants={letterVariants}
           initial="hidden"
           animate="visible"
@@ -339,9 +348,8 @@ const EditJobMongo: React.FC = () => {
           ))}
         </motion.h2>
         <p
-          className={`text-center text-lg ${
-            darkMode ? "text-gray-400" : "text-gray-600"
-          } mt-4`}
+          className={`text-center text-lg ${darkMode ? "text-gray-400" : "text-gray-600"
+            } mt-4`}
         >
           Update your job listing details
         </p>
@@ -353,24 +361,21 @@ const EditJobMongo: React.FC = () => {
           variants={sectionVariants}
           initial="hidden"
           animate="visible"
-          className={`${
-            darkMode
-              ? "bg-black/50 border-white/10"
-              : "bg-white/80 border-black/10"
-          } border rounded-2xl p-8 shadow-2xl backdrop-blur-sm`}
+          className={`${darkMode
+            ? "bg-black/50 border-white/10"
+            : "bg-white/80 border-black/10"
+            } border rounded-2xl p-8 shadow-2xl backdrop-blur-sm`}
         >
           <div className="flex items-center gap-3 mb-6">
             <Briefcase
-              className={`w-6 h-6 ${
-                darkMode ? "text-cyan-400" : "text-blue-600"
-              }`}
+              className={`w-6 h-6 ${darkMode ? "text-cyan-400" : "text-blue-600"
+                }`}
             />
             <motion.h3
-              className={`text-xl font-semibold bg-gradient-to-r ${
-                darkMode
-                  ? "from-blue-300 to-blue-500"
-                  : "from-blue-400 to-blue-600"
-              } bg-clip-text text-transparent font-inter tracking-tight`}
+              className={`text-xl font-semibold bg-gradient-to-r ${darkMode
+                ? "from-blue-300 to-blue-500"
+                : "from-blue-400 to-blue-600"
+                } bg-clip-text text-transparent font-inter tracking-tight`}
               variants={letterVariants}
               initial="hidden"
               animate="visible"
@@ -385,9 +390,8 @@ const EditJobMongo: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Job Title *
               </label>
@@ -396,18 +400,16 @@ const EditJobMongo: React.FC = () => {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter job title"
                 required
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Company *
               </label>
@@ -416,18 +418,16 @@ const EditJobMongo: React.FC = () => {
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="Enter company name"
                 required
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Job Type *
               </label>
@@ -435,11 +435,10 @@ const EditJobMongo: React.FC = () => {
                 value={jobType}
                 onChange={(e) => setJobType(e.target.value)}
                 required
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white"
-                    : "bg-white/10 border-gray-300/50 text-black"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white"
+                  : "bg-white/10 border-gray-300/50 text-black"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               >
                 <option value="" disabled className="text-gray-400">
                   Select Job Type
@@ -448,9 +447,8 @@ const EditJobMongo: React.FC = () => {
                   <option
                     key={jt}
                     value={jt}
-                    className={`${darkMode ? "bg-black" : "bg-white"} text-${
-                      darkMode ? "white" : "black"
-                    }`}
+                    className={`${darkMode ? "bg-black" : "bg-white"} text-${darkMode ? "white" : "black"
+                      }`}
                   >
                     {jt}
                   </option>
@@ -459,9 +457,8 @@ const EditJobMongo: React.FC = () => {
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Work Location *
               </label>
@@ -469,11 +466,10 @@ const EditJobMongo: React.FC = () => {
                 value={workLocation}
                 onChange={(e) => setWorkLocation(e.target.value)}
                 required
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white"
-                    : "bg-white/10 border-gray-300/50 text-black"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white"
+                  : "bg-white/10 border-gray-300/50 text-black"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               >
                 <option value="" disabled className="text-gray-400">
                   Select Work Location
@@ -482,9 +478,8 @@ const EditJobMongo: React.FC = () => {
                   <option
                     key={wl}
                     value={wl}
-                    className={`${darkMode ? "bg-black" : "bg-white"} text-${
-                      darkMode ? "white" : "black"
-                    }`}
+                    className={`${darkMode ? "bg-black" : "bg-white"} text-${darkMode ? "white" : "black"
+                      }`}
                   >
                     {wl}
                   </option>
@@ -493,9 +488,8 @@ const EditJobMongo: React.FC = () => {
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Category *
               </label>
@@ -503,11 +497,10 @@ const EditJobMongo: React.FC = () => {
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white"
-                    : "bg-white/10 border-gray-300/50 text-black"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white"
+                  : "bg-white/10 border-gray-300/50 text-black"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               >
                 <option value="" disabled className="text-gray-400">
                   Select Category
@@ -516,9 +509,8 @@ const EditJobMongo: React.FC = () => {
                   <option
                     key={cat}
                     value={cat}
-                    className={`${darkMode ? "bg-black" : "bg-white"} text-${
-                      darkMode ? "white" : "black"
-                    }`}
+                    className={`${darkMode ? "bg-black" : "bg-white"} text-${darkMode ? "white" : "black"
+                      }`}
                   >
                     {cat}
                   </option>
@@ -527,9 +519,8 @@ const EditJobMongo: React.FC = () => {
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Salary *
               </label>
@@ -539,18 +530,16 @@ const EditJobMongo: React.FC = () => {
                 placeholder="Enter salary range (e.g., 50,000-70,000 ETB)"
                 type="text"
                 required
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
             <motion.div variants={inputVariants} className="md:col-span-2">
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Job Description *
               </label>
@@ -560,11 +549,10 @@ const EditJobMongo: React.FC = () => {
                 placeholder="Describe the job"
                 rows={5}
                 required
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300 resize-none`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300 resize-none`}
               />
             </motion.div>
           </div>
@@ -575,24 +563,21 @@ const EditJobMongo: React.FC = () => {
           variants={sectionVariants}
           initial="hidden"
           animate="visible"
-          className={`${
-            darkMode
-              ? "bg-black/50 border-white/10"
-              : "bg-white/80 border-black/10"
-          } border rounded-2xl p-8 shadow-2xl backdrop-blur-sm`}
+          className={`${darkMode
+            ? "bg-black/50 border-white/10"
+            : "bg-white/80 border-black/10"
+            } border rounded-2xl p-8 shadow-2xl backdrop-blur-sm`}
         >
           <div className="flex items-center gap-3 mb-6">
             <MapPin
-              className={`w-6 h-6 ${
-                darkMode ? "text-cyan-400" : "text-blue-600"
-              }`}
+              className={`w-6 h-6 ${darkMode ? "text-cyan-400" : "text-blue-600"
+                }`}
             />
             <motion.h3
-              className={`text-xl font-semibold bg-gradient-to-r ${
-                darkMode
-                  ? "from-blue-300 to-blue-500"
-                  : "from-blue-400 to-blue-600"
-              } bg-clip-text text-transparent font-inter tracking-tight`}
+              className={`text-xl font-semibold bg-gradient-to-r ${darkMode
+                ? "from-blue-300 to-blue-500"
+                : "from-blue-400 to-blue-600"
+                } bg-clip-text text-transparent font-inter tracking-tight`}
               variants={letterVariants}
               initial="hidden"
               animate="visible"
@@ -607,20 +592,18 @@ const EditJobMongo: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Country
               </label>
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white"
-                    : "bg-white/10 border-gray-300/50 text-black"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white"
+                  : "bg-white/10 border-gray-300/50 text-black"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               >
                 <option value="" disabled className="text-gray-400">
                   Select Country
@@ -629,9 +612,8 @@ const EditJobMongo: React.FC = () => {
                   <option
                     key={c}
                     value={c}
-                    className={`${darkMode ? "bg-black" : "bg-white"} text-${
-                      darkMode ? "white" : "black"
-                    }`}
+                    className={`${darkMode ? "bg-black" : "bg-white"} text-${darkMode ? "white" : "black"
+                      }`}
                   >
                     {c}
                   </option>
@@ -640,9 +622,8 @@ const EditJobMongo: React.FC = () => {
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 City
               </label>
@@ -650,18 +631,16 @@ const EditJobMongo: React.FC = () => {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="Enter city"
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
             <motion.div variants={inputVariants} className="md:col-span-2">
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Address (Optional)
               </label>
@@ -669,11 +648,10 @@ const EditJobMongo: React.FC = () => {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Enter address"
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
           </div>
@@ -684,24 +662,21 @@ const EditJobMongo: React.FC = () => {
           variants={sectionVariants}
           initial="hidden"
           animate="visible"
-          className={`${
-            darkMode
-              ? "bg-black/50 border-white/10"
-              : "bg-white/80 border-black/10"
-          } border rounded-2xl p-8 shadow-2xl backdrop-blur-sm`}
+          className={`${darkMode
+            ? "bg-black/50 border-white/10"
+            : "bg-white/80 border-black/10"
+            } border rounded-2xl p-8 shadow-2xl backdrop-blur-sm`}
         >
           <div className="flex items-center gap-3 mb-6">
             <UserCheck
-              className={`w-6 h-6 ${
-                darkMode ? "text-cyan-400" : "text-blue-600"
-              }`}
+              className={`w-6 h-6 ${darkMode ? "text-cyan-400" : "text-blue-600"
+                }`}
             />
             <motion.h3
-              className={`text-xl font-semibold bg-gradient-to-r ${
-                darkMode
-                  ? "from-blue-300 to-blue-500"
-                  : "from-blue-400 to-blue-600"
-              } bg-clip-text text-transparent font-inter tracking-tight`}
+              className={`text-xl font-semibold bg-gradient-to-r ${darkMode
+                ? "from-blue-300 to-blue-500"
+                : "from-blue-400 to-blue-600"
+                } bg-clip-text text-transparent font-inter tracking-tight`}
               variants={letterVariants}
               initial="hidden"
               animate="visible"
@@ -716,20 +691,18 @@ const EditJobMongo: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Experience Level
               </label>
               <select
                 value={experience}
                 onChange={(e) => setExperience(e.target.value)}
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white"
-                    : "bg-white/10 border-gray-300/50 text-black"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white"
+                  : "bg-white/10 border-gray-300/50 text-black"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               >
                 <option value="" disabled className="text-gray-400">
                   Select Experience Level
@@ -738,9 +711,8 @@ const EditJobMongo: React.FC = () => {
                   <option
                     key={exp}
                     value={exp}
-                    className={`${darkMode ? "bg-black" : "bg-white"} text-${
-                      darkMode ? "white" : "black"
-                    }`}
+                    className={`${darkMode ? "bg-black" : "bg-white"} text-${darkMode ? "white" : "black"
+                      }`}
                   >
                     {exp}
                   </option>
@@ -749,20 +721,18 @@ const EditJobMongo: React.FC = () => {
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Gender
               </label>
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white"
-                    : "bg-white/10 border-gray-300/50 text-black"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white"
+                  : "bg-white/10 border-gray-300/50 text-black"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               >
                 <option value="" disabled className="text-gray-400">
                   Select Gender
@@ -771,9 +741,8 @@ const EditJobMongo: React.FC = () => {
                   <option
                     key={g}
                     value={g}
-                    className={`${darkMode ? "bg-black" : "bg-white"} text-${
-                      darkMode ? "white" : "black"
-                    }`}
+                    className={`${darkMode ? "bg-black" : "bg-white"} text-${darkMode ? "white" : "black"
+                      }`}
                   >
                     {g}
                   </option>
@@ -782,9 +751,8 @@ const EditJobMongo: React.FC = () => {
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Number of Vacancies (Optional)
               </label>
@@ -793,18 +761,16 @@ const EditJobMongo: React.FC = () => {
                 value={vacancies}
                 onChange={(e) => setVacancies(e.target.value)}
                 placeholder="Enter number of vacancies"
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Educational Qualification
               </label>
@@ -812,18 +778,16 @@ const EditJobMongo: React.FC = () => {
                 value={education}
                 onChange={(e) => setEducation(e.target.value)}
                 placeholder="Enter required education"
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
             <motion.div variants={inputVariants} className="md:col-span-2">
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-3`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-3`}
               >
                 Skills & Expertise (Select all that apply)
               </label>
@@ -836,13 +800,12 @@ const EditJobMongo: React.FC = () => {
                     variants={inputVariants}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`px-3 py-1 rounded-full border transition-all duration-300 ${
-                      skills.includes(skill)
-                        ? "bg-cyan-400 text-black border-cyan-400 shadow-lg shadow-cyan-400/25"
-                        : darkMode
+                    className={`px-3 py-1 rounded-full border transition-all duration-300 ${skills.includes(skill)
+                      ? "bg-cyan-400 text-black border-cyan-400 shadow-lg shadow-cyan-400/25"
+                      : darkMode
                         ? "border-gray-600 text-gray-300 hover:border-cyan-400 hover:text-cyan-400"
                         : "border-gray-300 text-gray-600 hover:border-cyan-400 hover:text-cyan-400"
-                    }`}
+                      }`}
                   >
                     {skill}
                   </motion.button>
@@ -857,24 +820,21 @@ const EditJobMongo: React.FC = () => {
           variants={sectionVariants}
           initial="hidden"
           animate="visible"
-          className={`${
-            darkMode
-              ? "bg-black/50 border-white/10"
-              : "bg-white/80 border-black/10"
-          } border rounded-2xl p-8 shadow-2xl backdrop-blur-sm`}
+          className={`${darkMode
+            ? "bg-black/50 border-white/10"
+            : "bg-white/80 border-black/10"
+            } border rounded-2xl p-8 shadow-2xl backdrop-blur-sm`}
         >
           <div className="flex items-center gap-3 mb-6">
             <LinkIcon
-              className={`w-6 h-6 ${
-                darkMode ? "text-cyan-400" : "text-blue-600"
-              }`}
+              className={`w-6 h-6 ${darkMode ? "text-cyan-400" : "text-blue-600"
+                }`}
             />
             <motion.h3
-              className={`text-xl font-semibold bg-gradient-to-r ${
-                darkMode
-                  ? "from-blue-300 to-blue-500"
-                  : "from-blue-400 to-blue-600"
-              } bg-clip-text text-transparent font-inter tracking-tight`}
+              className={`text-xl font-semibold bg-gradient-to-r ${darkMode
+                ? "from-blue-300 to-blue-500"
+                : "from-blue-400 to-blue-600"
+                } bg-clip-text text-transparent font-inter tracking-tight`}
               variants={letterVariants}
               initial="hidden"
               animate="visible"
@@ -889,9 +849,8 @@ const EditJobMongo: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Deadline *
               </label>
@@ -900,18 +859,16 @@ const EditJobMongo: React.FC = () => {
                 onChange={(e) => setDeadline(e.target.value)}
                 type="date"
                 required
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white"
-                    : "bg-white/10 border-gray-300/50 text-black"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white"
+                  : "bg-white/10 border-gray-300/50 text-black"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
             <motion.div variants={inputVariants}>
               <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2`}
+                className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
               >
                 Job Link (Optional)
               </label>
@@ -919,11 +876,10 @@ const EditJobMongo: React.FC = () => {
                 value={jobLink}
                 onChange={(e) => setJobLink(e.target.value)}
                 placeholder="Enter job application link"
-                className={`w-full p-4 rounded-xl border ${
-                  darkMode
-                    ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
-                    : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
+                className={`w-full p-4 rounded-xl border ${darkMode
+                  ? "bg-black/50 border-gray-700/50 text-white placeholder:text-gray-400"
+                  : "bg-white/10 border-gray-300/50 text-black placeholder:text-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300`}
               />
             </motion.div>
           </div>
@@ -944,11 +900,10 @@ const EditJobMongo: React.FC = () => {
             whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
             type="submit"
             disabled={isSubmitting}
-            className={`w-full max-w-md py-3 px-6 font-bold rounded-xl shadow-xl transition-all duration-300 font-inter tracking-tight ${
-              isSubmitting
-                ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-                : "bg-gradient-to-r from-cyan-500 to-blue-500 text-black shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400 hover:shadow-cyan-400/40"
-            }`}
+            className={`w-full max-w-md py-3 px-6 font-bold rounded-xl shadow-xl transition-all duration-300 font-inter tracking-tight ${isSubmitting
+              ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+              : "bg-gradient-to-r from-cyan-500 to-blue-500 text-black shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400 hover:shadow-cyan-400/40"
+              }`}
           >
             <Send className="inline w-5 h-5 mr-2" />
             {isSubmitting ? "🔄 Updating Job..." : "✅ Update Job"}

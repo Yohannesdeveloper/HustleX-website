@@ -7,6 +7,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FaSun, FaMoon, FaBars, FaTimes, FaSearch, FaGlobe, FaStar } from "react-icons/fa";
 import { useAuth } from "../store/hooks";
 import { useTranslation } from "../hooks/useTranslation";
+import FloatingDarkModeToggle from "./FloatingDarkModeToggle";
 
 const HomeNavbar: React.FC = () => {
   const navigate = useNavigate();
@@ -271,7 +272,10 @@ const HomeNavbar: React.FC = () => {
                 </AnimatePresence>
               </div>
 
-              {/* Dark mode switch removed - moved to global FloatingDarkModeToggle */}
+              {/* Attach dark mode/profile menu to navbar (was a floating component) */}
+              <div className="flex items-center">
+                <FloatingDarkModeToggle />
+              </div>
 
               {/* Hamburger for mobile */}
               <motion.button

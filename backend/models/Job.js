@@ -26,6 +26,18 @@ const jobSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    jobSector: {
+      type: String,
+      trim: true,
+    },
+    jobSite: {
+      type: String,
+      trim: true,
+    },
+    compensationType: {
+      type: String,
+      trim: true,
+    },
     jobType: {
       type: String, // removed enum to accept any string
     },
