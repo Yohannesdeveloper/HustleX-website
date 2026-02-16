@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaUsers, FaGlobeAfrica, FaRocket, FaHeart, FaStar, FaAward, FaHandshake, FaLightbulb } from "react-icons/fa";
 import { useTranslation } from "../hooks/useTranslation";
 import Footer from "../components/Footer";
+import { AboutSEO } from "../components/SEO";
 import yohannesImg from "../Images/Teams/Yohannes.png";
 import messieImg from "../Images/Teams/messie.png";
 import DagiImg from "../Images/Teams/Dagi.png";
@@ -94,10 +95,12 @@ const AboutUs: React.FC = () => {
   ];
 
   return (
-    <div
-      className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
-        } ${darkMode ? "text-white" : "text-black"} font-inter`}
-    >
+    <>
+      <AboutSEO />
+      <div
+        className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
+          } ${darkMode ? "text-white" : "text-black"} font-inter`}
+      >
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -491,7 +494,8 @@ const AboutUs: React.FC = () => {
         </main>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

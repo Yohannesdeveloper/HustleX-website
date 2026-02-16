@@ -5,6 +5,7 @@ import { useAppSelector } from "../store/hooks";
 import { useAuth } from "../store/hooks";
 import { useTranslation } from "../hooks/useTranslation";
 import Footer from "../components/Footer";
+import { HowItWorksSEO } from "../components/SEO";
 
 const HowItWorks: React.FC = () => {
   const darkMode = useAppSelector((s) => s.theme.darkMode);
@@ -66,12 +67,14 @@ const HowItWorks: React.FC = () => {
   };
 
   return (
-    <div
-      className={`relative min-h-screen transition-colors duration-300 ${darkMode
-          ? "bg-black"
-          : "bg-white"
-        } ${darkMode ? "text-white" : "text-black"} font-inter`}
-    >
+    <>
+      <HowItWorksSEO />
+      <div
+        className={`relative min-h-screen transition-colors duration-300 ${darkMode
+            ? "bg-black"
+            : "bg-white"
+          } ${darkMode ? "text-white" : "text-black"} font-inter`}
+      >
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -278,7 +281,8 @@ const HowItWorks: React.FC = () => {
         </div>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

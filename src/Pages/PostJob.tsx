@@ -6,6 +6,7 @@ import { useAuth } from "../store/hooks";
 import apiService from "../services/api";
 import { useTranslation } from "../hooks/useTranslation";
 import { Job as JobTypeFromAPI, User, Application, EmailData } from "../types";
+import { HireSEO } from "../components/SEO";
 
 // Then, in your code, replace Job with JobTypeFromAPI where needed:
 
@@ -837,10 +838,12 @@ const PostJob: React.FC = () => {
   const descriptionCharsLeft = maxDescriptionLength - description.length;
 
   return (
-    <div
-      className={`min-h-screen ${darkMode ? "bg-black text-white" : "bg-white text-black"
-        } px-6 py-12 flex flex-col items-center`}
-    >
+    <>
+      <HireSEO />
+      <div
+        className={`min-h-screen ${darkMode ? "bg-black text-white" : "bg-white text-black"
+          } px-6 py-12 flex flex-col items-center`}
+      >
       {/* Font Import */}
       <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Poppins:wght@700&display=swap"
@@ -1706,7 +1709,8 @@ const PostJob: React.FC = () => {
           </motion.div>
         </form>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

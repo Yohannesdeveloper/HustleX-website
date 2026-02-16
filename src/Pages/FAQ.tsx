@@ -5,6 +5,7 @@ import { FaChevronDown, FaChevronUp, FaQuestionCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "../hooks/useTranslation";
 import Footer from "../components/Footer";
+import { FAQSEO } from "../components/SEO";
 
 const FAQ: React.FC = () => {
   const darkMode = useAppSelector((s) => s.theme.darkMode);
@@ -69,10 +70,12 @@ const FAQ: React.FC = () => {
   ];
 
   return (
-    <div
-      className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
-        } ${darkMode ? "text-white" : "text-black"} font-inter`}
-    >
+    <>
+      <FAQSEO />
+      <div
+        className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
+          } ${darkMode ? "text-white" : "text-black"} font-inter`}
+      >
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -234,7 +237,8 @@ const FAQ: React.FC = () => {
         </main>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

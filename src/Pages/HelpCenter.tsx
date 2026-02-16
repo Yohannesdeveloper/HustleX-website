@@ -27,6 +27,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "../hooks/useTranslation";
+import { HelpCenterSEO } from "../components/SEO";
 
 interface Article {
   id: string;
@@ -677,7 +678,9 @@ However, make sure you can deliver quality work on time for all projects. Overco
   };
 
   return (
-    <div className={`relative min-h-screen ${darkMode ? "bg-black" : "bg-white"}`}>
+    <>
+      <HelpCenterSEO />
+      <div className={`relative min-h-screen ${darkMode ? "bg-black" : "bg-white"}`}>
       <AnimatePresence>
         {isLoaded && (
           <>
@@ -1230,7 +1233,8 @@ However, make sure you can deliver quality work on time for all projects. Overco
           </>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -40,7 +40,7 @@ const PaymentWizard: React.FC = () => {
     // Get plan and method from URL params
     const plan = searchParams.get("plan") || "basic";
     const method = searchParams.get("method") || "telebirr";
-    const manualMethods = ["telebirr", "cbe", "awash"];
+    const manualMethods = ["telebirr", "cbe"];
     setPlanId(plan);
     setSelectedMethod(manualMethods.includes(method) ? method : "telebirr");
 
@@ -84,8 +84,8 @@ const PaymentWizard: React.FC = () => {
       const response = await apiService.sendPaymentRequest(phoneNumber, planId, amount, currency);
 
       // No alert, just move to next step
-      // The UI will show the "Simulation Mode" info
-      console.log("Payment simulation response:", response);
+      // No alert, just move to next step
+      console.log("Payment request sent:", response);
 
       // Move to payment processing step
       setCurrentStep(2);
@@ -228,9 +228,8 @@ const PaymentWizard: React.FC = () => {
 
                 <div className="grid grid-cols-3 gap-3 mb-8">
                   {[
-                    { id: "telebirr", name: "Telebirr", color: "bg-blue-600", textColor: "text-blue-900", icon: "T" },
-                    { id: "cbe", name: "CBE", color: "bg-purple-800", textColor: "text-purple-900", icon: "C" },
-                    { id: "awash", name: "Awash", color: "bg-green-600", textColor: "text-green-900", icon: "A" }
+                    { id: "telebirr", name: "Telebirr", image: "/logos/telebirr.jpg" },
+                    { id: "cbe", name: "CBE", image: "/logos/CBE-Birr-01.jpg" }
                   ].map((method) => (
                     <button
                       key={method.id}
@@ -240,10 +239,14 @@ const PaymentWizard: React.FC = () => {
                         : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
-                      <div className={`w-10 h-10 ${method.color} rounded-lg flex items-center justify-center mb-2 shadow-sm`}>
-                        <span className="text-white font-bold text-lg">{method.icon}</span>
+                      <div className={`w-16 h-16 rounded-lg flex items-center justify-center mb-2 overflow-hidden`}>
+                        <img
+                          src={method.image}
+                          alt={method.name}
+                          className="w-full h-full object-contain"
+                        />
                       </div>
-                      <span className={`text-xs font-bold ${method.textColor}`}>{method.name}</span>
+                      <span className="text-xs font-bold text-gray-700">{method.name}</span>
                     </button>
                   ))}
                 </div>
@@ -251,34 +254,20 @@ const PaymentWizard: React.FC = () => {
                 <div className="flex items-center justify-center gap-2 mb-4">
                   {selectedMethod === "telebirr" && (
                     <>
-                      <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-xl">T</span>
+                      <div className="w-20 h-20 rounded-lg flex items-center justify-center overflow-hidden">
+                        <img src="/logos/telebirr.jpg" alt="Telebirr" className="w-full h-full object-contain" />
                       </div>
                       <span className="text-2xl font-bold text-blue-900">Telebirr</span>
                     </>
                   )}
                   {selectedMethod === "cbe" && (
                     <>
-                      <div className="w-12 h-12 bg-purple-800 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-xl">C</span>
+                      <div className="w-20 h-20 rounded-lg flex items-center justify-center overflow-hidden">
+                        <img src="/logos/CBE-Birr-01.jpg" alt="CBE" className="w-full h-full object-contain" />
                       </div>
                       <span className="text-2xl font-bold text-purple-900">CBE Birr</span>
                     </>
                   )}
-                  {selectedMethod === "awash" && (
-                    <>
-                      <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-xl">A</span>
-                      </div>
-                      <span className="text-2xl font-bold text-green-900">Awash Bank</span>
-                    </>
-                  )}
-                </div>
-
-                {/* Simulation Mode Banner */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 text-sm text-blue-800">
-                  <p className="font-semibold">⚠️ Test Mode / Simulation</p>
-                  <p>No real money will be deducted. Enter any 09XXXXXXXX number to test.</p>
                 </div>
 
                 <p className="text-gray-600 mb-6">{t.payment.enterPhoneNumber}</p>
@@ -311,16 +300,10 @@ const PaymentWizard: React.FC = () => {
               className="text-center py-12"
             >
               <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent mb-4"></div>
-              <h2 className="text-2xl font-bold mb-2 text-gray-800">{t.payment.paymentRequestSent} (Simulated)</h2>
+              <h2 className="text-2xl font-bold mb-2 text-gray-800">{t.payment.paymentRequestSent}</h2>
               <p className="text-gray-600 mb-2">
                 {t.payment.paymentRequestSentTo} <strong>{phoneNumber}</strong>
               </p>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto my-6 text-sm text-yellow-800">
-                <p className="font-bold mb-1">ℹ️ Simulation Info</p>
-                <p>Since this is a demo, you will <strong>not</strong> receive a real SMS.</p>
-                <p className="mt-1">Please click the button below to complete the process.</p>
-              </div>
 
               <p className="text-sm text-gray-500 mb-8">
                 {t.payment.waitingForConfirmation}
@@ -362,15 +345,9 @@ const PaymentWizard: React.FC = () => {
               {isPendingApproval && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4 mb-6 text-sm">
                   <p className="text-blue-800 mb-2">
-                    <strong>Development / Test Mode:</strong><br />
-                    Since this is a manual {selectedMethod === 'telebirr' ? 'Telebirr' : selectedMethod.toUpperCase()} payment, an admin must approve it.
+                    <strong>Payment Pending:</strong><br />
+                    Since this is a manual {selectedMethod === 'telebirr' ? 'Telebirr' : selectedMethod.toUpperCase()} payment, it requires approval.
                   </p>
-                  <button
-                    onClick={() => window.open("/admin/subscriptions", "_blank")}
-                    className="text-blue-600 hover:text-blue-800 font-semibold underline"
-                  >
-                    Go to Admin Verification Page (Open in new tab)
-                  </button>
                 </div>
               )}
 

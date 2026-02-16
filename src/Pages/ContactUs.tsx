@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "../hooks/useTranslation";
 import { getBackendApiUrlSync } from "../utils/portDetector";
 import Footer from "../components/Footer";
+import { ContactSEO } from "../components/SEO";
 
 const ContactUs: React.FC = () => {
   const darkMode = useAppSelector((s) => s.theme.darkMode);
@@ -111,10 +112,12 @@ const ContactUs: React.FC = () => {
   ];
 
   return (
-    <div
-      className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
-        } ${darkMode ? "text-white" : "text-black"} font-inter`}
-    >
+    <>
+      <ContactSEO />
+      <div
+        className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
+          } ${darkMode ? "text-white" : "text-black"} font-inter`}
+      >
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -476,7 +479,8 @@ const ContactUs: React.FC = () => {
         </main>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

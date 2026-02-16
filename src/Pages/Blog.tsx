@@ -4,6 +4,7 @@ import { useAppSelector } from "../store/hooks";
 import { useAuth } from "../store/hooks";
 import apiService from "../services/api";
 import Footer from "../components/Footer";
+import { BlogSEO } from "../components/SEO";
 
 type Blog = {
   _id: string;
@@ -120,11 +121,13 @@ const Blog: React.FC = () => {
     );
 
   return (
-    <div
-      className={`relative min-h-screen transition-colors duration-300 ${
-        darkMode ? "bg-black" : "bg-white"
-      } ${darkMode ? "text-white" : "text-black"} font-inter`}
-    >
+    <>
+      <BlogSEO />
+      <div
+        className={`relative min-h-screen transition-colors duration-300 ${
+          darkMode ? "bg-black" : "bg-white"
+        } ${darkMode ? "text-white" : "text-black"} font-inter`}
+      >
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -269,7 +272,8 @@ const Blog: React.FC = () => {
         </main>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

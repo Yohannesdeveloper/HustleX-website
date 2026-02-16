@@ -37,19 +37,15 @@ class ApiService {
       axios.defaults.headers.common["Authorization"] = `Bearer ${this.token}`;
     }
 
-    // Always attach latest token from localStorage to every request
     axios.interceptors.request.use((config) => {
       const latestToken = localStorage.getItem("token");
       if (latestToken && config.headers) {
         config.headers.Authorization = `Bearer ${latestToken}`;
       }
-
-      // Attach admin code if provided
       const adminCode = localStorage.getItem("adminCode");
       if (adminCode && config.headers) {
         config.headers['x-admin-code'] = adminCode;
       }
-
       return config;
     }, (error) => {
       return Promise.reject(error);
@@ -107,14 +103,29 @@ class ApiService {
     return this.portDetectionPromise;
   }
 
+  private async withPortRetry<T>(fn: (baseUrl: string) => Promise<T>): Promise<T> {
+    try {
+      return await fn(this.baseUrl);
+    } catch (error: any) {
+      const isNetwork = !error?.response;
+      if (isNetwork) {
+        await this.detectAndUpdatePort();
+        return await fn(this.baseUrl);
+      }
+      throw error;
+    }
+  }
+
   async login(email: string, password: string): Promise<{ token: string }> {
-    const response = await axios.post(`${this.baseUrl}/auth/login`, {
-      email,
-      password,
+    return this.withPortRetry(async (base) => {
+      const response = await axios.post(`${base}/auth/login`, {
+        email,
+        password,
+      });
+      const data = response.data as { token: string };
+      if (data.token) this.setToken(data.token);
+      return data;
     });
-    const data = response.data as { token: string };
-    if (data.token) this.setToken(data.token);
-    return data;
   }
 
   async register(userData: {
@@ -124,13 +135,15 @@ class ApiService {
     firstName?: string;
     lastName?: string;
   }): Promise<{ token: string }> {
-    const response = await axios.post(
-      `${this.baseUrl}/auth/register`,
-      userData
-    );
-    const data = response.data as { token: string };
-    if (data.token) this.setToken(data.token);
-    return data;
+    return this.withPortRetry(async (base) => {
+      const response = await axios.post(
+        `${base}/auth/register`,
+        userData
+      );
+      const data = response.data as { token: string };
+      if (data.token) this.setToken(data.token);
+      return data;
+    });
   }
 
   async getCurrentUser(): Promise<User> {

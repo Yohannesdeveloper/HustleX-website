@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { FaCheck, FaTimes, FaRocket, FaCrown, FaGem } from "react-icons/fa";
 import { useTranslation } from "../hooks/useTranslation";
 import Footer from "../components/Footer";
+import { PricingSEO } from "../components/SEO";
 
 const Pricing: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -113,10 +114,12 @@ const Pricing: React.FC = () => {
   };
 
   return (
-    <div
-      className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
-        }`}
-    >
+    <>
+      <PricingSEO />
+      <div
+        className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
+          }`}
+      >
       {/* Background */}
       {darkMode ? (
         <div className="fixed inset-0 z-0 bg-black" />
@@ -331,7 +334,8 @@ const Pricing: React.FC = () => {
         </motion.div>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

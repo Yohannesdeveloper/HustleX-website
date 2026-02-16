@@ -11,6 +11,7 @@ import FloatingChatBot from "../components/FloatingChatBot";
 import FloatingDarkModeToggle from "../components/FloatingDarkModeToggle";
 import { useTranslation } from "../hooks/useTranslation";
 import { useAuth } from "../store/hooks";
+import { HomeSEO } from "../components/SEO";
 
 // Import video
 import howItWorksVideo from "./videos/HowItWorks.mp4";
@@ -148,10 +149,12 @@ const Home = () => {
   ];
 
   return (
-    <div
-      className={`relative overflow-hidden ${darkMode ? "bg-black" : "bg-white"
-        }`}
-    >
+    <>
+      <HomeSEO />
+      <div
+        className={`relative overflow-hidden ${darkMode ? "bg-black" : "bg-white"
+          }`}
+      >
       {/* Background */}
       {darkMode ? (
         <div className="fixed inset-0 z-0 bg-black" />
@@ -1946,7 +1949,8 @@ const Home = () => {
 
       {/* Floating Chat Bot */}
       < FloatingChatBot />
-    </div >
+      </div>
+    </>
   );
 };
 

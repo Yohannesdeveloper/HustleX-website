@@ -6,6 +6,7 @@ import { JobType } from "../types";
 import apiService from "../services/api";
 import { useAuth } from "../store/hooks";
 import Footer from "../components/Footer";
+import { JobListingsSEO } from "../components/SEO";
 import {
   Share2,
   Copy,
@@ -792,10 +793,12 @@ const JobListings: React.FC = () => {
   };
 
   return (
-    <div
-      className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
-        }`}
-    >
+    <>
+      <JobListingsSEO />
+      <div
+        className={`relative min-h-screen transition-colors duration-300 ${darkMode ? "bg-black" : "bg-white"
+          }`}
+      >
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -2134,7 +2137,8 @@ const JobListings: React.FC = () => {
         </motion.main>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

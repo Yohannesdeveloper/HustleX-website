@@ -7,6 +7,7 @@ import { useAppSelector } from "../store/hooks";
 import { useTranslation } from "../hooks/useTranslation";
 import apiService from "../services/api";
 import { getBackendApiUrlSync } from "../utils/portDetector";
+import { RegisterSEO, LoginSEO } from "../components/SEO";
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -274,6 +275,9 @@ const Signup: React.FC = () => {
           errorMessage = err.response.data.message;
         } else if (err?.message) {
           errorMessage = err.message;
+          if (typeof err.message === 'string' && err.message.toLowerCase().includes('network')) {
+            errorMessage = 'Cannot connect to the server. Please ensure the backend is running.';
+          }
         } else if (err?.error?.message) {
           errorMessage = err.error.message;
         }
@@ -295,13 +299,17 @@ const Signup: React.FC = () => {
     }
   };
 
+  const isLoginPage = location.pathname === "/login";
+
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-300 ${darkMode
-        ? "bg-gradient-to-br from-black via-gray-900 to-black-900 text-white"
-        : "bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900"
-        }`}
-    >
+    <>
+      {isLoginPage ? <LoginSEO /> : <RegisterSEO />}
+      <div
+        className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-300 ${darkMode
+          ? "bg-gradient-to-br from-black via-gray-900 to-black-900 text-white"
+          : "bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900"
+          }`}
+      >
       {/* Animated background orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -713,8 +721,9 @@ const Signup: React.FC = () => {
             {t.signup.alreadyHaveAccount}
           </p>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
