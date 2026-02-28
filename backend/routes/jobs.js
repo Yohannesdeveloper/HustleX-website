@@ -149,6 +149,7 @@ router.post(
         postedBy: req.user._id,
         isActive: true,
         applicationCount: 0,
+        approved: req.user.role === 'admin' || req.user.email === (process.env.ADMIN_EMAIL || "HustleXet@gmail.com")
       };
 
       const job = new Job(jobData);
@@ -191,6 +192,12 @@ router.post(
       }
 
       res.status(201).json({ message: "Job created successfully", job });
+
+      // If auto-approved (e.g. by admin), post to Telegram immediately
+      if (job.approved) {
+        console.log("Jobs route: Auto-approved job, posting to Telegram:", job._id);
+        postJobToTelegram(job).catch(err => console.error("Auto-post Telegram error:", err));
+      }
     } catch (error) {
       console.error("Create job error:", error);
       res.status(500).json({ message: "Server error" });
@@ -252,8 +259,13 @@ router.put("/:id/approve", adminAuth, async (req, res) => {
       console.error("Failed to send approval email:", mailErr.message);
     }
 
-    // ✅ Post the approved job to your Telegram channel
-    postJobToTelegram(job);
+    //✅ Post the approved job to your Telegram channel
+    console.log("Jobs route: About to post job to Telegram:", job._id);
+    try {
+      await postJobToTelegram(job);
+    } catch (tgErr) {
+      console.error("Jobs route: Telegram posting failed after approval:", tgErr.message);
+    }
 
     res.json({ message: "Job approved", job });
   } catch (error) {

@@ -1,28 +1,52 @@
-const axios = require("axios");
+import axios from "axios";
 
-const botToken = process.env.TELEGRAM_BOT_TOKEN;
-const channelId = process.env.TELEGRAM_CHAT_ID;
+// Access environment variables using import.meta.env for Vite
+const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
+const channelId = import.meta.env.VITE_TELEGRAM_CHAT_ID;
 
-async function postJobToTelegram(job) {
-  if (!job.approved) return; // Only post approved jobs
+function escapeHtml(str) {
+  if (str == null || str === "") return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+export async function postJobToTelegram(job) {
+  if (!job.approved) {
+    console.warn("Skipping Telegram post: job not approved.");
+    return;
+  }
 
   const message = `🚀 <b>New Job Posted!</b>
-💼 <b>Title:</b> ${job.title}
-🏢 <b>Company:</b> ${job.company || "Not specified"}
-📍 <b>Location:</b> ${job.workLocation || "Remote"}
-💰 <b>Budget:</b> ${job.budget || "Not specified"}
-🔗 <b>Apply:</b> ${job.jobLink || "Not available"}`;
+💼 <b>Title:</b> ${escapeHtml(job.title)}
+🏢 <b>Company:</b> ${escapeHtml(job.company || "Not specified")}
+📍 <b>Location:</b> ${escapeHtml(job.workLocation || "Remote")}
+💰 <b>Budget:</b> ${escapeHtml(job.budget || "Not specified")}`;
+
+  const jobLink = `${window.location.origin}/job-details/${job._id}`;
+
+  const reply_markup = {
+    inline_keyboard: [
+      [
+        {
+          text: " Apply Now",
+          url: jobLink,
+        },
+      ],
+    ],
+  };
 
   try {
-    await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    await axios.post(url, {
       chat_id: channelId,
       text: message,
       parse_mode: "HTML",
+      reply_markup: reply_markup,
     });
     console.log("✅ Approved job posted to Telegram!");
   } catch (err) {
-    console.error("❌ Telegram posting error:", err.message);
+    console.error("❌ Telegram posting error:", err.response?.data || err.message);
   }
 }
-
-module.exports = postJobToTelegram;

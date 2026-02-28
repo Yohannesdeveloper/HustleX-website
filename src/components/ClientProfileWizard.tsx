@@ -682,7 +682,6 @@ const ReviewStep: React.FC<StepProps> = ({ data, onPrev, onSubmit, isFirst, isLa
         await refreshUser();
       }
 
-      alert('Company profile submitted successfully! Redirecting to client dashboard...');
       if (onSubmit) {
         onSubmit();
       }

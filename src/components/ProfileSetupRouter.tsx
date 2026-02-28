@@ -34,9 +34,13 @@ const ProfileSetupRouter: React.FC = () => {
         (user.profile?.skills && user.profile?.skills.length > 0);
       const hasClientProfile = user.hasCompanyProfile;
 
-      // If user has both roles and both profiles are complete, go to role selection
+      // If user has both roles and both profiles are complete, go to the active role's dashboard
       if (hasFreelancerRole && hasClientRole && hasFreelancerProfile && hasClientProfile) {
-        navigate('/dashboard/freelancer', { replace: true });
+        if (user.currentRole === 'client') {
+          navigate('/dashboard/hiring', { replace: true });
+        } else {
+          navigate('/dashboard/freelancer', { replace: true });
+        }
         return;
       }
 
@@ -52,16 +56,26 @@ const ProfileSetupRouter: React.FC = () => {
         return;
       }
 
-      // If both roles but only one profile complete, go to the completed one's dashboard
+      // If both roles but only one profile complete, respect the current role if its profile is missing
       if (hasFreelancerRole && hasClientRole) {
-        if (hasFreelancerProfile && !hasClientProfile) {
-          // Has freelancer profile, skip client setup for existing users
-          navigate('/dashboard/freelancer', { replace: true });
+        if (user.currentRole === 'client' && !hasClientProfile) {
+          // Stay here to show client wizard
+          setIsLoading(false);
           return;
         }
-        if (!hasFreelancerProfile && hasClientProfile) {
-          // Has client profile, skip freelancer setup for existing users
+        if (user.currentRole === 'freelancer' && !hasFreelancerProfile) {
+          // Stay here to show freelancer wizard
+          setIsLoading(false);
+          return;
+        }
+
+        // If active profile is complete, go to its dashboard
+        if (user.currentRole === 'client' && hasClientProfile) {
           navigate('/dashboard/hiring', { replace: true });
+          return;
+        }
+        if (user.currentRole === 'freelancer' && hasFreelancerProfile) {
+          navigate('/dashboard/freelancer', { replace: true });
           return;
         }
       }
@@ -117,16 +131,15 @@ const ProfileSetupRouter: React.FC = () => {
     return <FreelancerProfileWizard />;
   }
 
-  // Priority 2: If user has both incomplete profiles, show based on their roles
-  if (shouldShowFreelancerWizard && shouldShowClientWizard) {
-    // Default to showing client wizard if they have client role
-    if (hasClientRole) {
-      return <ClientProfileWizard />;
-    }
+  // Priority 2: Respect currentRole if it needs a profile
+  if (user?.currentRole === 'client' && shouldShowClientWizard) {
+    return <ClientProfileWizard />;
+  }
+  if (user?.currentRole === 'freelancer' && shouldShowFreelancerWizard) {
     return <FreelancerProfileWizard />;
   }
 
-  // Priority 3: Show the wizard for whichever profile is incomplete
+  // Priority 3: Fallback based on roles
   if (shouldShowClientWizard) {
     return <ClientProfileWizard />;
   }
@@ -135,13 +148,20 @@ const ProfileSetupRouter: React.FC = () => {
     return <FreelancerProfileWizard />;
   }
 
-  // Fallback - redirect based on user's role (profiles must be complete if we reach here)
-  if (user?.roles?.includes('client')) {
+  // Fallback - redirect based on user's current role
+  if (user?.currentRole === 'client') {
     navigate('/dashboard/hiring', { replace: true });
-  } else if (user?.roles?.includes('freelancer')) {
+  } else if (user?.currentRole === 'freelancer') {
     navigate('/dashboard/freelancer', { replace: true });
   } else {
-    navigate('/signup', { replace: true });
+    // Last resort fallbacks based on available roles
+    if (hasClientRole) {
+      navigate('/dashboard/hiring', { replace: true });
+    } else if (hasFreelancerRole) {
+      navigate('/dashboard/freelancer', { replace: true });
+    } else {
+      navigate('/signup', { replace: true });
+    }
   }
   return null;
 };

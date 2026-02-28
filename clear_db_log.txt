@@ -1,0 +1,25 @@
+[2026-02-25T16:02:31.568Z] Starting deep clear of database...
+[2026-02-25T16:02:31.570Z] Connecting to MongoDB...
+[2026-02-25T16:02:34.397Z] ✅ Connected to MongoDB
+[2026-02-25T16:02:34.810Z] Found 9 collections. Clearing all...
+[2026-02-25T16:02:35.089Z] ✅ Cleared 0 documents from 'contacts'
+[2026-02-25T16:02:35.295Z] ✅ Cleared 0 documents from 'jobs'
+[2026-02-25T16:02:35.650Z] ✅ Cleared 0 documents from 'applications'
+[2026-02-25T16:02:36.326Z] ✅ Cleared 0 documents from 'messages'
+[2026-02-25T16:02:36.514Z] ✅ Cleared 0 documents from 'companies'
+[2026-02-25T16:02:36.836Z] ✅ Cleared 0 documents from 'conversations'
+[2026-02-25T16:02:37.263Z] ✅ Cleared 0 documents from 'blogs'
+[2026-02-25T16:02:37.451Z] ✅ Cleared 0 documents from 'products'
+[2026-02-25T16:02:37.663Z] ✅ Cleared 0 documents from 'users'
+[2026-02-25T16:02:37.664Z] 
+✨ Database cleared successfully!
+[2026-02-25T16:02:37.665Z] Waiting 2 seconds for indexes/state to settle...
+[2026-02-25T16:02:39.670Z] Attempting to create admin user: hustlexet@gmail.com
+[2026-02-25T16:02:40.148Z] Saving admin user...
+[2026-02-25T16:02:50.240Z] ❌ ERROR: Operation `users.insertOne()` buffering timed out after 10000ms
+[2026-02-25T16:02:50.242Z] MongooseError: Operation `users.insertOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Yohannes\OneDrive\Final year project\OneDrive\Desktop\HustleX-freelancing-platform-WEB\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:185:23)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[2026-02-25T16:02:50.251Z] 
+🔌 Database connection closed.

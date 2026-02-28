@@ -480,12 +480,24 @@ const FindFreelancersTab: React.FC<FindFreelancersTabProps> = ({
                     {/* Compact Avatar */}
                     <div className="relative flex-shrink-0">
                       <div
-                        className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${darkMode
+                        className={`w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden ${darkMode
                           ? "bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30"
                           : "bg-gradient-to-br from-cyan-100 to-blue-100 border border-cyan-200"
                           } flex items-center justify-center text-lg md:text-xl font-bold shadow-sm`}
                       >
-                        {fullName.charAt(0).toUpperCase()}
+                        {profile.avatar ? (
+                          <img
+                            src={apiService.getFileUrl(profile.avatar)}
+                            alt={fullName}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback if image fails to load
+                              (e.target as HTMLImageElement).src = "";
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : null}
+                        {(!profile.avatar) && fullName.charAt(0).toUpperCase()}
                       </div>
                       {freelancer.status && (
                         <div className="absolute -bottom-0.5 -right-0.5 scale-75">

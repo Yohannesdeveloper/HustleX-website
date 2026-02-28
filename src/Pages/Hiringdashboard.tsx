@@ -17,6 +17,7 @@ import ApplicationsManagementMongo from "./ApplicationsManagementMongo";
 import FloatingDarkModeToggle from "../components/FloatingDarkModeToggle";
 
 
+
 // Animation for individual letters in headings
 const letterVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -199,8 +200,8 @@ const HiringDashboard: React.FC = () => {
         const companyNameFromUser = user.profile.firstName && user.profile.lastName
           ? `${user.profile.firstName} ${user.profile.lastName} Company`
           : user.profile.firstName
-          ? `${user.profile.firstName} Company`
-          : '';
+            ? `${user.profile.firstName} Company`
+            : '';
 
         const inheritedProfile = {
           companyName: companyNameFromUser,
@@ -295,14 +296,14 @@ const HiringDashboard: React.FC = () => {
       const avgDaysToHire =
         hiredApplications.length > 0
           ? hiredApplications.reduce((sum, app) => {
-              const hireDate = new Date(app.updatedAt);
-              const postDate = new Date(app.job?.createdAt || app.createdAt);
-              const days = Math.ceil(
-                (hireDate.getTime() - postDate.getTime()) /
-                  (1000 * 60 * 60 * 24)
-              );
-              return sum + days;
-            }, 0) / hiredApplications.length
+            const hireDate = new Date(app.updatedAt);
+            const postDate = new Date(app.job?.createdAt || app.createdAt);
+            const days = Math.ceil(
+              (hireDate.getTime() - postDate.getTime()) /
+              (1000 * 60 * 60 * 24)
+            );
+            return sum + days;
+          }, 0) / hiredApplications.length
           : 0;
 
       // Calculate category performance
@@ -373,13 +374,13 @@ const HiringDashboard: React.FC = () => {
       const responseTime =
         respondedApplications.length > 0
           ? respondedApplications.reduce((sum, app) => {
-              const responseDate = new Date(app.updatedAt);
-              const submitDate = new Date(app.createdAt);
-              const hours =
-                (responseDate.getTime() - submitDate.getTime()) /
-                (1000 * 60 * 60);
-              return sum + hours;
-            }, 0) / respondedApplications.length
+            const responseDate = new Date(app.updatedAt);
+            const submitDate = new Date(app.createdAt);
+            const hours =
+              (responseDate.getTime() - submitDate.getTime()) /
+              (1000 * 60 * 60);
+            return sum + hours;
+          }, 0) / respondedApplications.length
           : 0;
 
       // Calculate total job views
@@ -431,26 +432,23 @@ const HiringDashboard: React.FC = () => {
       case "jobs":
         return (
           <div
-            className={`min-h-screen ${
-              darkMode ? "bg-black text-white" : "bg-white text-black"
-            }`}
+            className={`min-h-screen ${darkMode ? "bg-black text-white" : "bg-white text-black"
+              }`}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
               <div>
                 <div className="mb-6 sm:mb-8">
                   <h1
-                    className={`text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r ${
-                      darkMode
+                    className={`text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r ${darkMode
                         ? "from-blue-300 to-blue-500"
                         : "from-blue-400 to-blue-600"
-                    } bg-clip-text text-transparent mb-2 font-inter tracking-tight leading-tight`}
+                      } bg-clip-text text-transparent mb-2 font-inter tracking-tight leading-tight`}
                   >
                     My Jobs
                   </h1>
                   <p
-                    className={`${
-                      darkMode ? "text-gray-400" : "text-gray-600"
-                    } text-base sm:text-lg`}
+                    className={`${darkMode ? "text-gray-400" : "text-gray-600"
+                      } text-base sm:text-lg`}
                   >
                     Manage and track all your posted job listings
                   </p>
@@ -486,11 +484,10 @@ const HiringDashboard: React.FC = () => {
               </div>
 
               <div
-                className={`${
-                  darkMode
+                className={`${darkMode
                     ? "bg-black/50 border-white/10"
                     : "bg-white border-black/10"
-                } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
+                  } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
               >
                 <h3
                   className={`text-lg font-semibold mb-4 ${darkMode ? "text-white" : "text-black"
@@ -506,9 +503,8 @@ const HiringDashboard: React.FC = () => {
                       className={`w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin`}
                     />
                     <span
-                      className={`ml-3 ${
-                        darkMode ? "text-gray-300" : "text-gray-600"
-                      }`}
+                      className={`ml-3 ${darkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
                     >
                       Loading your jobs...
                     </span>
@@ -523,30 +519,27 @@ const HiringDashboard: React.FC = () => {
                       userJobs.map((job: any, index: number) => (
                         <div
                           key={job._id}
-                          className={`${
-                            darkMode
+                          className={`${darkMode
                               ? "bg-gray-800/50 border-white/10"
                               : "bg-gray-50 border-black/10"
-                          } border rounded-lg p-4 hover:shadow-md transition-all duration-300`}
+                            } border rounded-lg p-4 hover:shadow-md transition-all duration-300`}
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-start justify-between mb-2">
                                 <h4
-                                  className={`text-lg font-semibold ${
-                                    darkMode ? "text-white" : "text-black"
-                                  }`}
+                                  className={`text-lg font-semibold ${darkMode ? "text-white" : "text-black"
+                                    }`}
                                 >
                                   {job.title}
                                 </h4>
                                 <span
-                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    job.status === "active"
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${job.status === "active"
                                       ? "bg-green-100 text-green-800"
                                       : job.status === "expired"
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-gray-100 text-gray-800"
-                                  }`}
+                                        ? "bg-red-100 text-red-800"
+                                        : "bg-gray-100 text-gray-800"
+                                    }`}
                                 >
                                   {job.status || "active"}
                                 </span>
@@ -554,53 +547,48 @@ const HiringDashboard: React.FC = () => {
 
                               <div className="flex flex-wrap items-center gap-4 text-sm">
                                 <span
-                                  className={`${
-                                    darkMode
+                                  className={`${darkMode
                                       ? "text-gray-300"
                                       : "text-gray-600"
-                                  }`}
+                                    }`}
                                 >
                                   📂 {job.category || "General"}
                                 </span>
                                 <span
-                                  className={`${
-                                    darkMode
+                                  className={`${darkMode
                                       ? "text-gray-300"
                                       : "text-gray-600"
-                                  }`}
+                                    }`}
                                 >
                                   👥 {job.applicationsCount || 0} applications
                                 </span>
                                 <span
-                                  className={`${
-                                    darkMode
+                                  className={`${darkMode
                                       ? "text-gray-300"
                                       : "text-gray-600"
-                                  }`}
+                                    }`}
                                 >
                                   👁️ {job.views || 0} views
                                 </span>
                                 <span
-                                  className={`${
-                                    darkMode
+                                  className={`${darkMode
                                       ? "text-gray-300"
                                       : "text-gray-600"
-                                  }`}
+                                    }`}
                                 >
                                   📅 Posted:{" "}
                                   {job.createdAt
                                     ? new Date(
-                                        job.createdAt
-                                      ).toLocaleDateString()
+                                      job.createdAt
+                                    ).toLocaleDateString()
                                     : "N/A"}
                                 </span>
                                 {job.deadline && (
                                   <span
-                                    className={`${
-                                      darkMode
+                                    className={`${darkMode
                                         ? "text-gray-300"
                                         : "text-gray-600"
-                                    }`}
+                                      }`}
                                   >
                                     ⏰ Deadline:{" "}
                                     {new Date(
@@ -632,21 +620,18 @@ const HiringDashboard: React.FC = () => {
                     ) : (
                       <div className="text-center py-12">
                         <Briefcase
-                          className={`w-16 h-16 mx-auto mb-4 ${
-                            darkMode ? "text-gray-400" : "text-gray-300"
-                          }`}
+                          className={`w-16 h-16 mx-auto mb-4 ${darkMode ? "text-gray-400" : "text-gray-300"
+                            }`}
                         />
                         <h4
-                          className={`text-lg font-semibold mb-2 ${
-                            darkMode ? "text-white" : "text-black"
-                          }`}
+                          className={`text-lg font-semibold mb-2 ${darkMode ? "text-white" : "text-black"
+                            }`}
                         >
                           No jobs posted yet
                         </h4>
                         <p
-                          className={`mb-6 ${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          }`}
+                          className={`mb-6 ${darkMode ? "text-gray-400" : "text-gray-600"
+                            }`}
                         >
                           Start by posting your first job to find great talent
                         </p>
@@ -671,24 +656,22 @@ const HiringDashboard: React.FC = () => {
       default:
         return (
           <div
-            className={`min-h-screen ${
-              darkMode ? "bg-black text-white" : "bg-white text-black"
-            }`}
+            className={`min-h-screen ${darkMode ? "bg-black text-white" : "bg-white text-black"
+              }`}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
               <div>
                 <div className="mb-6 sm:mb-8">
                   <h1
-                    className={`text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r ${
-                      darkMode
+                    className={`text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r ${darkMode
                         ? "from-blue-300 to-blue-500"
                         : "from-blue-400 to-blue-600"
-                    } bg-clip-text text-transparent mb-2 font-inter tracking-tight leading-tight`}
+                      } bg-clip-text text-transparent mb-2 font-inter tracking-tight leading-tight`}
                   >
                     Hiring Dashboard
                   </h1>
                   <p
-                    className={`${
+                    className={`$
                       darkMode ? "text-gray-400" : "text-gray-600"
                     } text-base sm:text-lg`}
                   >
@@ -696,13 +679,14 @@ const HiringDashboard: React.FC = () => {
                   </p>
                 </div>
 
+
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                   <div
-                    className={`${
-                      darkMode
+                    className={`${darkMode
                         ? "bg-black/50 border-white/10"
                         : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden group backdrop-blur-sm`}
+                      } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden group backdrop-blur-sm`}
                     onClick={() => setActiveTab("applications")}
                   >
                     <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
@@ -711,38 +695,34 @@ const HiringDashboard: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3
-                          className={`text-base sm:text-lg font-semibold bg-gradient-to-r ${
-                            darkMode
+                          className={`text-base sm:text-lg font-semibold bg-gradient-to-r ${darkMode
                               ? "from-blue-300 to-blue-500"
                               : "from-blue-400 to-blue-600"
-                          } bg-clip-text text-transparent font-inter tracking-tight`}
+                            } bg-clip-text text-transparent font-inter tracking-tight`}
                         >
                           Applications
                         </h3>
                         <p
-                          className={`${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          } text-xs sm:text-sm`}
+                          className={`${darkMode ? "text-gray-400" : "text-gray-600"
+                            } text-xs sm:text-sm`}
                         >
                           Review freelancer applications
                         </p>
                       </div>
                     </div>
                     <p
-                      className={`${
-                        darkMode ? "text-gray-400" : "text-gray-500"
-                      } text-xs sm:text-sm`}
+                      className={`${darkMode ? "text-gray-400" : "text-gray-500"
+                        } text-xs sm:text-sm`}
                     >
                       Manage and review all applications for your posted jobs
                     </p>
                   </div>
 
                   <div
-                    className={`${
-                      darkMode
+                    className={`${darkMode
                         ? "bg-black/50 border-white/10"
                         : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden group backdrop-blur-sm`}
+                      } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden group backdrop-blur-sm`}
                     onClick={() => navigate("/post-job")}
                   >
                     <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
@@ -751,38 +731,34 @@ const HiringDashboard: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3
-                          className={`text-base sm:text-lg font-semibold bg-gradient-to-r ${
-                            darkMode
+                          className={`text-base sm:text-lg font-semibold bg-gradient-to-r ${darkMode
                               ? "from-blue-300 to-blue-500"
                               : "from-blue-400 to-blue-600"
-                          } bg-clip-text text-transparent font-inter tracking-tight`}
+                            } bg-clip-text text-transparent font-inter tracking-tight`}
                         >
                           Post Job
                         </h3>
                         <p
-                          className={`${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          } text-xs sm:text-sm`}
+                          className={`${darkMode ? "text-gray-400" : "text-gray-600"
+                            } text-xs sm:text-sm`}
                         >
                           Create a new job posting
                         </p>
                       </div>
                     </div>
                     <p
-                      className={`${
-                        darkMode ? "text-gray-400" : "text-gray-500"
-                      } text-xs sm:text-sm`}
+                      className={`${darkMode ? "text-gray-400" : "text-gray-500"
+                        } text-xs sm:text-sm`}
                     >
                       Post a new job and start receiving applications
                     </p>
                   </div>
 
                   <div
-                    className={`${
-                      darkMode
+                    className={`${darkMode
                         ? "bg-black/50 border-white/10"
                         : "bg-white border-black/10"
-                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden group backdrop-blur-sm`}
+                      } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden group backdrop-blur-sm`}
                     onClick={() => setActiveTab("jobs")}
                   >
                     <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
@@ -791,27 +767,24 @@ const HiringDashboard: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3
-                          className={`text-base sm:text-lg font-semibold bg-gradient-to-r ${
-                            darkMode
+                          className={`text-base sm:text-lg font-semibold bg-gradient-to-r ${darkMode
                               ? "from-blue-300 to-blue-500"
                               : "from-blue-400 to-blue-600"
-                          } bg-clip-text text-transparent font-inter tracking-tight`}
+                            } bg-clip-text text-transparent font-inter tracking-tight`}
                         >
                           My Jobs
                         </h3>
                         <p
-                          className={`${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          } text-xs sm:text-sm`}
+                          className={`${darkMode ? "text-gray-400" : "text-gray-600"
+                            } text-xs sm:text-sm`}
                         >
                           Manage your job postings
                         </p>
                       </div>
                     </div>
                     <p
-                      className={`${
-                        darkMode ? "text-gray-400" : "text-gray-500"
-                      } text-xs sm:text-sm`}
+                      className={`${darkMode ? "text-gray-400" : "text-gray-500"
+                        } text-xs sm:text-sm`}
                     >
                       View and manage all your posted jobs
                     </p>
@@ -819,47 +792,41 @@ const HiringDashboard: React.FC = () => {
                 </div>
 
                 <div
-                  className={`${
-                    darkMode
+                  className={`${darkMode
                       ? "bg-black/50 border-white/10"
                       : "bg-white/80 border-black/10"
-                  } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
+                    } border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm`}
                 >
                   <h2
-                    className={`text-lg sm:text-xl font-semibold bg-gradient-to-r ${
-                      darkMode
+                    className={`text-lg sm:text-xl font-semibold bg-gradient-to-r ${darkMode
                         ? "from-blue-300 to-blue-500"
                         : "from-blue-400 to-blue-600"
-                    } bg-clip-text text-transparent mb-3 sm:mb-4 font-inter tracking-tight`}
+                      } bg-clip-text text-transparent mb-3 sm:mb-4 font-inter tracking-tight`}
                   >
                     Quick Actions
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <button
                       onClick={() => setActiveTab("applications")}
-                      className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border ${
-                        darkMode
+                      className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border ${darkMode
                           ? "border-white/10 hover:bg-white/10"
                           : "border-black/10 hover:bg-gray-50"
-                      } rounded-lg transition-all duration-300 shadow-md`}
+                        } rounded-lg transition-all duration-300 shadow-md`}
                     >
                       <Users
-                        className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                          darkMode ? "text-white" : "text-gray-600"
-                        }`}
+                        className={`w-4 h-4 sm:w-5 sm:h-5 ${darkMode ? "text-white" : "text-gray-600"
+                          }`}
                       />
                       <div className="text-left">
                         <p
-                          className={`font-medium text-sm sm:text-base ${
-                            darkMode ? "text-white" : "text-gray-900"
-                          }`}
+                          className={`font-medium text-sm sm:text-base ${darkMode ? "text-white" : "text-gray-900"
+                            }`}
                         >
                           View Applications
                         </p>
                         <p
-                          className={`${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          } text-xs sm:text-sm`}
+                          className={`${darkMode ? "text-gray-400" : "text-gray-600"
+                            } text-xs sm:text-sm`}
                         >
                           Review pending applications
                         </p>
@@ -867,29 +834,25 @@ const HiringDashboard: React.FC = () => {
                     </button>
                     <button
                       onClick={() => navigate("/post-job")}
-                      className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border ${
-                        darkMode
+                      className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border ${darkMode
                           ? "border-white/10 hover:bg-white/10"
                           : "border-black/10 hover:bg-gray-50"
-                      } rounded-lg transition-all duration-300 shadow-md`}
+                        } rounded-lg transition-all duration-300 shadow-md`}
                     >
                       <Plus
-                        className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                          darkMode ? "text-white" : "text-gray-600"
-                        }`}
+                        className={`w-4 h-4 sm:w-5 sm:h-5 ${darkMode ? "text-white" : "text-gray-600"
+                          }`}
                       />
                       <div className="text-left">
                         <p
-                          className={`font-medium text-sm sm:text-base ${
-                            darkMode ? "text-white" : "text-gray-900"
-                          }`}
+                          className={`font-medium text-sm sm:text-base ${darkMode ? "text-white" : "text-gray-900"
+                            }`}
                         >
                           Post New Job
                         </p>
                         <p
-                          className={`${
-                            darkMode ? "text-gray-400" : "text-gray-600"
-                          } text-xs sm:text-sm`}
+                          className={`${darkMode ? "text-gray-400" : "text-gray-600"
+                            } text-xs sm:text-sm`}
                         >
                           Create a job posting
                         </p>
@@ -906,9 +869,8 @@ const HiringDashboard: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        darkMode ? "bg-black text-white" : "bg-white text-black"
-      }`}
+      className={`min-h-screen ${darkMode ? "bg-black text-white" : "bg-white text-black"
+        }`}
     >
       {/* Font Import */}
       <link
@@ -928,67 +890,64 @@ const HiringDashboard: React.FC = () => {
 
       {/* Navigation Tabs */}
       <div
-        className={`${
-          darkMode
+        className={`${darkMode
             ? "bg-black/50 border-white/10"
             : "bg-white/80 border-black/10"
-        } border-b sticky top-0 z-10 backdrop-blur-sm shadow-2xl`}
+          } border-b sticky top-0 z-10 backdrop-blur-sm shadow-2xl`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Mobile: Horizontal scrollable tabs */}
           <div className="flex items-center gap-2 sm:gap-8 overflow-x-auto scrollbar-hide pb-2">
             <div className="flex items-center gap-2 sm:gap-8 overflow-x-auto flex-1">
-             {tabs.map((tab) => (
-               <button
-                 key={tab.id}
-                 onClick={() => {
-                   const navPath = (tab as any).navigate as string | undefined;
-                   if (navPath) {
-                     navigate(navPath);
-                   } else {
-                     setActiveTab(tab.id as "overview" | "applications" | "jobs" | "profile");
-                   }
-                 }}
-                 className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-3 sm:py-4 border-b-2 font-medium transition-all duration-300 font-inter tracking-tight text-sm sm:text-base whitespace-nowrap ${
-                   activeTab === tab.id
-                     ? darkMode
-                       ? "border-blue-500 text-white"
-                       : "border-blue-600 text-gray-900"
-                     : darkMode
-                     ? "border-transparent text-gray-300 hover:text-white"
-                     : "border-transparent text-gray-600 hover:text-gray-900"
-                 }`}
-               >
-                 {tab.id === "profile" && companyLogo ? (
-                   <img
-                     src={companyLogo}
-                     alt="Company Logo"
-                     className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover border border-gray-300"
-                   />
-                 ) : (
-                   <tab.icon
-                     className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                       activeTab === tab.id
-                         ? darkMode
-                           ? "text-white"
-                           : "text-gray-900"
-                         : darkMode
-                         ? "text-gray-300"
-                         : "text-gray-600"
-                     }`}
-                   />
-                 )}
-                 <span className="hidden xs:inline">{tab.label}</span>
-                 <span className="xs:hidden">{tab.label.split(" ")[0]}</span>
-               </button>
-             ))}
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    const navPath = (tab as any).navigate as string | undefined;
+                    if (navPath) {
+                      navigate(navPath);
+                    } else {
+                      setActiveTab(tab.id as "overview" | "applications" | "jobs" | "profile");
+                    }
+                  }}
+                  className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-3 sm:py-4 border-b-2 font-medium transition-all duration-300 font-inter tracking-tight text-sm sm:text-base whitespace-nowrap ${activeTab === tab.id
+                      ? darkMode
+                        ? "border-blue-500 text-white"
+                        : "border-blue-600 text-gray-900"
+                      : darkMode
+                        ? "border-transparent text-gray-300 hover:text-white"
+                        : "border-transparent text-gray-600 hover:text-gray-900"
+                    }`}
+                >
+                  {tab.id === "profile" && companyLogo ? (
+                    <img
+                      src={companyLogo}
+                      alt="Company Logo"
+                      className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover border border-gray-300"
+                    />
+                  ) : (
+                    <tab.icon
+                      className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === tab.id
+                          ? darkMode
+                            ? "text-white"
+                            : "text-gray-900"
+                          : darkMode
+                            ? "text-gray-300"
+                            : "text-gray-600"
+                        }`}
+                    />
+                  )}
+                  <span className="hidden xs:inline">{tab.label}</span>
+                  <span className="xs:hidden">{tab.label.split(" ")[0]}</span>
+                </button>
+              ))}
             </div>
             {/* Attach dark mode/profile menu to the dashboard header */}
             <div className="flex-shrink-0 ml-4">
               <FloatingDarkModeToggle />
             </div>
-           </div>
-         </div>
+          </div>
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -998,27 +957,24 @@ const HiringDashboard: React.FC = () => {
       {showClearConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div
-            className={`${
-              darkMode
+            className={`${darkMode
                 ? "bg-gray-800 border-white/10"
                 : "bg-white border-black/10"
-            } border rounded-2xl p-6 max-w-md w-full shadow-2xl`}
+              } border rounded-2xl p-6 max-w-md w-full shadow-2xl`}
           >
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">⚠️</span>
               </div>
               <h3
-                className={`text-xl font-bold mb-2 ${
-                  darkMode ? "text-white" : "text-black"
-                }`}
+                className={`text-xl font-bold mb-2 ${darkMode ? "text-white" : "text-black"
+                  }`}
               >
                 Clear All Jobs?
               </h3>
               <p
-                className={`text-sm ${
-                  darkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 This action will permanently delete all {userJobs.length} jobs
                 you have posted. This cannot be undone.
@@ -1028,11 +984,10 @@ const HiringDashboard: React.FC = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className={`flex-1 px-4 py-3 border ${
-                  darkMode
+                className={`flex-1 px-4 py-3 border ${darkMode
                     ? "border-white/20 hover:bg-white/10"
                     : "border-black/20 hover:bg-gray-50"
-                } rounded-lg transition-all duration-300 font-medium`}
+                  } rounded-lg transition-all duration-300 font-medium`}
                 disabled={clearingJobs}
               >
                 Cancel

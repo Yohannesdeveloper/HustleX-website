@@ -255,11 +255,24 @@ const Signup: React.FC = () => {
         return;
       }
 
-      // Priority 2: Redirect to profile setup for new accounts
+      // Priority 2: Redirect to profile setup for new accounts or appropriate dashboard for free plan
+      // Check if the redirect came from pricing page (free plan)
+      const isFromPricing = redirectPath && (redirectPath.includes('pricing') || redirectPath.includes('signup'));
+
       if (role === 'freelancer') {
-        navigate('/profile-setup?role=freelancer', { replace: true });
+        // If the user came from pricing (free plan), redirect to freelancer dashboard directly
+        if (isFromPricing) {
+          navigate('/dashboard/freelancer', { replace: true });
+        } else {
+          navigate('/profile-setup?role=freelancer', { replace: true });
+        }
       } else if (role === 'client') {
-        navigate('/profile-setup?role=client', { replace: true });
+        // If the user came from pricing (free plan), redirect to client dashboard directly
+        if (isFromPricing) {
+          navigate('/dashboard/hiring', { replace: true });
+        } else {
+          navigate('/profile-setup?role=client', { replace: true });
+        }
       } else {
         navigate('/job-listings', { replace: true });
       }
@@ -310,139 +323,389 @@ const Signup: React.FC = () => {
           : "bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900"
           }`}
       >
-      {/* Animated background orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className={`absolute w-[500px] h-[500px] rounded-full top-1/4 left-1/4  ${darkMode ? "opacity-20" : "opacity-10"
-            }`}
-        />
-        <div
-          className={`absolute w-[300px] h-[300px]  rounded-full bottom-1/4 right-1/4  ${darkMode ? "opacity-15" : "opacity-8"
-            }`}
-        />
-      </div>
-
-      <div
-        className={`relative z-10 backdrop-blur-xl border rounded-3xl shadow-2xl p-10 w-full max-w-md ${darkMode
-          ? "bg-black/40 border-cyan-500/20 shadow-cyan-500/10"
-          : "bg-white/80 border-cyan-500/10 shadow-cyan-500/5"
-          }`}
-      >
-        <h2
-          className={`text-3xl font-bold mb-6 text-center drop-shadow-lg ${darkMode ? "text-cyan-400" : "text-cyan-600"
-            }`}
-        >
-          {t.signup.createAccount}
-        </h2>
-
-        <button
-          disabled
-          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-4 transition-all duration-300 opacity-50 cursor-not-allowed border ${darkMode
-            ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
-            : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
-            }`}
-        >
-          <FcGoogle className="text-xl" /> Sign up with Google (Coming Soon)
-        </button>
-
-        <button
-          disabled
-          className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-6 transition-all duration-300 opacity-50 cursor-not-allowed border ${darkMode
-            ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
-            : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
-            }`}
-        >
-          <FaApple className="text-xl" /> {t.signup.signUpWithApple} {t.signup.comingSoon}
-        </button>
-
-        <div
-          className={`my-6 text-center relative ${darkMode ? "text-gray-300" : "text-gray-600"
-            }`}
-        >
-          <div className="absolute inset-0 flex items-center">
-            <div
-              className={`w-full border-t ${darkMode ? "border-gray-600/50" : "border-gray-300/50"
-                }`}
-            ></div>
-          </div>
+        {/* Animated background orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
-            className={`relative px-4 ${darkMode ? "bg-black/40" : "bg-white/80"
+            className={`absolute w-[500px] h-[500px] rounded-full top-1/4 left-1/4  ${darkMode ? "opacity-20" : "opacity-10"
+              }`}
+          />
+          <div
+            className={`absolute w-[300px] h-[300px]  rounded-full bottom-1/4 right-1/4  ${darkMode ? "opacity-15" : "opacity-8"
+              }`}
+          />
+        </div>
+
+        <div
+          className={`relative z-10 backdrop-blur-xl border rounded-3xl shadow-2xl p-10 w-full max-w-md ${darkMode
+            ? "bg-black/40 border-cyan-500/20 shadow-cyan-500/10"
+            : "bg-white/80 border-cyan-500/10 shadow-cyan-500/5"
+            }`}
+        >
+          <h2
+            className={`text-3xl font-bold mb-6 text-center drop-shadow-lg ${darkMode ? "text-cyan-400" : "text-cyan-600"
               }`}
           >
-            Use your email
-          </div>
-        </div>
+            {t.signup.createAccount}
+          </h2>
 
-        {/* Email Input - Always visible */}
-        <div className="relative mb-4">
-          <input
-            type="email"
-            placeholder={t.signup.email}
-            value={email}
-            onChange={handleEmailChange}
-            autoComplete="email"
-            name="email"
-            onBlur={() => {
-              if (email && email.includes("@")) {
-                checkExistingUser(email);
-              }
-            }}
-            className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
-              ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-              : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+          <button
+            disabled
+            className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-4 transition-all duration-300 opacity-50 cursor-not-allowed border ${darkMode
+              ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
+              : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
               }`}
-            required
-          />
-          {checkingUser && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+          >
+            <FcGoogle className="text-xl" /> Sign up with Google
+          </button>
+
+          <button
+            disabled
+            className={`flex items-center justify-center gap-3 w-full font-medium py-3 px-4 rounded-xl mb-6 transition-all duration-300 opacity-50 cursor-not-allowed border ${darkMode
+              ? "bg-gray-900/50 text-white hover:bg-gray-800/50 border-gray-700/50"
+              : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/50 border-gray-300/50"
+              }`}
+          >
+            <FaApple className="text-xl" /> {t.signup.signUpWithApple} {t.signup.comingSoon}
+          </button>
+
+          <div
+            className={`my-6 text-center relative ${darkMode ? "text-gray-300" : "text-gray-600"
+              }`}
+          >
+            <div className="absolute inset-0 flex items-center">
+              <div
+                className={`w-full border-t ${darkMode ? "border-gray-600/50" : "border-gray-300/50"
+                  }`}
+              ></div>
+            </div>
+            <div
+              className={`relative px-4 ${darkMode ? "bg-black/40" : "bg-white/80"
+                }`}
+            >
+              Use your email
+            </div>
+          </div>
+
+          {/* Email Input - Always visible */}
+          <div className="relative mb-4">
+            <input
+              type="email"
+              placeholder={t.signup.email}
+              value={email}
+              onChange={handleEmailChange}
+              autoComplete="email"
+              name="email"
+              onBlur={() => {
+                if (email && email.includes("@")) {
+                  checkExistingUser(email);
+                }
+              }}
+              className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                }`}
+              required
+            />
+            {checkingUser && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+          </div>
+
+          {/* Login Form for Existing Users */}
+          {existingUser && showLoginForm && (
+            <div className={`p-4 rounded-xl border ${darkMode ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100/50 border-gray-300/50'}`}>
+              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                Sign In
+              </h3>
+              <p className={`text-sm mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                {selectedRoleForLogin && !existingUser.roles?.includes(selectedRoleForLogin)
+                  ? t.signup.signInToAddRole.replace("{role}", selectedRoleForLogin)
+                  : t.signup.signInToContinue.replace("{role}", selectedRoleForLogin || existingUser.roles?.[0] || 'user')}
+              </p>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    name="password"
+                    required
+                    className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                      ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                      : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                      }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}`}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className={`text-sm text-left ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-500'}`}
+                >
+                  {t.signup.forgotPassword}
+                </button>
+
+                {error && (
+                  <p className="text-red-400 text-sm font-semibold bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${darkMode
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+                    : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+                    }`}
+                >
+                  {isLoading ? "Signing In..." : "Sign In"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLoginForm(false);
+                    setSelectedRoleForLogin(null);
+                    setPassword("");
+                    setError(null);
+                  }}
+                  className={`w-full text-sm ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'}`}
+                >
+                  {t.signup.backToAccountSelection}
+                </button>
+              </form>
             </div>
           )}
-        </div>
 
-        {/* Login Form for Existing Users */}
-        {existingUser && showLoginForm && (
-          <div className={`p-4 rounded-xl border ${darkMode ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100/50 border-gray-300/50'}`}>
-            <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Sign In
-            </h3>
-            <p className={`text-sm mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              {selectedRoleForLogin && !existingUser.roles?.includes(selectedRoleForLogin)
-                ? t.signup.signInToAddRole.replace("{role}", selectedRoleForLogin)
-                : t.signup.signInToContinue.replace("{role}", selectedRoleForLogin || existingUser.roles?.[0] || 'user')}
-            </p>
+          {/* Existing Accounts Selection */}
+          {existingUser && !showLoginForm && (
+            <div className={`p-4 rounded-xl border mb-4 ${darkMode ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100/50 border-gray-300/50'}`}>
+              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                Account Found
+              </h3>
+              <p className={`text-sm mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                {t.signup.accountExistsMessage || "An account with this email already exists. Please sign in or add a new role."}
+              </p>
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="relative">
+              {/* Existing Roles */}
+              <div className="space-y-2 mb-4">
+                <h4 className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Continue with existing role:
+                </h4>
+                {existingUser.roles && existingUser.roles.length > 0 ? (
+                  existingUser.roles.map((role: string) => (
+                    <button
+                      key={role}
+                      onClick={() => handleAccountSelection(role)}
+                      disabled={isLoading}
+                      className={`w-full p-3 rounded-lg border transition-all text-left ${role === 'freelancer'
+                        ? darkMode
+                          ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
+                          : 'bg-cyan-500/5 border-cyan-500/20 text-cyan-600 hover:bg-cyan-500/10'
+                        : darkMode
+                          ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
+                          : 'bg-green-500/5 border-green-500/20 text-green-600 hover:bg-green-500/10'
+                        } disabled:opacity-50`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium capitalize">{role} {t.signup.account}</span>
+                          {existingUser.profile?.firstName && (
+                            <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                              ({existingUser.profile.firstName} {existingUser.profile.lastName})
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-sm">
+                          {role === 'freelancer' ? '💼' : '🏢'} {t.signup.signIn}
+                        </span>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    No roles found for this account.
+                  </p>
+                )}
+              </div>
+
+              {/* Add New Role Option */}
+              <div className={`pt-3 border-t ${darkMode ? 'border-gray-600/50' : 'border-gray-300/50'}`}>
+                <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Or add a new role to your account:
+                </h4>
+                <div className="space-y-2">
+                  {!existingUser.roles?.includes('freelancer') && (
+                    <button
+                      onClick={() => handleAddRole('freelancer')}
+                      disabled={isLoading}
+                      className={`w-full p-3 rounded-lg border transition-all text-left ${darkMode
+                        ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
+                        : 'bg-cyan-500/5 border-cyan-500/20 text-cyan-600 hover:bg-cyan-500/10'
+                        } disabled:opacity-50`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium">{t.signup.addFreelancerRole}</span>
+                          <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {t.signup.offerServices}
+                          </span>
+                        </div>
+                        <span className="text-sm">💼 {t.signup.add}</span>
+                      </div>
+                    </button>
+                  )}
+                  {!existingUser.roles?.includes('client') && (
+                    <button
+                      onClick={() => handleAddRole('client')}
+                      disabled={isLoading}
+                      className={`w-full p-3 rounded-lg border transition-all text-left ${darkMode
+                        ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
+                        : 'bg-green-500/5 border-green-500/20 text-green-600 hover:bg-green-500/10'
+                        } disabled:opacity-50`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium">{t.signup.addClientRole}</span>
+                          <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {t.signup.hireFreelancersAndPost}
+                          </span>
+                        </div>
+                        <span className="text-sm">🏢 {t.signup.add}</span>
+                      </div>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Create Account Form */}
+          {!existingUser && (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
                 <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  name="password"
+                  type="text"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  autoComplete="given-name"
+                  name="firstName"
                   required
                   className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
                     ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
                     : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
                     }`}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}`}
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
+                <input
+                  type="text"
+                  placeholder={t.signup.lastName}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  autoComplete="family-name"
+                  name="lastName"
+                  required
+                  className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                    ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                    : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                    }`}
+                />
               </div>
 
-              <button
-                type="button"
-                onClick={() => navigate('/forgot-password')}
-                className={`text-sm text-left ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-500'}`}
-              >
-                {t.signup.forgotPassword}
-              </button>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    name="password"
+                    required
+                    className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                      ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                      : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                      }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}`}
+                  >
+                    {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    name="confirmPassword"
+                    required
+                    className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
+                      ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                      : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
+                      }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}`}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"
+                    }`}
+                >
+                  {t.signup.iWantTo}
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRole("freelancer")}
+                    className={`px-4 py-3 rounded-xl border transition-all ${role === "freelancer"
+                      ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
+                      : darkMode
+                        ? "bg-gray-800/50 border-gray-600/50 text-gray-300 hover:border-gray-500/50"
+                        : "bg-gray-100/50 border-gray-300/50 text-gray-600 hover:border-gray-400/50"
+                      }`}
+                  >
+                    Find Work
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole("client")}
+                    className={`px-4 py-3 rounded-xl border transition-all ${role === "client"
+                      ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
+                      : darkMode
+                        ? "bg-gray-800/50 border-gray-600/50 text-gray-300 hover:border-gray-500/50"
+                        : "bg-gray-100/50 border-gray-300/50 text-gray-600 hover:border-gray-400/50"
+                      }`}
+                  >
+                    {t.signup.hireFreelancers}
+                  </button>
+                </div>
+              </div>
 
               {error && (
                 <p className="text-red-400 text-sm font-semibold bg-red-500/10 border border-red-500/20 rounded-lg p-3">
@@ -458,269 +721,19 @@ const Signup: React.FC = () => {
                   : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
                   }`}
               >
-                {isLoading ? "Signing In..." : "Sign In"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowLoginForm(false);
-                  setSelectedRoleForLogin(null);
-                  setPassword("");
-                  setError(null);
-                }}
-                className={`w-full text-sm ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'}`}
-              >
-                {t.signup.backToAccountSelection}
+                {isLoading ? "Creating Account..." : "Create Account"}
               </button>
             </form>
-          </div>
-        )}
+          )}
 
-        {/* Existing Accounts Selection */}
-        {existingUser && !showLoginForm && (
-          <div className={`p-4 rounded-xl border mb-4 ${darkMode ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100/50 border-gray-300/50'}`}>
-            <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Account Found
-            </h3>
-            <p className={`text-sm mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              {t.signup.accountExistsMessage || "An account with this email already exists. Please sign in or add a new role."}
-            </p>
-
-            {/* Existing Roles */}
-            <div className="space-y-2 mb-4">
-              <h4 className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Continue with existing role:
-              </h4>
-              {existingUser.roles && existingUser.roles.length > 0 ? (
-                existingUser.roles.map((role: string) => (
-                  <button
-                    key={role}
-                    onClick={() => handleAccountSelection(role)}
-                    disabled={isLoading}
-                    className={`w-full p-3 rounded-lg border transition-all text-left ${role === 'freelancer'
-                      ? darkMode
-                        ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
-                        : 'bg-cyan-500/5 border-cyan-500/20 text-cyan-600 hover:bg-cyan-500/10'
-                      : darkMode
-                        ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
-                        : 'bg-green-500/5 border-green-500/20 text-green-600 hover:bg-green-500/10'
-                      } disabled:opacity-50`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium capitalize">{role} {t.signup.account}</span>
-                        {existingUser.profile?.firstName && (
-                          <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            ({existingUser.profile.firstName} {existingUser.profile.lastName})
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-sm">
-                        {role === 'freelancer' ? '💼' : '🏢'} {t.signup.signIn}
-                      </span>
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  No roles found for this account.
-                </p>
-              )}
-            </div>
-
-            {/* Add New Role Option */}
-            <div className={`pt-3 border-t ${darkMode ? 'border-gray-600/50' : 'border-gray-300/50'}`}>
-              <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Or add a new role to your account:
-              </h4>
-              <div className="space-y-2">
-                {!existingUser.roles?.includes('freelancer') && (
-                  <button
-                    onClick={() => handleAddRole('freelancer')}
-                    disabled={isLoading}
-                    className={`w-full p-3 rounded-lg border transition-all text-left ${darkMode
-                      ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
-                      : 'bg-cyan-500/5 border-cyan-500/20 text-cyan-600 hover:bg-cyan-500/10'
-                      } disabled:opacity-50`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium">{t.signup.addFreelancerRole}</span>
-                        <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                          {t.signup.offerServices}
-                        </span>
-                      </div>
-                      <span className="text-sm">💼 {t.signup.add}</span>
-                    </div>
-                  </button>
-                )}
-                {!existingUser.roles?.includes('client') && (
-                  <button
-                    onClick={() => handleAddRole('client')}
-                    disabled={isLoading}
-                    className={`w-full p-3 rounded-lg border transition-all text-left ${darkMode
-                      ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
-                      : 'bg-green-500/5 border-green-500/20 text-green-600 hover:bg-green-500/10'
-                      } disabled:opacity-50`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium">{t.signup.addClientRole}</span>
-                        <span className={`text-sm ml-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                          {t.signup.hireFreelancersAndPost}
-                        </span>
-                      </div>
-                      <span className="text-sm">🏢 {t.signup.add}</span>
-                    </div>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Create Account Form */}
-        {!existingUser && (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="text"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                autoComplete="given-name"
-                name="firstName"
-                required
-                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
-                  ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                  : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                  }`}
-              />
-              <input
-                type="text"
-                placeholder={t.signup.lastName}
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                autoComplete="family-name"
-                name="lastName"
-                required
-                className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
-                  ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                  : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                  }`}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="new-password"
-                  name="password"
-                  required
-                  className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
-                    ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                    : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                    }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}`}
-                >
-                  {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-                </button>
-              </div>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  autoComplete="new-password"
-                  name="confirmPassword"
-                  required
-                  className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 ${darkMode
-                    ? "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
-                    : "bg-white/50 border-gray-300/50 text-gray-900 placeholder-gray-500"
-                    }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}`}
-                >
-                  {showConfirmPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label
-                className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-              >
-                {t.signup.iWantTo}
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRole("freelancer")}
-                  className={`px-4 py-3 rounded-xl border transition-all ${role === "freelancer"
-                    ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
-                    : darkMode
-                      ? "bg-gray-800/50 border-gray-600/50 text-gray-300 hover:border-gray-500/50"
-                      : "bg-gray-100/50 border-gray-300/50 text-gray-600 hover:border-gray-400/50"
-                    }`}
-                >
-                  Find Work
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("client")}
-                  className={`px-4 py-3 rounded-xl border transition-all ${role === "client"
-                    ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
-                    : darkMode
-                      ? "bg-gray-800/50 border-gray-600/50 text-gray-300 hover:border-gray-500/50"
-                      : "bg-gray-100/50 border-gray-300/50 text-gray-600 hover:border-gray-400/50"
-                    }`}
-                >
-                  {t.signup.hireFreelancers}
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <p className="text-red-400 text-sm font-semibold bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${darkMode
-                ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
-                : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400"
+          {!existingUser && (
+            <p
+              className={`text-center mt-6 text-sm whitespace-nowrap ${darkMode ? "text-gray-300" : "text-gray-600"
                 }`}
             >
-              {isLoading ? "Creating Account..." : "Create Account"}
-            </button>
-          </form>
-        )}
-
-        {!existingUser && (
-          <p
-            className={`text-center mt-6 text-sm whitespace-nowrap ${darkMode ? "text-gray-300" : "text-gray-600"
-              }`}
-          >
-            {t.signup.alreadyHaveAccount}
-          </p>
-        )}
+              {t.signup.alreadyHaveAccount}
+            </p>
+          )}
         </div>
       </div>
     </>

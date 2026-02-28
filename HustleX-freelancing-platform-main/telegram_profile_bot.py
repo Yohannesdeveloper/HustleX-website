@@ -30,7 +30,8 @@ class ProfileWizard:
             'profile_setup': 'waiting_for_image',
             'waiting_for_image': 'waiting_for_education',
             'waiting_for_education': 'waiting_for_certificates',
-            'waiting_for_certificates': 'profile_complete'
+            'waiting_for_certificates': 'profile_complete',
+            'jobs': 'viewing_jobs'
         }
 
     def get_next_step(self, current_step: str) -> str:
@@ -68,6 +69,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
         [KeyboardButton("👤 Profile Setup")],
         [KeyboardButton("📋 View Profile")],
+        [KeyboardButton("💼 Browse Jobs")],
         [KeyboardButton("ℹ️ About HustleX")]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -125,6 +127,8 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await view_profile(update, context)
     elif text == "ℹ️ About HustleX":
         await about_hustlex(update, context)
+    elif text == "💼 Browse Jobs":
+        await browse_jobs(update, context)
     else:
         # Handle profile setup wizard steps
         current_step = user_profile.get('current_step', 'start')
@@ -612,11 +616,47 @@ To empower freelancers and businesses by providing a seamless, secure, and effic
 🌐 Visit our website: [Coming Soon]
 📧 Contact: support@hustleX.et
 """
+    
+    # Add inline button for jobs
+    keyboard = [
+        [InlineKeyboardButton("🚀 Browse Jobs", url="http://localhost:5173/job-listings")],
+        [InlineKeyboardButton("💼 Post a Job", url="http://localhost:5173/post-job")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
         about_message,
+        reply_markup=reply_markup,
         parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True
+    )
+
+async def browse_jobs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Show information about browsing jobs."""
+    jobs_message = """
+💼 *Browse Latest Jobs on HustleX* 💼
+
+━━━━━━━━━━━━━━━━━━━━━
+Ready to find your next opportunity? Our platform has variety of jobs in different sectors:
+
+• 👨‍💻 Software Development
+• 🎨 Design & Creative
+• 📊 Marketing & Sales
+• ✍️ Writing & Translation
+• 📂 Admin & Support
+
+Click the button below to see all open positions!
+━━━━━━━━━━━━━━━━━━━━━
+"""
+    keyboard = [
+        [InlineKeyboardButton("🚀 View Job Listings", url="http://localhost:5173/job-listings")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        jobs_message,
+        reply_markup=reply_markup,
+        parse_mode=ParseMode.MARKDOWN
     )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -667,6 +707,7 @@ async def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("profile", view_profile))
+    application.add_handler(CommandHandler("jobs", browse_jobs))
 
     application.add_handler(CallbackQueryHandler(handle_callback))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))

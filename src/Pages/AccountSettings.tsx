@@ -6,6 +6,7 @@ import { FaArrowLeft, FaSave, FaUser, FaCamera, FaCrown, FaBriefcase, FaUserTie 
 import { RootState } from '../store';
 import apiService from '../services/api';
 import { useAuth } from '../store/hooks';
+import SubscriptionDisplay from '../components/SubscriptionDisplay';
 
 const AccountSettings: React.FC = () => {
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
@@ -457,6 +458,11 @@ const AccountSettings: React.FC = () => {
             </div>
           </div>
 
+          {/* Subscription Display */}
+          <div className="mt-8">
+            <SubscriptionDisplay />
+          </div>
+          
           {/* Save Button */}
           <div className="flex justify-end pt-6">
             <motion.button

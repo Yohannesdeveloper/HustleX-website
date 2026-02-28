@@ -8,7 +8,7 @@ import Footer from "../components/Footer";
 import { PricingSEO } from "../components/SEO";
 
 const Pricing: React.FC = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const darkMode = useAppSelector((s) => s.theme.darkMode);
   const navigate = useNavigate();
   const t = useTranslation();
@@ -107,7 +107,15 @@ const Pricing: React.FC = () => {
     // If already authenticated
     console.log("Authenticated, proceeding to destination");
     if (planId === "free") {
-      navigate("/dashboard/freelancer");
+      
+      if (user?.currentRole === 'client') {
+        navigate('/dashboard/hiring');
+      } else if (user?.currentRole === 'freelancer') {
+        navigate('/dashboard/freelancer');
+      } else {
+        // If no role is set, redirect to profile setup
+        navigate('/profile-setup');
+      }
     } else {
       navigate(`/payment-wizard?plan=${planId}&method=telebirr`);
     }

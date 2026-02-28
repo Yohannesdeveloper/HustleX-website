@@ -12,7 +12,7 @@ const CompanyProfile: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tradeLicenseRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   const [companyData, setCompanyData] = useState({
     companyName: '',
@@ -103,8 +103,8 @@ const CompanyProfile: React.FC = () => {
           const companyNameFromUser = user.profile.firstName && user.profile.lastName
             ? `${user.profile.firstName} ${user.profile.lastName} Company`
             : user.profile.firstName
-            ? `${user.profile.firstName} Company`
-            : '';
+              ? `${user.profile.firstName} Company`
+              : '';
 
           setCompanyData(prev => ({
             ...prev,
@@ -302,15 +302,14 @@ const CompanyProfile: React.FC = () => {
 
       await apiService.updateCompanyProfile(companyProfileData);
 
+      // Refresh user so dashboard reflects updated hasCompanyProfile
+      await refreshUser();
+
       // Simulate verification process for private clients
       setIsVerified(true);
 
-      // Navigate to hiring dashboard after successful registration
-      setTimeout(() => {
-        navigate('/dashboard/hiring');
-      }, 2000);
-
       alert('Company profile saved successfully! You are now registered as a client and can access the hiring dashboard.');
+      navigate('/dashboard/hiring');
     } catch (error: any) {
       console.error('Error saving company profile:', error);
       const errMsg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Please try again.';
@@ -367,11 +366,10 @@ const CompanyProfile: React.FC = () => {
             <div className="flex items-center space-x-6">
               <div className="relative">
                 <div
-                  className={`w-24 h-24 rounded-lg border-4 border-dashed flex items-center justify-center cursor-pointer transition-all ${
-                    darkMode
-                      ? 'border-gray-600 hover:border-purple-500 bg-gray-700'
-                      : 'border-gray-300 hover:border-purple-500 bg-gray-50'
-                  }`}
+                  className={`w-24 h-24 rounded-lg border-4 border-dashed flex items-center justify-center cursor-pointer transition-all ${darkMode
+                    ? 'border-gray-600 hover:border-purple-500 bg-gray-700'
+                    : 'border-gray-300 hover:border-purple-500 bg-gray-50'
+                    }`}
                   onClick={handleLogoClick}
                 >
                   {logo ? (
@@ -385,9 +383,8 @@ const CompanyProfile: React.FC = () => {
                   )}
                 </div>
                 <motion.button
-                  className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center ${
-                    darkMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'
-                  } text-white shadow-lg`}
+                  className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center ${darkMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'
+                    } text-white shadow-lg`}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handleLogoClick}
@@ -412,11 +409,10 @@ const CompanyProfile: React.FC = () => {
                 />
                 <motion.button
                   onClick={handleLogoClick}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    darkMode
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                      : 'bg-purple-500 hover:bg-purple-600 text-white'
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${darkMode
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                    : 'bg-purple-500 hover:bg-purple-600 text-white'
+                    }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -443,11 +439,10 @@ const CompanyProfile: React.FC = () => {
                   type="text"
                   value={companyData.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                   placeholder={companyData.companyName.trim() ? "Enter your company name" : "Leave blank for private clients"}
                 />
               </div>
@@ -459,11 +454,10 @@ const CompanyProfile: React.FC = () => {
                 <select
                   value={companyData.industry}
                   onChange={(e) => handleInputChange('industry', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                 >
                   <option value="">Select Industry</option>
                   {industries.map((industry) => (
@@ -479,11 +473,10 @@ const CompanyProfile: React.FC = () => {
                 <select
                   value={companyData.companySize}
                   onChange={(e) => handleInputChange('companySize', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                 >
                   <option value="">Select Company Size</option>
                   {companySizes.map((size) => (
@@ -500,11 +493,10 @@ const CompanyProfile: React.FC = () => {
                   type="url"
                   value={companyData.website}
                   onChange={(e) => handleInputChange('website', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                   placeholder="https://yourcompany.com"
                 />
               </div>
@@ -517,11 +509,10 @@ const CompanyProfile: React.FC = () => {
                   type="tel"
                   value={companyData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                   placeholder="+251 XXX XXX XXX"
                 />
               </div>
@@ -534,11 +525,10 @@ const CompanyProfile: React.FC = () => {
                   type="email"
                   value={companyData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                   placeholder="contact@yourcompany.com"
                 />
               </div>
@@ -551,11 +541,10 @@ const CompanyProfile: React.FC = () => {
                   type="number"
                   value={companyData.foundedYear}
                   onChange={(e) => handleInputChange('foundedYear', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                   placeholder="2020"
                   min="1900"
                   max={new Date().getFullYear()}
@@ -570,11 +559,10 @@ const CompanyProfile: React.FC = () => {
                   value={companyData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={4}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none`}
                   placeholder="Describe your company, mission, and what you do..."
                 />
               </div>
@@ -587,11 +575,10 @@ const CompanyProfile: React.FC = () => {
                   value={companyData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   rows={2}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none`}
                   placeholder="Company address"
                 />
               </div>
@@ -603,11 +590,10 @@ const CompanyProfile: React.FC = () => {
             <div className="flex items-center space-x-3 mb-6">
               <FaFileAlt className={`w-5 h-5 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
               <h2 className="text-xl font-semibold">Legal Documents</h2>
-              <span className={`text-xs px-2 py-1 rounded ${
-                isVerified
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-800'
-              }`}>
+              <span className={`text-xs px-2 py-1 rounded ${isVerified
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-800'
+                }`}>
                 {isVerified ? 'Verified Documents' : 'Required for Verification'}
               </span>
             </div>
@@ -621,11 +607,10 @@ const CompanyProfile: React.FC = () => {
                   type="text"
                   value={companyData.registrationNumber}
                   onChange={(e) => handleInputChange('registrationNumber', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                   placeholder="Enter your business registration number"
                 />
               </div>
@@ -638,11 +623,10 @@ const CompanyProfile: React.FC = () => {
                   type="text"
                   value={companyData.taxId}
                   onChange={(e) => handleInputChange('taxId', e.target.value)}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                   placeholder="Enter your tax identification number"
                 />
               </div>
@@ -653,14 +637,13 @@ const CompanyProfile: React.FC = () => {
                 </label>
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
-                    <div className={`flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
-                      tradeLicense
-                        ? 'border-green-500 bg-green-50'
-                        : darkMode
+                    <div className={`flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all ${tradeLicense
+                      ? 'border-green-500 bg-green-50'
+                      : darkMode
                         ? 'border-gray-600 hover:border-green-500 bg-gray-700'
                         : 'border-gray-300 hover:border-green-500 bg-gray-50'
-                    }`}
-                    onClick={handleTradeLicenseClick}>
+                      }`}
+                      onClick={handleTradeLicenseClick}>
                       {tradeLicense ? (
                         <div className="text-center">
                           <FaCheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />

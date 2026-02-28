@@ -92,7 +92,7 @@ const SubscriptionAdmin: React.FC = () => {
 
     const handlePasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (passwordInput === "0991313700yf@") {
+        if (passwordInput === "0991313700Yf@") {
             setIsPasswordVerified(true);
             setPasswordError("");
         } else {

@@ -1,0 +1,10 @@
+Connected to DB
+contacts: 5 documents
+jobs: 0 documents
+applications: 0 documents
+messages: 0 documents
+companies: 0 documents
+conversations: 17 documents
+blogs: 0 documents
+products: 16 documents
+users: 0 documents

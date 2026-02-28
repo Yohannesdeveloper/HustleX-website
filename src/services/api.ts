@@ -887,6 +887,21 @@ class ApiService {
   }
 
   // Enhanced Messaging Methods have been removed
+
+  // Get user's current subscription
+  async getUserSubscription(): Promise<any> {
+    const token = localStorage.getItem("token") || this.token;
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+    try {
+      const response = await axios.get(`${this.baseUrl}/pricing/subscription`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Get user subscription error:", error);
+      throw error;
+    }
+  }
 }
 
 export default new ApiService();

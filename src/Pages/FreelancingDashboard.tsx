@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useAuth } from "../store/hooks";
 import apiService from "../services/api";
+import SubscriptionDisplay from "../components/SubscriptionDisplay";
 import {
   Briefcase,
   Users,
@@ -491,7 +492,12 @@ const FreelancingDashboard: React.FC = () => {
                 Track your applications, discover opportunities, and grow your freelance career
               </p>
             </div>
-
+            
+            {/* Subscription Display */}
+            <div className="mb-8">
+              <SubscriptionDisplay />
+            </div>
+            
             {/* Key Metrics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-8">
               <motion.div

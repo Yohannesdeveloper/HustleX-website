@@ -24,6 +24,7 @@ import {
 import StatusIndicator from "./StatusIndicator";
 import { User } from "../types";
 import { useNavigate } from "react-router-dom";
+import apiService from "../services/api";
 
 interface FreelancerProfileModalProps {
   freelancer: User & { status?: "online" | "offline" | "available" | "busy"; lastActive?: string };
@@ -78,10 +79,21 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <div
-                      className={`w-16 h-16 rounded-full ${darkMode ? "bg-cyan-500/20" : "bg-cyan-100"
+                      className={`w-16 h-16 rounded-full overflow-hidden ${darkMode ? "bg-cyan-500/20" : "bg-cyan-100"
                         } flex items-center justify-center text-2xl font-bold`}
                     >
-                      {fullName.charAt(0).toUpperCase()}
+                      {profile.avatar ? (
+                        <img
+                          src={apiService.getFileUrl(profile.avatar)}
+                          alt={fullName}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "";
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : null}
+                      {!profile.avatar && fullName.charAt(0).toUpperCase()}
                     </div>
                     {freelancer.status && (
                       <div className="absolute bottom-0 right-0">
@@ -116,8 +128,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                     <motion.button
                       onClick={onMessage}
                       className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${darkMode
-                          ? "bg-cyan-600 hover:bg-cyan-500 text-white"
-                          : "bg-cyan-600 hover:bg-cyan-700 text-white"
+                        ? "bg-cyan-600 hover:bg-cyan-500 text-white"
+                        : "bg-cyan-600 hover:bg-cyan-700 text-white"
                         }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -169,8 +181,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${darkMode
-                          ? "bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30"
-                          : "bg-cyan-100 text-cyan-600 hover:bg-cyan-200"
+                        ? "bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30"
+                        : "bg-cyan-100 text-cyan-600 hover:bg-cyan-200"
                         } transition-colors`}
                     >
                       View Portfolio
@@ -194,8 +206,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                         <span
                           key={index}
                           className={`px-3 py-1 rounded-full text-sm ${darkMode
-                              ? "bg-cyan-500/20 text-cyan-400"
-                              : "bg-cyan-100 text-cyan-700"
+                            ? "bg-cyan-500/20 text-cyan-400"
+                            : "bg-cyan-100 text-cyan-700"
                             }`}
                         >
                           {skill}
@@ -366,8 +378,8 @@ const FreelancerProfileModal: React.FC<FreelancerProfileModalProps> = ({
                       href={cvUrl}
                       download
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${darkMode
-                          ? "bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30"
-                          : "bg-cyan-100 text-cyan-600 hover:bg-cyan-200"
+                        ? "bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30"
+                        : "bg-cyan-100 text-cyan-600 hover:bg-cyan-200"
                         } transition-colors`}
                     >
                       <Download className="w-4 h-4" />
